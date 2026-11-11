@@ -1,7 +1,7 @@
 import DeviceCatalog
 import ImageIOKit
 
-/// 背景の種類（docs/spec.md §5-2）
+/// 背景の種類（仕様書 §5-2）
 public enum BackgroundKind: String, Sendable, Equatable {
     /// 単色
     case solid

@@ -28,4 +28,6 @@
 - 検証の数値と画像を全部作り直す処理は、ふだんのテストから分けてある（`VerificationReportTests`。環境変数 `BARLESS_REPORT_DIR` を渡したときだけ動く。`Tools/statusbar/make-verification-report.sh`）。Simulator で流すときは `TEST_RUNNER_BARLESS_REPORT_DIR=<出力先> xcodebuild test … -only-testing:BarlessKitTests/VerificationReportTests`（2026-11-12）
 - パッケージのテスト（`BarlessKitTests`）をアプリのスキームに入れるには、pbxproj でパッケージを**フォルダの参照**（`PBXFileReference`、`lastKnownFileType = wrapper`）として持つ必要がある。`XCLocalSwiftPackageReference` で参照すると、スキームに `TestableReference` を書いても「isn’t a member of the specified test plan or scheme」になり、テストが黙って流れない（アプリのテスト 2 件だけで `TEST SUCCEEDED` になる）。pbxproj を触ったら、ログに `BarlessKitTests` のテスト数（38 件ほど）が出ているかを見る（2026-11-12）
 - macOS 27 と Xcode 27.1 が入った Mac では、Xcode 26.6 の `xcodebuild test` が Simulator につながらず、6 分待って「The test runner hung before establishing connection」で落ちることがある（ビルドと `build-for-testing` は通る）。手元で Simulator のテストを流すときは `DEVELOPER_DIR=/Applications/Xcode-27.1.app/Contents/Developer` を付ける。CI は Xcode 26.6 のまま（2026-11-12）
-- private リポジトリなので、Organization の Secret（Free プラン）は使えない。Upload はリポジトリ変数 `ENABLE_DELIVERY=false` で止めてある。リポジトリの Secret を登録して配信を始めるときに、この変数を消す（2026-11-12）
+- このリポジトリは公開している。仕様書と企画時の資料（価格・収益化・審査対策・商標の下調べなど）は非公開の `shilokuma-inc/barless-spec` に置き、ここには書き写さない。コードやドキュメントからは「仕様書 §5-2」のように節の番号だけで参照する（2026-11-12）
+- 一度 PR に入ったファイルは、ブランチから消しても GitHub 上の PR の履歴（コミット一覧・force push の前後の比較）から読める。公開したくないファイルを入れてしまったら、公開する前にリポジトリを作り直すしかない（このリポジトリは 2026-11-12 に、仕様書を含まない履歴で作り直した）（2026-11-12）
+- Upload（TestFlight への配信）は、リポジトリ変数 `ENABLE_DELIVERY=false` で止めてある。App Store Connect にアプリを作って配信を始めるときに、この変数を消す（2026-11-12）

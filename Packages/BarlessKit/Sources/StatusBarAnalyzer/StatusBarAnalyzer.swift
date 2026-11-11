@@ -28,7 +28,7 @@ public struct StatusBarAnalysis: Sendable, Equatable {
     }
 }
 
-/// スクリーンショットから、機種グループ・iOS の世代・インクの位置・背景の種類を調べる（docs/spec.md §5-2）。
+/// スクリーンショットから、機種グループ・iOS の世代・インクの位置・背景の種類を調べる（仕様書 §5-2）。
 ///
 /// 流れ: 大きさ（px）でカタログから候補を引く → 帯の中だけ文字認識で時刻を読む → 時刻の位置と大きさで候補を 1 つに決める。
 public actor StatusBarAnalyzer {

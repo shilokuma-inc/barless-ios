@@ -16,7 +16,7 @@ private typealias PlatformFont = NSFont
 ///
 /// カタログには「撮ったときの文字列」と「インクの矩形」しか無いので、そこから大きさと位置を求める。
 /// 時刻は中央ぞろえ（文字列の送り幅の中心が機種ごとに一定）なので、別の文字列でも同じ中心に置けば位置が合う。
-/// フォントはシステムフォント（SF Pro はアプリに同梱しない。docs/spec.md §5-3）。
+/// フォントはシステムフォント（SF Pro はアプリに同梱しない。仕様書 §5-3）。
 public struct TimeTypography: Sendable, Equatable {
     /// 画素の 8% 以上が覆われていれば「インクあり」と数える（実測スクリプト analyze.py のしきい値に合わせた値）
     static let coverageThreshold: CGFloat = 0.08

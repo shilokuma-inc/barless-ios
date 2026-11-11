@@ -53,7 +53,7 @@ public enum ImageDecoder {
 /// 書き出しの設定
 public struct ExportOptions: Sendable, Equatable {
     public var format: ImageFileFormat
-    /// メタデータの Software 欄に書くアプリ名。`nil` なら書かない（docs/spec.md §5-4a）
+    /// メタデータの Software 欄に書くアプリ名。`nil` なら書かない（仕様書 §5-4a）
     public var softwareName: String?
     /// HEIC の画質（0〜1）。PNG では使わない
     public var lossyQuality: Double

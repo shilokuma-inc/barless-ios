@@ -1,7 +1,7 @@
 // swift-tools-version: 6.0
 import PackageDescription
 
-// キレスク / Barless の画像処理のコア。アプリ本体・共有シート拡張・ショートカットから同じものを使う（docs/spec.md §7）。
+// キレスク / Barless の画像処理のコア。アプリ本体・共有シート拡張・ショートカットから同じものを使う（仕様書 §7）。
 // macOS も対象にしているのは、Simulator を起動せずに `swift test` でテストを回すため。
 // 画素を 1 つずつ触る処理は、最適化なし（Debug）だと 10 倍以上遅い。Debug でもエディタとテストが実用の速さで動くよう、
 // 画像を扱うターゲットは Debug でも最適化をかける（ローカルパッケージなので unsafeFlags を使える）

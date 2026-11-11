@@ -4,7 +4,7 @@ import ImageIOKit
 
 /// ステータスバーを描く。
 ///
-/// 時刻はシステムフォントの輪郭、電波・Wi-Fi・電池は自作のベクター（SF Symbols は使わない。docs/spec.md §5-3）。
+/// 時刻はシステムフォントの輪郭、電波・Wi-Fi・電池は自作のベクター（SF Symbols は使わない。仕様書 §5-3）。
 /// 位置と大きさは `DeviceCatalog` の実測に合わせるので、機種・iOS の世代ごとの見た目になる。
 /// 背景は描かない。先に `InpaintEngine` で元の表示を消した画像に重ねる。
 public struct StatusBarRenderer: Sendable {

@@ -10,11 +10,13 @@
 
 | ファイル | 内容 |
 |---|---|
-| [docs/spec.md](docs/spec.md) | 仕様書（コンセプト・機能・画面・処理の仕様・アーキテクチャ） |
 | [docs/device-table.md](docs/device-table.md) | 機種・iOS ごとのスクリーンショットの大きさと、ステータスバーの位置の実測 |
 | [docs/verification.md](docs/verification.md) | 判定・消去・描き直しの検証結果（うまくいく条件・いかない条件） |
 | [Tools/statusbar/README.md](Tools/statusbar/README.md) | 実測の撮り方と、カタログ・フィクスチャ・検証結果の作り直し方 |
 | [LEARNINGS.md](LEARNINGS.md) | このリポジトリで分かった、ツールや環境の癖 |
+
+仕様書（コンセプト・機能・画面・処理の仕様・アーキテクチャ）と企画時の資料は、非公開のリポジトリ `shilokuma-inc/barless-spec` で管理しています。
+このリポジトリのコードとドキュメントでは、仕様書を「仕様書 §5-2」のように節の番号で参照しています。
 
 ## 開発の進み具合
 
@@ -322,7 +324,7 @@ API が無い・アカウントで一度だけ行うなど、ワークフロー�
 ├── AppStore/                # App Store の掲載情報（言語・撮る画面・説明文・クリエイティブアセット）
 ├── Tools/                   # スクリーンショットの撮影と App Store Connect への反映
 │   └── statusbar/           # ステータスバーの実測（撮影・解析）と、カタログ・検証結果の生成
-├── docs/                    # 仕様書・機種の実測・検証結果、ExportOptions.plist のサンプル
+├── docs/                    # 機種の実測・検証結果、ExportOptions.plist のサンプル
 ├── scripts/                 # rename.sh
 ├── .swiftlint.yml           # SwiftLint 設定
 └── .github/

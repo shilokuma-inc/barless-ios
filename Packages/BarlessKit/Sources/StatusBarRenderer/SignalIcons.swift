@@ -25,7 +25,7 @@ extension CGContext {
     }
 }
 
-/// 電波（棒 4 本）。SF Symbols は使わず、実測した棒の位置にそのまま描く（docs/spec.md §5-3）
+/// 電波（棒 4 本）。SF Symbols は使わず、実測した棒の位置にそのまま描く（仕様書 §5-3）
 struct CellularIcon {
     let layout: StatusBarLayout
 

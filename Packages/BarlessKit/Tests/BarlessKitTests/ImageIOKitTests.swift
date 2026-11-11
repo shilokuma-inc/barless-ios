@@ -92,7 +92,7 @@ struct ImageCodecTests {
         #expect(restored[0, 0] == RGB(red: 240, green: 240, blue: 245))
     }
 
-    /// Software 欄にアプリ名を書ける。指定しなければ書かない。位置情報は入らない（docs/spec.md §5-4a）
+    /// Software 欄にアプリ名を書ける。指定しなければ書かない。位置情報は入らない（仕様書 §5-4a）
     @Test
     func writesSoftwareNameOnlyWhenRequested() throws {
         let named = try ImageEncoder.encode(sample(), options: ExportOptions(softwareName: "Barless"))
