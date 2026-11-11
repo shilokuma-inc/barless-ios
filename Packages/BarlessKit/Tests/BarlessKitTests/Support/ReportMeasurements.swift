@@ -123,12 +123,16 @@ struct ReportMeasurements {
                         Markdown.number(group.map(\.overlap).reduce(0, +) / count, digits: 3),
                         Markdown.number(group.map(\.overlap).min() ?? 0, digits: 3),
                         Markdown.number(group.map(\.meanDifference).reduce(0, +) / count, digits: 1),
-                        "\(group.map(\.edgeDistance).max() ?? 0)"
+                        "\(group.map(\.edgeDistance).max() ?? 0)",
+                        Markdown.number(group.map(\.colorDifference).max() ?? 0, digits: 1)
                     ])
                 }
             }
         }
-        let header = ["要素", "iOS の世代", "中身", "枚数", "重なり（平均）", "重なり（最小）", "差の平均（0〜255）", "辺のずれの最大 (px)"]
+        let header = [
+            "要素", "iOS の世代", "中身", "枚数", "重なり（平均）", "重なり（最小）", "差の平均（0〜255）", "辺のずれの最大 (px)",
+            "内側の色の差の最大（0〜255）"
+        ]
         return Markdown.table(header, rows)
     }
 

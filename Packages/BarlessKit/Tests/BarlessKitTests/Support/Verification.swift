@@ -20,6 +20,8 @@ enum Verification {
         let meanDifference: Double
         /// インクの範囲の 4 辺の差の最大（px）
         let edgeDistance: Int
+        /// インクの色の差（輪郭を除いた内側の画素での、チャンネルあたりの差の平均。0〜255）
+        let colorDifference: Double
     }
 
     /// 消した結果と、インクが無い背景との比較
@@ -86,7 +88,10 @@ enum Verification {
                 element: element.name,
                 overlap: ImageMetrics.inkOverlap(truth: input, rendered: output.redrawn, background: background, in: area),
                 meanDifference: ImageMetrics.difference(input, output.redrawn, in: area).meanAbsolute,
-                edgeDistance: drawnBounds.map { $0.maxEdgeDistance(to: truthBounds) } ?? .max
+                edgeDistance: drawnBounds.map { $0.maxEdgeDistance(to: truthBounds) } ?? .max,
+                colorDifference: ImageMetrics.inkColorDifference(
+                    truth: input, rendered: output.redrawn, background: background, in: area
+                ) ?? 0
             )
         }
         return (output, results)

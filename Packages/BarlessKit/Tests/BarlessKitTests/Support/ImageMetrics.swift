@@ -58,6 +58,27 @@ enum ImageMetrics {
         return either == 0 ? 1 : Double(both) / Double(either)
     }
 
+    /// インクの色の差。正解と描いたものの両方で、その画素と上下左右がすべてインクになっている画素（輪郭のにじみを除いた内側）について、
+    /// チャンネルあたりの差の平均（0〜255）。形が同じでも色が違えば（赤の残量を緑で描くなど）大きくなる。
+    /// 内側の画素が無ければ `nil`
+    static func inkColorDifference(truth: Bitmap, rendered: Bitmap, background: Bitmap, in rect: PixelRect) -> Double? {
+        let area = clamp(rect, to: truth).insetBy(dx: 1, dy: 1)
+        guard !area.isEmpty else { return nil }
+        func isInk(_ x: Int, _ y: Int) -> Bool {
+            truth[x, y].distance(to: background[x, y]) > inkThreshold && rendered[x, y].distance(to: background[x, y]) > inkThreshold
+        }
+        var total = 0
+        var count = 0
+        for y in area.y..<area.maxY {
+            for x in area.x..<area.maxX {
+                guard isInk(x, y), isInk(x - 1, y), isInk(x + 1, y), isInk(x, y - 1), isInk(x, y + 1) else { continue }
+                total += truth[x, y].distance(to: rendered[x, y])
+                count += 1
+            }
+        }
+        return count == 0 ? nil : Double(total) / Double(count * 3)
+    }
+
     /// インクが載っている範囲（無ければ `nil`）
     static func inkBounds(_ bitmap: Bitmap, background: Bitmap, in rect: PixelRect) -> PixelRect? {
         let area = clamp(rect, to: bitmap)
