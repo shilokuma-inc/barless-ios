@@ -1,14 +1,47 @@
-# IOSTemplateApp
+# Barless（キレスク）
 
-iOS Application Template (SwiftUI)
+スクリーンショットのステータスバー（時刻・電池・電波）を隠す・整える iOS アプリです。日本での名前は「キレスク」、海外での名前は「Barless」。
+画像の処理はすべて端末の中で行います。
 
-iOS アプリのリポジトリを新規作成するときの GitHub テンプレートリポジトリです。
-SwiftUI のプロジェクト一式と、ビルド・テスト・Archive・TestFlight 配信までの GitHub Actions ワークフローを含みます。
+[shilokuma-inc/template-app-ios](https://github.com/shilokuma-inc/template-app-ios) から作ったリポジトリで、
+ビルド・テスト・Archive・TestFlight 配信までの GitHub Actions ワークフローを含みます。
+
+## ドキュメント
+
+| ファイル | 内容 |
+|---|---|
+| [docs/device-table.md](docs/device-table.md) | 機種・iOS ごとのスクリーンショットの大きさと、ステータスバーの位置の実測 |
+| [docs/verification.md](docs/verification.md) | 判定・消去・描き直しの検証結果（うまくいく条件・いかない条件） |
+| [Tools/statusbar/README.md](Tools/statusbar/README.md) | 実測の撮り方と、カタログ・フィクスチャ・検証結果の作り直し方 |
+| [LEARNINGS.md](LEARNINGS.md) | このリポジトリで分かった、ツールや環境の癖 |
+
+仕様書（コンセプト・機能・画面・処理の仕様・アーキテクチャ）と企画時の資料は、非公開のリポジトリ `shilokuma-inc/barless-spec` で管理しています。
+このリポジトリのコードとドキュメントでは、仕様書を「仕様書 §5-2」のように節の番号で参照しています。
+
+## 開発の進み具合
+
+最初のマイルストーン（リポジトリの用意と、判定・消去・描き直しの技術検証）まで。UI・課金・広告はこれから。
+
+画像処理のコアはローカルパッケージ [Packages/BarlessKit](Packages/BarlessKit) にあります。
+
+| モジュール | 役割 |
+|---|---|
+| `DeviceCatalog` | 機種グループ × iOS の世代ごとの配置（実測から作った JSON）と、その読み込み |
+| `StatusBarAnalyzer` | 機種グループと iOS の世代の判定、文字・アイコンの検出、背景の種類の判定 |
+| `InpaintEngine` | ステータスバーの消去（単色・グラデーション） |
+| `StatusBarRenderer` | 時刻（システムフォント）と自作ベクターのアイコン（電波・Wi-Fi・電池）の描画 |
+| `ImageIOKit` | 画素の入れ物、読み込み、メタデータ、書き出し |
+
+パッケージのテストは、Simulator を起動せずに macOS の上で流せます（アプリのスキームにも入っているので、Xcode と CI では Simulator でも流れます）。
+
+```bash
+cd Packages/BarlessKit && swift test
+```
 
 ## Environment
 
 - Xcode 26.6
-- iOS 17.0 以上
+- iOS 18.0 以上
 - Swift 6（Swift 6 言語モード / Strict Concurrency）
 - SwiftUI / Swift Testing / XCTest（UI テスト）
 - SwiftLint 0.65.1（Build Tool Plugin。バイナリだけを配布する [SwiftLintPlugins](https://github.com/SimplyDanny/SwiftLintPlugins) 経由）
@@ -27,13 +60,13 @@ SwiftUI のプロジェクト一式と、ビルド・テスト・Archive・TestF
       <tr>
         <td style="border:2px double #000080;text-align:left;">main</td>
         <td style="border:2px double #000080;text-align:center;">
-          <a href="https://github.com/shilokuma-inc/template-app-ios/actions/workflows/build.yml?query=branch%3Amain">
-            <img src="https://github.com/shilokuma-inc/template-app-ios/actions/workflows/build.yml/badge.svg?branch=main" alt="Build">
+          <a href="https://github.com/shilokuma-inc/barless-ios/actions/workflows/build.yml?query=branch%3Amain">
+            <img src="https://github.com/shilokuma-inc/barless-ios/actions/workflows/build.yml/badge.svg?branch=main" alt="Build">
           </a>
         </td>
         <td style="border:2px double #000080;text-align:center;">
-          <a href="https://github.com/shilokuma-inc/template-app-ios/actions/workflows/archive.yml?query=branch%3Amain">
-            <img src="https://github.com/shilokuma-inc/template-app-ios/actions/workflows/archive.yml/badge.svg?branch=main" alt="Archive">
+          <a href="https://github.com/shilokuma-inc/barless-ios/actions/workflows/archive.yml?query=branch%3Amain">
+            <img src="https://github.com/shilokuma-inc/barless-ios/actions/workflows/archive.yml/badge.svg?branch=main" alt="Archive">
           </a>
         </td>
         <td style="border:2px double #000080;text-align:center;">
@@ -42,15 +75,15 @@ SwiftUI のプロジェクト一式と、ビルド・テスト・Archive・TestF
       <tr>
         <td style="border:2px double #000080;text-align:left;">develop</td>
         <td style="border:2px double #000080;text-align:center;">
-          <a href="https://github.com/shilokuma-inc/template-app-ios/actions/workflows/build.yml?query=branch%3Adevelop">
-            <img src="https://github.com/shilokuma-inc/template-app-ios/actions/workflows/build.yml/badge.svg?branch=develop" alt="Build">
+          <a href="https://github.com/shilokuma-inc/barless-ios/actions/workflows/build.yml?query=branch%3Adevelop">
+            <img src="https://github.com/shilokuma-inc/barless-ios/actions/workflows/build.yml/badge.svg?branch=develop" alt="Build">
           </a>
         </td>
         <td style="border:2px double #000080;text-align:center;">
         </td>
         <td style="border:2px double #000080;text-align:center;">
-          <a href="https://github.com/shilokuma-inc/template-app-ios/actions/workflows/upload.yml?query=branch%3Adevelop">
-            <img src="https://github.com/shilokuma-inc/template-app-ios/actions/workflows/upload.yml/badge.svg?branch=develop" alt="Upload">
+          <a href="https://github.com/shilokuma-inc/barless-ios/actions/workflows/upload.yml?query=branch%3Adevelop">
+            <img src="https://github.com/shilokuma-inc/barless-ios/actions/workflows/upload.yml/badge.svg?branch=develop" alt="Upload">
           </a>
         </td>
       </tr>
@@ -60,13 +93,15 @@ SwiftUI のプロジェクト一式と、ビルド・テスト・Archive・TestF
 
 ## テンプレートの使い方
 
+テンプレートから引き継いだ、リポジトリの運用の説明です。1〜3 はこのリポジトリでは済んでいます。
+
 ### 1. リポジトリを作成する
 
 GitHub の「Use this template」からリポジトリを作成し、clone します。
 
 ### 2. プロジェクト名を変更する
 
-`IOSTemplateApp` を新しいアプリ名に一括変更するスクリプトを用意しています。
+`Barless` を新しいアプリ名に一括変更するスクリプトを用意しています。
 ディレクトリ・`.xcodeproj`・スキーム・ソース内の識別子・README のバッジ URL をまとめて置換し、GitHub リポジトリの Discussions を有効にします。
 
 ```bash
@@ -190,8 +225,8 @@ App Store のプロダクトページに載せるものは、`AppStore/` の JSO
 
 **スクリーンショット**
 
-- 撮影はアプリの撮影モード（[IOSTemplateApp/Screenshot/ScreenshotDemo.swift](IOSTemplateApp/Screenshot/ScreenshotDemo.swift)）で行います。`Tools/capture_screenshots.sh` が `-screenshot-demo -screenshot-scene <名前>` と言語を起動引数で渡し、アプリはデモデータで目的の画面を開きます
-- 画面を足すときは、`ScreenshotDemo.Scene` に case を足し、`IOSTemplateApp.swift` の `rootView` で開く画面を返し、`AppStore/screenshots.json` の `scenes` に同じ名前を足します（1 表示サイズにつき 10 枚まで）
+- 撮影はアプリの撮影モード（[Barless/Screenshot/ScreenshotDemo.swift](Barless/Screenshot/ScreenshotDemo.swift)）で行います。`Tools/capture_screenshots.sh` が `-screenshot-demo -screenshot-scene <名前>` と言語を起動引数で渡し、アプリはデモデータで目的の画面を開きます
+- 画面を足すときは、`ScreenshotDemo.Scene` に case を足し、`Barless.swift` の `rootView` で開く画面を返し、`AppStore/screenshots.json` の `scenes` に同じ名前を足します（1 表示サイズにつき 10 枚まで）
 - App Store Connect で必須なのは iPhone 6.1 / 6.3 inch（`APP_IPHONE_61`、1206x2622 か 1179x2556）と iPhone Duo（`APP_IPHONE_DUO`）です。iPad に対応するアプリは iPad 13 inch も必須です。大型ディスプレイ（6.5 / 6.7 / 6.9 inch、`APP_IPHONE_67`）は任意ですが、6.3 inch の元になるので必ず撮ります（反映だけ外すなら `display_types` に `APP_IPHONE_61,APP_IPHONE_DUO` のように必要なものだけ書きます）
 - 撮るのはリリースのときだけです。`release/**` ブランチを選んで手動実行します（それ以外のブランチでは止まります）
 - macOS ランナーの枠を開発のビルドと取り合わないよう、撮影は 1 本ずつ流します。6.3 inch（`deriveFrom`）は撮らずに 6.9 inch を ubuntu で縮めて作り、App Store Connect への反映も ubuntu で行います
@@ -268,9 +303,9 @@ API が無い・アカウントで一度だけ行うなど、ワークフロー�
 |---|---|
 | アプリの作成（名前・プライマリ言語・バンドル ID・SKU） | API で作れません。「5. App Store Connect にアプリを作成する」の手順で、Upload の Job Summary に出る値で作ります |
 | App Review に関する情報の添付ファイル（実機の画面収録） | API で反映していません。最初の審査では求められることが多いので、上の「審査メモと画面収録」の手順で撮って添付します |
-| App のプライバシー（収集するデータの申告） | API がありません。[IOSTemplateApp/PrivacyInfo.xcprivacy](IOSTemplateApp/PrivacyInfo.xcprivacy) とプライバシーポリシーに合わせて「App のプライバシー」で答え、公開します |
+| App のプライバシー（収集するデータの申告） | API がありません。[Barless/PrivacyInfo.xcprivacy](Barless/PrivacyInfo.xcprivacy) とプライバシーポリシーに合わせて「App のプライバシー」で答え、公開します |
 | 2 つ目以降のバージョンの作成 | 今は App Store Connect の画面で作る運用にしています（「iOS アプリ」の＋）。作らずに `Metadata/App Store` を流すと「編集できる状態のバージョンがありません」で止まります（dry-run は配信中の値と比べます） |
-| ビルドの選択と審査への提出 | リリースの判断なので人が行います。輸出コンプライアンスは [IOSTemplateApp/Info.plist](IOSTemplateApp/Info.plist) の `ITSAppUsesNonExemptEncryption`（`false`）で申告済みなので、聞かれません |
+| ビルドの選択と審査への提出 | リリースの判断なので人が行います。輸出コンプライアンスは [Barless/Info.plist](Barless/Info.plist) の `ITSAppUsesNonExemptEncryption`（`false`）で申告済みなので、聞かれません |
 | デジタルサービス法（EU）の取引業者の情報 | アプリごとではなくアカウントで一度だけ行います（「ビジネス」）。登録済みなら不要です |
 | App プレビュー（動画。任意） | ワークフローでは反映していません。載せるときは App Store Connect のメディアマネージャで追加します |
 
@@ -281,13 +316,15 @@ API が無い・アカウントで一度だけ行うなど、ワークフロー�
 ```
 .
 ├── Configs/                 # xcconfig（署名情報・バージョン・Deployment Target）
-├── IOSTemplateApp/          # アプリ本体（SwiftUI）
-├── IOSTemplateAppTests/     # Unit テスト（Swift Testing）
-├── IOSTemplateAppUITests/   # UI テスト（XCTest）
-├── IOSTemplateApp.xcodeproj # 共有スキーム IOSTemplateApp を含む
+├── Barless/          # アプリ本体（SwiftUI）
+├── BarlessTests/     # Unit テスト（Swift Testing）
+├── BarlessUITests/   # UI テスト（XCTest）
+├── Barless.xcodeproj # 共有スキーム Barless を含む
+├── Packages/BarlessKit/     # 画像処理のコア（ローカルの Swift Package。テストとフィクスチャを含む）
 ├── AppStore/                # App Store の掲載情報（言語・撮る画面・説明文・クリエイティブアセット）
 ├── Tools/                   # スクリーンショットの撮影と App Store Connect への反映
-├── docs/                    # ExportOptions.plist のサンプル
+│   └── statusbar/           # ステータスバーの実測（撮影・解析）と、カタログ・検証結果の生成
+├── docs/                    # 機種の実測・検証結果、ExportOptions.plist のサンプル
 ├── scripts/                 # rename.sh
 ├── .swiftlint.yml           # SwiftLint 設定
 └── .github/
@@ -307,7 +344,8 @@ API が無い・アカウントで一度だけ行うなど、ワークフロー�
 - プロジェクトはフォルダ同期グループ（Xcode 16 以降の形式）で管理しているため、ファイルの追加・削除で pbxproj は変わりません
 - SwiftLint は Build Tool Plugin として全ターゲットに適用され、CI では `swiftlint lint --strict` としても実行されます。ルールは [.swiftlint.yml](.swiftlint.yml) で管理します
 - CI のワークフローは `*.xcodeproj` の名前と同名の共有スキームが存在することを前提にしています
-- [IOSTemplateApp/PrivacyInfo.xcprivacy](IOSTemplateApp/PrivacyInfo.xcprivacy) はプライバシーマニフェストです。UserDefaults（`@AppStorage`）の利用だけを申告しています。データの収集・トラッキング・ほかの理由の申告が必要な API を足したら、ここと App Store Connect の「App のプライバシー」を更新してください
+- ローカルパッケージ（`Packages/BarlessKit`）のテスト `BarlessKitTests` は、共有スキーム `Barless` の Test に入れてあります。CI の `xcodebuild test` でアプリのテストと一緒に流れます
+- [Barless/PrivacyInfo.xcprivacy](Barless/PrivacyInfo.xcprivacy) はプライバシーマニフェストです。UserDefaults（`@AppStorage`）の利用だけを申告しています。データの収集・トラッキング・ほかの理由の申告が必要な API を足したら、ここと App Store Connect の「App のプライバシー」を更新してください
 
 ## License
 

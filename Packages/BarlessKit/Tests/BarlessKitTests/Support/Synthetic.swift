@@ -1,0 +1,85 @@
+import CoreGraphics
+import Foundation
+import ImageIO
+import ImageIOKit
+import UniformTypeIdentifiers
+
+/// 検証用に作る背景
+enum SyntheticBackground: String, CaseIterable {
+    /// 上から下へ直線的に変わる
+    case vertical
+    /// 左から右へ直線的に変わる
+    case horizontal
+    /// 斜めに直線的に変わる
+    case diagonal
+    /// 円形に広がる（直線的ではない）
+    case radial
+
+    /// - Parameter isLight: 明るい背景（黒い文字用）か、暗い背景（白い文字用）か
+    func make(width: Int, height: Int, isLight: Bool) -> Bitmap {
+        let from = isLight ? (red: 255.0, green: 236.0, blue: 210.0) : (red: 16.0, green: 28.0, blue: 72.0)
+        let to = isLight ? (red: 250.0, green: 170.0, blue: 150.0) : (red: 84.0, green: 20.0, blue: 96.0)
+        var bitmap = Bitmap(width: width, height: height)
+        for y in 0..<height {
+            for x in 0..<width {
+                let ratio = min(1, max(0, position(x: Double(x) / Double(width), y: Double(y) / Double(height))))
+                bitmap[x, y] = RGB(
+                    red: UInt8((from.red + (to.red - from.red) * ratio).rounded()),
+                    green: UInt8((from.green + (to.green - from.green) * ratio).rounded()),
+                    blue: UInt8((from.blue + (to.blue - from.blue) * ratio).rounded())
+                )
+            }
+        }
+        return bitmap
+    }
+
+    /// 0〜1 の位置（x・y は幅・高さに対する割合）から、色の混ぜ具合を出す
+    private func position(x: Double, y: Double) -> Double {
+        switch self {
+        case .vertical: y
+        case .horizontal: x
+        case .diagonal: (x + y) / 2
+        case .radial: ((x - 0.3) * (x - 0.3) * 4 + (y - 1.2) * (y - 1.2)).squareRoot() / 1.6
+        }
+    }
+}
+
+enum Synthetic {
+    /// JPEG で保存し直す（SNS やメッセージアプリを通って再圧縮された画像の代わり）。大きさは変えない
+    static func recompressed(_ bitmap: Bitmap, quality: Double) throws -> Bitmap {
+        let output = NSMutableData()
+        guard let destination = CGImageDestinationCreateWithData(output, UTType.jpeg.identifier as CFString, 1, nil) else {
+            throw ImageCodecError.cannotEncode
+        }
+        let options = [kCGImageDestinationLossyCompressionQuality: quality] as CFDictionary
+        CGImageDestinationAddImage(destination, try bitmap.makeCGImage(), options)
+        guard CGImageDestinationFinalize(destination) else { throw ImageCodecError.cannotEncode }
+        return try Bitmap(cgImage: ImageDecoder.decode(data: output as Data))
+    }
+
+    /// 単色の背景で撮った画像のインク（文字・アイコン）を、別の背景に移す。
+    /// 画素ごとに「撮った画像と、その背景の色との差」をそのまま新しい背景に足す
+    static func transplantInk(from shot: Bitmap, onto background: Bitmap, scale: Int) -> Bitmap {
+        let base = shot[shot.width / 2, 4 * scale]
+        var result = background
+        let corner = 4 * scale
+        for y in 0..<min(shot.height, background.height) {
+            for x in 0..<min(shot.width, background.width) {
+                // Simulator の画像は四隅が黒く欠けているので、そこは移さない
+                if y < corner && (x < corner || x >= shot.width - corner) { continue }
+                let pixel = shot[x, y]
+                guard pixel != base else { continue }
+                let under = background[x, y]
+                func shift(_ value: UInt8, _ from: UInt8, _ to: UInt8) -> UInt8 {
+                    UInt8(min(255, max(0, Int(value) + Int(to) - Int(from))))
+                }
+                result[x, y] = RGB(
+                    red: shift(under.red, base.red, pixel.red),
+                    green: shift(under.green, base.green, pixel.green),
+                    blue: shift(under.blue, base.blue, pixel.blue)
+                )
+            }
+        }
+        return result
+    }
+}

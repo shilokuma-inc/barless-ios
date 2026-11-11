@@ -1,0 +1,50 @@
+// swift-tools-version: 6.0
+import PackageDescription
+
+// キレスク / Barless の画像処理のコア。アプリ本体・共有シート拡張・ショートカットから同じものを使う（仕様書 §7）。
+// macOS も対象にしているのは、Simulator を起動せずに `swift test` でテストを回すため。
+// 画素を 1 つずつ触る処理は、最適化なし（Debug）だと 10 倍以上遅い。Debug でもエディタとテストが実用の速さで動くよう、
+// 画像を扱うターゲットは Debug でも最適化をかける（ローカルパッケージなので unsafeFlags を使える）
+let optimized: [SwiftSetting] = [.unsafeFlags(["-O"], .when(configuration: .debug))]
+
+let package = Package(
+    name: "BarlessKit",
+    platforms: [.iOS(.v18), .macOS(.v15)],
+    products: [
+        .library(
+            name: "BarlessKit",
+            targets: ["DeviceCatalog", "ImageIOKit", "InpaintEngine", "StatusBarAnalyzer", "StatusBarRenderer"]
+        )
+    ],
+    targets: [
+        // 画素の入れ物・デコード・メタデータ・書き出し
+        .target(name: "ImageIOKit", swiftSettings: optimized),
+        // 機種グループ × iOS の世代ごとの配置（JSON とその読み込み）
+        .target(name: "DeviceCatalog", resources: [.process("Resources")]),
+        // 時刻と自作アイコンの描画
+        .target(name: "StatusBarRenderer", dependencies: ["DeviceCatalog", "ImageIOKit"], swiftSettings: optimized),
+        // ステータスバーの消去（単色・グラデーション）
+        .target(name: "InpaintEngine", dependencies: ["ImageIOKit"], swiftSettings: optimized),
+        // 機種と iOS の世代の判定、インクの検出
+        .target(
+            name: "StatusBarAnalyzer",
+            dependencies: ["DeviceCatalog", "ImageIOKit", "StatusBarRenderer"],
+            swiftSettings: optimized
+        ),
+        // テスト用: Simulator と実機の画像（上端の切り出し）とその一覧
+        .target(
+            name: "BarlessTestSupport",
+            dependencies: ["ImageIOKit"],
+            path: "Tests/BarlessTestSupport",
+            resources: [.copy("Fixtures")]
+        ),
+        .testTarget(
+            name: "BarlessKitTests",
+            dependencies: [
+                "BarlessTestSupport", "DeviceCatalog", "ImageIOKit", "InpaintEngine", "StatusBarAnalyzer", "StatusBarRenderer"
+            ],
+            swiftSettings: optimized
+        )
+    ],
+    swiftLanguageModes: [.v6]
+)
