@@ -30,4 +30,4 @@
 - macOS 27 と Xcode 27.1 が入った Mac では、Xcode 26.6 の `xcodebuild test` が Simulator につながらず、6 分待って「The test runner hung before establishing connection」で落ちることがある（ビルドと `build-for-testing` は通る）。手元で Simulator のテストを流すときは `DEVELOPER_DIR=/Applications/Xcode-27.1.app/Contents/Developer` を付ける。CI は Xcode 26.6 のまま（2026-11-12）
 - このリポジトリは公開している。仕様書と企画時の資料（価格・収益化・審査対策・商標の下調べなど）は非公開の `shilokuma-inc/barless-spec` に置き、ここには書き写さない。コードやドキュメントからは「仕様書 §5-2」のように節の番号だけで参照する（2026-11-12）
 - 一度 PR に入ったファイルは、ブランチから消しても GitHub 上の PR の履歴（コミット一覧・force push の前後の比較）から読める。公開したくないファイルを入れてしまったら、公開する前にリポジトリを作り直すしかない（このリポジトリは 2026-11-12 に、仕様書を含まない履歴で作り直した）（2026-11-12）
-- Upload（TestFlight への配信）は、リポジトリ変数 `ENABLE_DELIVERY=false` で止めてある。App Store Connect にアプリを作って配信を始めるときに、この変数を消す（2026-11-12）
+- Upload（TestFlight への配信）は有効にしてある（リポジトリ変数 `ENABLE_DELIVERY=true`）。App Store Connect にアプリ（Bundle ID `jp.shilokuma.Barless`）を作るまでは、develop への push のたびに Upload が「App Store Connect にアプリがありません」で失敗する。Job Summary に出る手順でアプリを作ってから、失敗した実行をやり直す（2026-11-12）
