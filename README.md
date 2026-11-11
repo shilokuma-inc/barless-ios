@@ -1,9 +1,40 @@
-# Barless
+# Barless（キレスク）
 
-iOS Application Template (SwiftUI)
+スクリーンショットのステータスバー（時刻・電池・電波）を隠す・整える iOS アプリです。日本での名前は「キレスク」、海外での名前は「Barless」。
+画像の処理はすべて端末の中で行います。
 
-iOS アプリのリポジトリを新規作成するときの GitHub テンプレートリポジトリです。
-SwiftUI のプロジェクト一式と、ビルド・テスト・Archive・TestFlight 配信までの GitHub Actions ワークフローを含みます。
+[shilokuma-inc/template-app-ios](https://github.com/shilokuma-inc/template-app-ios) から作ったリポジトリで、
+ビルド・テスト・Archive・TestFlight 配信までの GitHub Actions ワークフローを含みます。
+
+## ドキュメント
+
+| ファイル | 内容 |
+|---|---|
+| [docs/spec.md](docs/spec.md) | 仕様書（コンセプト・機能・画面・処理の仕様・アーキテクチャ） |
+| [docs/device-table.md](docs/device-table.md) | 機種・iOS ごとのスクリーンショットの大きさと、ステータスバーの位置の実測 |
+| [docs/verification.md](docs/verification.md) | 判定・消去・描き直しの検証結果（うまくいく条件・いかない条件） |
+| [Tools/statusbar/README.md](Tools/statusbar/README.md) | 実測の撮り方と、カタログ・フィクスチャ・検証結果の作り直し方 |
+| [LEARNINGS.md](LEARNINGS.md) | このリポジトリで分かった、ツールや環境の癖 |
+
+## 開発の進み具合
+
+最初のマイルストーン（リポジトリの用意と、判定・消去・描き直しの技術検証）まで。UI・課金・広告はこれから。
+
+画像処理のコアはローカルパッケージ [Packages/BarlessKit](Packages/BarlessKit) にあります。
+
+| モジュール | 役割 |
+|---|---|
+| `DeviceCatalog` | 機種グループ × iOS の世代ごとの配置（実測から作った JSON）と、その読み込み |
+| `StatusBarAnalyzer` | 機種グループと iOS の世代の判定、文字・アイコンの検出、背景の種類の判定 |
+| `InpaintEngine` | ステータスバーの消去（単色・グラデーション） |
+| `StatusBarRenderer` | 時刻（システムフォント）と自作ベクターのアイコン（電波・Wi-Fi・電池）の描画 |
+| `ImageIOKit` | 画素の入れ物、読み込み、メタデータ、書き出し |
+
+パッケージのテストは、Simulator を起動せずに macOS の上で流せます（アプリのスキームにも入っているので、Xcode と CI では Simulator でも流れます）。
+
+```bash
+cd Packages/BarlessKit && swift test
+```
 
 ## Environment
 
@@ -59,6 +90,8 @@ SwiftUI のプロジェクト一式と、ビルド・テスト・Archive・TestF
 </div>
 
 ## テンプレートの使い方
+
+テンプレートから引き継いだ、リポジトリの運用の説明です。1〜3 はこのリポジトリでは済んでいます。
 
 ### 1. リポジトリを作成する
 
@@ -285,9 +318,11 @@ API が無い・アカウントで一度だけ行うなど、ワークフロー�
 ├── BarlessTests/     # Unit テスト（Swift Testing）
 ├── BarlessUITests/   # UI テスト（XCTest）
 ├── Barless.xcodeproj # 共有スキーム Barless を含む
+├── Packages/BarlessKit/     # 画像処理のコア（ローカルの Swift Package。テストとフィクスチャを含む）
 ├── AppStore/                # App Store の掲載情報（言語・撮る画面・説明文・クリエイティブアセット）
 ├── Tools/                   # スクリーンショットの撮影と App Store Connect への反映
-├── docs/                    # ExportOptions.plist のサンプル
+│   └── statusbar/           # ステータスバーの実測（撮影・解析）と、カタログ・検証結果の生成
+├── docs/                    # 仕様書・機種の実測・検証結果、ExportOptions.plist のサンプル
 ├── scripts/                 # rename.sh
 ├── .swiftlint.yml           # SwiftLint 設定
 └── .github/
@@ -307,6 +342,7 @@ API が無い・アカウントで一度だけ行うなど、ワークフロー�
 - プロジェクトはフォルダ同期グループ（Xcode 16 以降の形式）で管理しているため、ファイルの追加・削除で pbxproj は変わりません
 - SwiftLint は Build Tool Plugin として全ターゲットに適用され、CI では `swiftlint lint --strict` としても実行されます。ルールは [.swiftlint.yml](.swiftlint.yml) で管理します
 - CI のワークフローは `*.xcodeproj` の名前と同名の共有スキームが存在することを前提にしています
+- ローカルパッケージ（`Packages/BarlessKit`）のテスト `BarlessKitTests` は、共有スキーム `Barless` の Test に入れてあります。CI の `xcodebuild test` でアプリのテストと一緒に流れます
 - [Barless/PrivacyInfo.xcprivacy](Barless/PrivacyInfo.xcprivacy) はプライバシーマニフェストです。UserDefaults（`@AppStorage`）の利用だけを申告しています。データの収集・トラッキング・ほかの理由の申告が必要な API を足したら、ここと App Store Connect の「App のプライバシー」を更新してください
 
 ## License
