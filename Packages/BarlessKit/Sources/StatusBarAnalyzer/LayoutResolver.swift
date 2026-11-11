@@ -135,12 +135,15 @@ struct LayoutResolver {
 
 /// 電池の形から iOS の世代を見分ける。
 ///
-/// iOS 18〜26 の電池は「枠・すき間・中身」の順に並ぶので、左端から中へ進むと、枠のすぐ内側で背景の色に戻る。
+/// iOS 18〜26 の電池は「枠・すき間・中身」の順に並ぶので、左端から中へ進むと、枠のすぐ内側でいったん背景の色に戻り、その先でまた塗りに戻る。
 /// iOS 27 の電池は枠のないカプセル形で、左端からずっと塗られている。
 struct BatteryStyleProbe {
-    /// 背景との差が、それまでの最大のこの割合を下回ったら「すき間」とみなす。
+    /// 背景との差が、それまでの最大のこの割合を下回ったら「塗りが途切れた」とみなす。
     /// JPEG で再圧縮された画像ではすき間が背景の色に戻りきらないので、絶対値ではなく比で見る
     static let gapRatio = 0.4
+    /// 途切れた後、途切れる前の最大のこの割合まで差が戻ったら「中身に入った」とみなす。
+    /// iOS 27 でも残量が少ないと「残量の色 → 空いている部分の薄い色」で差が下がるが、その先で戻らないので区別できる
+    static let refillRatio = 0.7
 
     let detector: InkDetector
 
@@ -155,12 +158,18 @@ struct BatteryStyleProbe {
         return votes.filter { $0 }.count * 2 > votes.count ? .iOS18to26 : .iOS27
     }
 
-    /// 左端から、枠（1pt）とすき間（1pt）の先まで進み、塗りが途切れるかを見る。インクが無ければ `nil`
+    /// 左端から、枠（1pt）・すき間（1pt）を越えて中身に入るところ（3.5pt）まで進み、
+    /// 「塗り → 途切れ → 塗り」と並んでいるかを見る。インクが無ければ `nil`
     private func hasGap(in bitmap: Bitmap, blob: PixelRect, y: Int) -> Bool? {
         var peak = 0
-        for x in blob.x..<min(blob.maxX, blob.x + 3 * detector.scale) {
+        var peakBeforeGap: Int?
+        for x in blob.x..<min(blob.maxX, blob.x + 7 * detector.scale / 2) {
             let difference = bitmap[x, y].distance(to: detector.expectedColor(bitmap, x: x, y: y))
-            if peak > InkDetector.inkThreshold, Double(difference) < Double(peak) * Self.gapRatio { return true }
+            if let before = peakBeforeGap {
+                if Double(difference) >= Double(before) * Self.refillRatio { return true }
+            } else if peak > InkDetector.inkThreshold, Double(difference) < Double(peak) * Self.gapRatio {
+                peakBeforeGap = peak
+            }
             peak = max(peak, difference)
         }
         return peak > InkDetector.inkThreshold ? false : nil

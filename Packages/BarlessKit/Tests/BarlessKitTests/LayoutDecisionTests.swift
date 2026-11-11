@@ -2,6 +2,7 @@ import BarlessTestSupport
 import DeviceCatalog
 import ImageIOKit
 import StatusBarAnalyzer
+import StatusBarRenderer
 import Testing
 
 /// 検証 1: 「大きさで候補 → 時刻の位置と大きさで機種グループと iOS の世代を決める」判定（docs/verification.md）
@@ -89,6 +90,35 @@ struct LayoutDecisionTests {
         #expect(analysis.decision == .unknownSize)
         #expect(analysis.scan == nil)
         #expect(analysis.eraseMask() == nil)
+    }
+
+    /// 電池の残量や背景の色が変わっても、電池の形で世代を取り違えない。
+    /// iOS 27 の電池は、残量が少ないと「残量の色 → 空いている部分の薄い色」の境目が左端の近くに来る。
+    /// これを iOS 18〜26 の「枠の内側のすき間」と取り違えないこと（時刻では決まらない iPhone 11 系・SE を、描いた画像で確かめる）
+    @Test(arguments: [0.05, 0.12, 0.5, 1.0])
+    func tellsGenerationFromBatteryAtAnyLevel(level: Double) throws {
+        let catalog = try DeviceCatalog.bundled()
+        let groups = ["750x1334-a", "828x1792-a", "1125x2436-a", "1242x2688-a"]
+        let backgrounds: [(color: RGB, appearance: ContentAppearance)] = [
+            (RGB(red: 242, green: 242, blue: 247), .darkContent),
+            (RGB(red: 0, green: 180, blue: 200), .darkContent),
+            (RGB(red: 0, green: 180, blue: 200), .lightContent),
+            (RGB(red: 128, green: 128, blue: 128), .darkContent),
+            (RGB(red: 128, green: 128, blue: 128), .lightContent),
+            (.black, .lightContent)
+        ]
+        let spec = StatusBarSpec(time: "9:41", cellularBars: 4, wifiBars: 3, battery: BatterySpec(level: level))
+        for layout in catalog.layouts where groups.contains(layout.group) {
+            for background in backgrounds {
+                var strip = Bitmap(width: layout.pixelWidth, height: 72 * layout.scale, fill: background.color)
+                try StatusBarRenderer().render(spec, layout: layout, appearance: background.appearance, into: &strip)
+                let analysis = StatusBarAnalyzer.analyze(strip: strip, pixelHeight: layout.pixelHeight, timeText: "9:41", catalog: catalog)
+                #expect(
+                    analysis.decision.layout?.id == layout.id,
+                    "\(layout.id) 残量 \(level) 背景 \(background.color) \(background.appearance): \(analysis.decision.layout?.id ?? "決められない")"
+                )
+            }
+        }
     }
 
     /// 上端の切り出しが短すぎて帯が入りきらない画像では、落ちずに「決められない」を返す
