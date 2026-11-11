@@ -73,6 +73,20 @@ struct InpaintEngineTests {
         }
     }
 
+    /// マスクが画像の外にあるときは、落ちずに画像をそのまま返す
+    @Test
+    func maskOutsideImageChangesNothing() {
+        let background = gradient(width: 10, height: 10, horizontal: 5, vertical: 5)
+        var mask = PixelMask(originX: 20, originY: 3, width: 2, height: 2)
+        mask[20, 3] = true
+        #expect(SolidFillInpainter().fill(background, mask: mask).data == background.data)
+        #expect(GradientInpainter().fill(background, mask: mask).data == background.data)
+        var below = PixelMask(originX: 2, originY: 30, width: 2, height: 2)
+        below[2, 30] = true
+        #expect(SolidFillInpainter().fill(background, mask: below).data == background.data)
+        #expect(GradientInpainter().fill(background, mask: below).data == background.data)
+    }
+
     @Test
     func emptyMaskChangesNothing() {
         let background = gradient(width: 10, height: 10, horizontal: 5, vertical: 5)

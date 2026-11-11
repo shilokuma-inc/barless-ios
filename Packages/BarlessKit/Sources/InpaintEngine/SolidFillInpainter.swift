@@ -10,10 +10,12 @@ public struct SolidFillInpainter: Inpainter {
 
     /// 同期版
     public func fill(_ bitmap: Bitmap, mask: PixelMask) -> Bitmap {
-        guard let color = backgroundColor(of: bitmap, mask: mask) else { return bitmap }
+        guard let area = Self.overlap(of: bitmap, and: mask), let color = backgroundColor(of: bitmap, mask: mask) else {
+            return bitmap
+        }
         var result = bitmap
-        for y in max(0, mask.originY)..<min(bitmap.height, mask.originY + mask.height) {
-            for x in max(0, mask.originX)..<min(bitmap.width, mask.originX + mask.width) where mask[x, y] {
+        for y in area.rows {
+            for x in area.columns where mask[x, y] {
                 result[x, y] = color
             }
         }
@@ -22,11 +24,12 @@ public struct SolidFillInpainter: Inpainter {
 
     /// マスクが覆う矩形の中で、マスクされていない画素の中央値（チャンネルごと）
     func backgroundColor(of bitmap: Bitmap, mask: PixelMask) -> RGB? {
+        guard let area = Self.overlap(of: bitmap, and: mask) else { return nil }
         var reds: [UInt8] = []
         var greens: [UInt8] = []
         var blues: [UInt8] = []
-        for y in max(0, mask.originY)..<min(bitmap.height, mask.originY + mask.height) {
-            for x in max(0, mask.originX)..<min(bitmap.width, mask.originX + mask.width) where !mask[x, y] {
+        for y in area.rows {
+            for x in area.columns where !mask[x, y] {
                 let pixel = bitmap[x, y]
                 reds.append(pixel.red)
                 greens.append(pixel.green)
@@ -38,5 +41,15 @@ public struct SolidFillInpainter: Inpainter {
         greens.sort()
         blues.sort()
         return RGB(red: reds[reds.count / 2], green: greens[greens.count / 2], blue: blues[blues.count / 2])
+    }
+
+    /// 画像とマスクが重なる範囲。重ならなければ `nil`（マスクが画像の外にあるとき）
+    private static func overlap(of bitmap: Bitmap, and mask: PixelMask) -> (columns: Range<Int>, rows: Range<Int>)? {
+        let minX = max(0, mask.originX)
+        let maxX = min(bitmap.width, mask.originX + mask.width)
+        let minY = max(0, mask.originY)
+        let maxY = min(bitmap.height, mask.originY + mask.height)
+        guard minX < maxX, minY < maxY else { return nil }
+        return (minX..<maxX, minY..<maxY)
     }
 }
