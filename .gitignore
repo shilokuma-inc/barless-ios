@@ -111,3 +111,6 @@ __pycache__/
 
 # ステータスバーの実測用に Simulator で撮った画像（約 130MB）。Tools/statusbar/README.md を参照
 Tools/statusbar/simshots/
+
+# Xcode がローカルパッケージの中に作る作業用のファイル
+Packages/*/.swiftpm/
