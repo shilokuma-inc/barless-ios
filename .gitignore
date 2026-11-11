@@ -108,3 +108,6 @@ __pycache__/
 # （ralph-loop の制御用 worktree に残ると、起動スクリプトが worktree を片付けられない）
 *.profraw
 *.profdata
+
+# ステータスバーの実測用に Simulator で撮った画像（約 130MB）。Tools/statusbar/README.md を参照
+Tools/statusbar/simshots/
