@@ -27,9 +27,11 @@ def measure(path):
         band.append(y)
     y0, y1 = band[0], band[-1] + 1
     cols = [x for x in range(W) if any(ink(x, y) for y in range(y0, y1))]
-    groups = []                                   # 横方向に 5pt 以上あいたら別の要素
+    # 横方向に 3pt 以上あいたら別の要素。要素の中のすき間（電波の棒の間・文字の間・電池と突起の間）は 2pt 以下、
+    # 要素どうしの間は 4.5pt 以上ある（iPhone 11・13 mini・SE は 4.5〜5pt で、しきい値が 5pt だと 1 かたまりになっていた）
+    groups = []
     for x in cols:
-        if groups and x - groups[-1][1] <= 5 * s: groups[-1][1] = x
+        if groups and x - groups[-1][1] <= 3 * s: groups[-1][1] = x
         else: groups.append([x, x])
     def box(g):
         ys = [y for y in range(y0, y1) if any(ink(x, y) for x in range(g[0], g[1] + 1))]

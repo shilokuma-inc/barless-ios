@@ -17,7 +17,8 @@ for k in sorted(d, key=lambda k: (d[k]['width'], d[k]['device'], d[k]['runtime']
     v = d[k]; s = v['scale']; e = v['elements']
     b = lambda x: f"{pt(x['x'], s)}, {pt(x['y'], s)}, {pt(x['w'], s)}×{pt(x['h'], s)}"
     if len(e) == 4: cells = [b(x) for x in e]
+    elif len(e) == 5: cells = [b(e[3]), b(e[0]), b(e[2]), b(e[4]) + '（ほかにキャリア名 ' + b(e[1]) + '）']  # ホームボタンの機種: 電波・キャリア名・Wi-Fi・時刻・電池の順
     elif len(e) == 1: cells = ['（別の配置。本文を参照）', '', '', '']
-    else: cells = [b(e[0])] + ['（右側は 1 かたまり）' + b(x) for x in e[1:]] + [''] * (4 - len(e))
+    else: cells = [b(e[0])] + ['（分けられなかった）' + b(x) for x in e[1:]] + [''] * (4 - len(e))
     cells = (cells + [''] * 4)[:4]
     print(f"| {v['device'].replace('iPhone-', 'iPhone ').replace('-', ' ')} | {RT.get(v['runtime'], v['runtime'])} | {v['width']}×{v['height']} | {pt(v['ink_top'], s)}〜{pt(v['ink_bottom'], s)} | " + ' | '.join(cells) + " |")
