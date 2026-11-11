@@ -1,0 +1,2740 @@
+{
+ "schemaVersion": 1,
+ "updatedAt": "2026-11-12",
+ "unsupported": [
+  {
+   "pixelWidth": 1398,
+   "pixelHeight": 2034,
+   "models": [
+    "iPhone Duo"
+   ],
+   "reason": "vertical-layout"
+  }
+ ],
+ "layouts": [
+  {
+   "id": "750x1334-a/ios18-26",
+   "group": "750x1334-a",
+   "models": [
+    "iPhone SE 3rd generation"
+   ],
+   "generation": "ios18-26",
+   "pixelWidth": 750,
+   "pixelHeight": 1334,
+   "scale": 2,
+   "style": "centeredTime",
+   "inkTop": 8,
+   "inkBottom": 31,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 350,
+      "y": 11,
+      "width": 48,
+      "height": 19
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 341,
+      "y": 11,
+      "width": 68,
+      "height": 19
+     }
+    }
+   ],
+   "cellular": {
+    "x": 13,
+    "y": 9,
+    "width": 33,
+    "height": 21
+   },
+   "wifi": {
+    "x": 140,
+    "y": 9,
+    "width": 31,
+    "height": 22
+   },
+   "battery": {
+    "x": 691,
+    "y": 8,
+    "width": 48,
+    "height": 23
+   },
+   "carrier": {
+    "x": 55,
+    "y": 11,
+    "width": 76,
+    "height": 19
+   },
+   "cellularBars": [
+    {
+     "x": 13,
+     "y": 22,
+     "width": 6,
+     "height": 8
+    },
+    {
+     "x": 22,
+     "y": 18,
+     "width": 6,
+     "height": 12
+    },
+    {
+     "x": 31,
+     "y": 13,
+     "width": 6,
+     "height": 17
+    },
+    {
+     "x": 40,
+     "y": 9,
+     "width": 6,
+     "height": 21
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 9,
+     "bottom": 14
+    },
+    {
+     "top": 17,
+     "bottom": 22
+    },
+    {
+     "top": 24,
+     "bottom": 31
+    }
+   ],
+   "batteryBody": {
+    "x": 691,
+    "y": 8,
+    "width": 44,
+    "height": 23
+   },
+   "batteryNub": {
+    "x": 737,
+    "y": 15,
+    "width": 2,
+    "height": 8
+   },
+   "sources": [
+    "iPhone-SE-3rd-generation__iOS-18-6",
+    "iPhone-SE-3rd-generation__iOS-26-5"
+   ]
+  },
+  {
+   "id": "750x1334-a/ios27",
+   "group": "750x1334-a",
+   "models": [
+    "iPhone SE 3rd generation"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 750,
+   "pixelHeight": 1334,
+   "scale": 2,
+   "style": "centeredTime",
+   "inkTop": 8,
+   "inkBottom": 31,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 350,
+      "y": 11,
+      "width": 48,
+      "height": 19
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 341,
+      "y": 11,
+      "width": 68,
+      "height": 19
+     }
+    }
+   ],
+   "cellular": {
+    "x": 13,
+    "y": 9,
+    "width": 33,
+    "height": 21
+   },
+   "wifi": {
+    "x": 140,
+    "y": 8,
+    "width": 31,
+    "height": 23
+   },
+   "battery": {
+    "x": 689,
+    "y": 8,
+    "width": 50,
+    "height": 23
+   },
+   "carrier": {
+    "x": 55,
+    "y": 11,
+    "width": 76,
+    "height": 19
+   },
+   "cellularBars": [
+    {
+     "x": 13,
+     "y": 22,
+     "width": 6,
+     "height": 8
+    },
+    {
+     "x": 22,
+     "y": 18,
+     "width": 6,
+     "height": 12
+    },
+    {
+     "x": 31,
+     "y": 13,
+     "width": 6,
+     "height": 17
+    },
+    {
+     "x": 40,
+     "y": 9,
+     "width": 6,
+     "height": 21
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 8,
+     "bottom": 13
+    },
+    {
+     "top": 16,
+     "bottom": 21
+    },
+    {
+     "top": 24,
+     "bottom": 31
+    }
+   ],
+   "batteryBody": {
+    "x": 689,
+    "y": 8,
+    "width": 44,
+    "height": 23
+   },
+   "batteryNub": {
+    "x": 735,
+    "y": 14,
+    "width": 4,
+    "height": 10
+   },
+   "sources": [
+    "iPhone-SE-3rd-generation__iOS-27-0"
+   ]
+  },
+  {
+   "id": "828x1792-a/ios18-26",
+   "group": "828x1792-a",
+   "models": [
+    "iPhone 11"
+   ],
+   "generation": "ios18-26",
+   "pixelWidth": 828,
+   "pixelHeight": 1792,
+   "scale": 2,
+   "style": "leadingTime",
+   "inkTop": 37,
+   "inkBottom": 62,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 72,
+      "y": 38,
+      "width": 61,
+      "height": 24
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 59,
+      "y": 38,
+      "width": 88,
+      "height": 24
+     }
+    }
+   ],
+   "cellular": {
+    "x": 653,
+    "y": 38,
+    "width": 37,
+    "height": 23
+   },
+   "wifi": {
+    "x": 699,
+    "y": 37,
+    "width": 33,
+    "height": 24
+   },
+   "battery": {
+    "x": 741,
+    "y": 37,
+    "width": 53,
+    "height": 25
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 653,
+     "y": 52,
+     "width": 7,
+     "height": 9
+    },
+    {
+     "x": 663,
+     "y": 48,
+     "width": 7,
+     "height": 13
+    },
+    {
+     "x": 673,
+     "y": 43,
+     "width": 7,
+     "height": 18
+    },
+    {
+     "x": 683,
+     "y": 38,
+     "width": 7,
+     "height": 23
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 37,
+     "bottom": 43
+    },
+    {
+     "top": 46,
+     "bottom": 51
+    },
+    {
+     "top": 54,
+     "bottom": 61
+    }
+   ],
+   "batteryBody": {
+    "x": 741,
+    "y": 37,
+    "width": 48,
+    "height": 25
+   },
+   "batteryNub": {
+    "x": 791,
+    "y": 45,
+    "width": 3,
+    "height": 9
+   },
+   "sources": [
+    "iPhone-11__iOS-18-6",
+    "iPhone-11__iOS-26-5"
+   ]
+  },
+  {
+   "id": "828x1792-a/ios27",
+   "group": "828x1792-a",
+   "models": [
+    "iPhone 11"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 828,
+   "pixelHeight": 1792,
+   "scale": 2,
+   "style": "leadingTime",
+   "inkTop": 37,
+   "inkBottom": 63,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 72,
+      "y": 38,
+      "width": 61,
+      "height": 24
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 59,
+      "y": 38,
+      "width": 88,
+      "height": 24
+     }
+    }
+   ],
+   "cellular": {
+    "x": 653,
+    "y": 38,
+    "width": 37,
+    "height": 23
+   },
+   "wifi": {
+    "x": 697,
+    "y": 37,
+    "width": 34,
+    "height": 25
+   },
+   "battery": {
+    "x": 740,
+    "y": 38,
+    "width": 54,
+    "height": 25
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 653,
+     "y": 52,
+     "width": 7,
+     "height": 9
+    },
+    {
+     "x": 663,
+     "y": 48,
+     "width": 7,
+     "height": 13
+    },
+    {
+     "x": 673,
+     "y": 43,
+     "width": 7,
+     "height": 18
+    },
+    {
+     "x": 683,
+     "y": 38,
+     "width": 7,
+     "height": 23
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 37,
+     "bottom": 42
+    },
+    {
+     "top": 45,
+     "bottom": 51
+    },
+    {
+     "top": 54,
+     "bottom": 62
+    }
+   ],
+   "batteryBody": {
+    "x": 740,
+    "y": 38,
+    "width": 48,
+    "height": 25
+   },
+   "batteryNub": {
+    "x": 790,
+    "y": 45,
+    "width": 4,
+    "height": 11
+   },
+   "sources": [
+    "iPhone-11__iOS-27-0"
+   ]
+  },
+  {
+   "id": "1080x2340-a/ios18-26",
+   "group": "1080x2340-a",
+   "models": [
+    "iPhone 13 mini"
+   ],
+   "generation": "ios18-26",
+   "pixelWidth": 1080,
+   "pixelHeight": 2340,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 62,
+   "inkBottom": 96,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 82,
+      "y": 62,
+      "width": 83,
+      "height": 33
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 66,
+      "y": 62,
+      "width": 120,
+      "height": 33
+     }
+    }
+   ],
+   "cellular": {
+    "x": 857,
+    "y": 63,
+    "width": 50,
+    "height": 32
+   },
+   "wifi": {
+    "x": 921,
+    "y": 62,
+    "width": 45,
+    "height": 33
+   },
+   "battery": {
+    "x": 981,
+    "y": 62,
+    "width": 67,
+    "height": 34
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 857,
+     "y": 83,
+     "width": 9,
+     "height": 12
+    },
+    {
+     "x": 870,
+     "y": 78,
+     "width": 10,
+     "height": 17
+    },
+    {
+     "x": 884,
+     "y": 71,
+     "width": 9,
+     "height": 24
+    },
+    {
+     "x": 897,
+     "y": 63,
+     "width": 10,
+     "height": 32
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 62,
+     "bottom": 70
+    },
+    {
+     "top": 73,
+     "bottom": 81
+    },
+    {
+     "top": 84,
+     "bottom": 95
+    }
+   ],
+   "batteryBody": {
+    "x": 981,
+    "y": 62,
+    "width": 60,
+    "height": 33
+   },
+   "batteryNub": {
+    "x": 1043,
+    "y": 73,
+    "width": 5,
+    "height": 11
+   },
+   "sources": [
+    "iPhone-13-mini__iOS-18-6",
+    "iPhone-13-mini__iOS-26-5"
+   ]
+  },
+  {
+   "id": "1080x2340-a/ios27",
+   "group": "1080x2340-a",
+   "models": [
+    "iPhone 13 mini"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 1080,
+   "pixelHeight": 2340,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 65,
+   "inkBottom": 105,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 114,
+      "y": 67,
+      "width": 93,
+      "height": 37
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 95,
+      "y": 67,
+      "width": 133,
+      "height": 37
+     }
+    }
+   ],
+   "cellular": {
+    "x": 806,
+    "y": 65,
+    "width": 56,
+    "height": 38
+   },
+   "wifi": {
+    "x": 876,
+    "y": 65,
+    "width": 54,
+    "height": 40
+   },
+   "battery": {
+    "x": 945,
+    "y": 67,
+    "width": 81,
+    "height": 38
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 806,
+     "y": 84,
+     "width": 10,
+     "height": 19
+    },
+    {
+     "x": 821,
+     "y": 78,
+     "width": 11,
+     "height": 25
+    },
+    {
+     "x": 837,
+     "y": 72,
+     "width": 10,
+     "height": 31
+    },
+    {
+     "x": 852,
+     "y": 65,
+     "width": 10,
+     "height": 38
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 65,
+     "bottom": 73
+    },
+    {
+     "top": 79,
+     "bottom": 88
+    },
+    {
+     "top": 92,
+     "bottom": 105
+    }
+   ],
+   "batteryBody": {
+    "x": 945,
+    "y": 67,
+    "width": 73,
+    "height": 38
+   },
+   "batteryNub": {
+    "x": 1019,
+    "y": 79,
+    "width": 7,
+    "height": 14
+   },
+   "sources": [
+    "iPhone-13-mini__iOS-27-0"
+   ]
+  },
+  {
+   "id": "1125x2436-a/ios18-26",
+   "group": "1125x2436-a",
+   "models": [
+    "iPhone 11 Pro"
+   ],
+   "generation": "ios18-26",
+   "pixelWidth": 1125,
+   "pixelHeight": 2436,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 51,
+   "inkBottom": 86,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 95,
+      "y": 52,
+      "width": 87,
+      "height": 34
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 79,
+      "y": 52,
+      "width": 124,
+      "height": 34
+     }
+    }
+   ],
+   "cellular": {
+    "x": 882,
+    "y": 53,
+    "width": 51,
+    "height": 32
+   },
+   "wifi": {
+    "x": 948,
+    "y": 52,
+    "width": 46,
+    "height": 33
+   },
+   "battery": {
+    "x": 1009,
+    "y": 51,
+    "width": 73,
+    "height": 35
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 882,
+     "y": 73,
+     "width": 9,
+     "height": 12
+    },
+    {
+     "x": 896,
+     "y": 67,
+     "width": 9,
+     "height": 18
+    },
+    {
+     "x": 910,
+     "y": 60,
+     "width": 9,
+     "height": 25
+    },
+    {
+     "x": 924,
+     "y": 53,
+     "width": 9,
+     "height": 32
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 52,
+     "bottom": 59
+    },
+    {
+     "top": 63,
+     "bottom": 71
+    },
+    {
+     "top": 75,
+     "bottom": 85
+    }
+   ],
+   "batteryBody": {
+    "x": 1009,
+    "y": 52,
+    "width": 66,
+    "height": 34
+   },
+   "batteryNub": {
+    "x": 1078,
+    "y": 63,
+    "width": 4,
+    "height": 12
+   },
+   "sources": [
+    "iPhone-11-Pro__iOS-18-6",
+    "iPhone-11-Pro__iOS-26-5"
+   ]
+  },
+  {
+   "id": "1125x2436-a/ios27",
+   "group": "1125x2436-a",
+   "models": [
+    "iPhone 11 Pro"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 1125,
+   "pixelHeight": 2436,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 52,
+   "inkBottom": 87,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 95,
+      "y": 52,
+      "width": 87,
+      "height": 34
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 79,
+      "y": 52,
+      "width": 124,
+      "height": 34
+     }
+    }
+   ],
+   "cellular": {
+    "x": 882,
+    "y": 53,
+    "width": 51,
+    "height": 32
+   },
+   "wifi": {
+    "x": 947,
+    "y": 52,
+    "width": 46,
+    "height": 34
+   },
+   "battery": {
+    "x": 1007,
+    "y": 52,
+    "width": 75,
+    "height": 35
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 882,
+     "y": 73,
+     "width": 9,
+     "height": 12
+    },
+    {
+     "x": 896,
+     "y": 67,
+     "width": 9,
+     "height": 18
+    },
+    {
+     "x": 910,
+     "y": 60,
+     "width": 9,
+     "height": 25
+    },
+    {
+     "x": 924,
+     "y": 53,
+     "width": 9,
+     "height": 32
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 52,
+     "bottom": 59
+    },
+    {
+     "top": 63,
+     "bottom": 71
+    },
+    {
+     "top": 75,
+     "bottom": 86
+    }
+   ],
+   "batteryBody": {
+    "x": 1007,
+    "y": 53,
+    "width": 66,
+    "height": 34
+   },
+   "batteryNub": {
+    "x": 1076,
+    "y": 62,
+    "width": 6,
+    "height": 16
+   },
+   "sources": [
+    "iPhone-11-Pro__iOS-27-0"
+   ]
+  },
+  {
+   "id": "1170x2532-a/ios18-26",
+   "group": "1170x2532-a",
+   "models": [
+    "iPhone 12",
+    "iPhone 16e",
+    "iPhone 17e"
+   ],
+   "generation": "ios18-26",
+   "pixelWidth": 1170,
+   "pixelHeight": 2532,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 55,
+   "inkBottom": 93,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 111,
+      "y": 57,
+      "width": 89,
+      "height": 35
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 93,
+      "y": 57,
+      "width": 128,
+      "height": 35
+     }
+    }
+   ],
+   "cellular": {
+    "x": 907,
+    "y": 57,
+    "width": 51,
+    "height": 34
+   },
+   "wifi": {
+    "x": 974,
+    "y": 55,
+    "width": 50,
+    "height": 36
+   },
+   "battery": {
+    "x": 1040,
+    "y": 55,
+    "width": 75,
+    "height": 38
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 907,
+     "y": 79,
+     "width": 9,
+     "height": 12
+    },
+    {
+     "x": 921,
+     "y": 73,
+     "width": 9,
+     "height": 18
+    },
+    {
+     "x": 935,
+     "y": 65,
+     "width": 9,
+     "height": 26
+    },
+    {
+     "x": 949,
+     "y": 57,
+     "width": 9,
+     "height": 34
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 55,
+     "bottom": 63
+    },
+    {
+     "top": 68,
+     "bottom": 76
+    },
+    {
+     "top": 80,
+     "bottom": 91
+    }
+   ],
+   "batteryBody": {
+    "x": 1040,
+    "y": 56,
+    "width": 68,
+    "height": 36
+   },
+   "batteryNub": {
+    "x": 1111,
+    "y": 68,
+    "width": 4,
+    "height": 12
+   },
+   "sources": [
+    "iPhone-12__iOS-18-6",
+    "iPhone-12__iOS-26-5",
+    "iPhone-16e__iOS-18-6",
+    "iPhone-16e__iOS-26-5",
+    "iPhone-17e__iOS-26-5"
+   ]
+  },
+  {
+   "id": "1170x2532-a/ios27",
+   "group": "1170x2532-a",
+   "models": [
+    "iPhone 12",
+    "iPhone 16e",
+    "iPhone 17e"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 1170,
+   "pixelHeight": 2532,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 57,
+   "inkBottom": 99,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 142,
+      "y": 59,
+      "width": 96,
+      "height": 38
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 122,
+      "y": 59,
+      "width": 139,
+      "height": 38
+     }
+    }
+   ],
+   "cellular": {
+    "x": 856,
+    "y": 57,
+    "width": 58,
+    "height": 39
+   },
+   "wifi": {
+    "x": 932,
+    "y": 57,
+    "width": 55,
+    "height": 41
+   },
+   "battery": {
+    "x": 1007,
+    "y": 58,
+    "width": 84,
+    "height": 41
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 856,
+     "y": 77,
+     "width": 10,
+     "height": 19
+    },
+    {
+     "x": 872,
+     "y": 71,
+     "width": 10,
+     "height": 25
+    },
+    {
+     "x": 888,
+     "y": 64,
+     "width": 10,
+     "height": 32
+    },
+    {
+     "x": 904,
+     "y": 57,
+     "width": 10,
+     "height": 39
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 57,
+     "bottom": 65
+    },
+    {
+     "top": 71,
+     "bottom": 80
+    },
+    {
+     "top": 85,
+     "bottom": 98
+    }
+   ],
+   "batteryBody": {
+    "x": 1007,
+    "y": 59,
+    "width": 75,
+    "height": 39
+   },
+   "batteryNub": {
+    "x": 1084,
+    "y": 71,
+    "width": 7,
+    "height": 15
+   },
+   "sources": [
+    "iPhone-12__iOS-27-0",
+    "iPhone-16e__iOS-27-0",
+    "iPhone-17e__iOS-27-0"
+   ]
+  },
+  {
+   "id": "1179x2556-a/ios18-26",
+   "group": "1179x2556-a",
+   "models": [
+    "iPhone 15",
+    "iPhone 16"
+   ],
+   "generation": "ios18-26",
+   "pixelWidth": 1179,
+   "pixelHeight": 2556,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 67,
+   "inkBottom": 108,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 165,
+      "y": 69,
+      "width": 96,
+      "height": 38
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 146,
+      "y": 69,
+      "width": 139,
+      "height": 38
+     }
+    }
+   ],
+   "cellular": {
+    "x": 846,
+    "y": 69,
+    "width": 58,
+    "height": 37
+   },
+   "wifi": {
+    "x": 926,
+    "y": 69,
+    "width": 51,
+    "height": 37
+   },
+   "battery": {
+    "x": 999,
+    "y": 67,
+    "width": 82,
+    "height": 41
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 846,
+     "y": 92,
+     "width": 10,
+     "height": 14
+    },
+    {
+     "x": 862,
+     "y": 85,
+     "width": 10,
+     "height": 21
+    },
+    {
+     "x": 878,
+     "y": 77,
+     "width": 10,
+     "height": 29
+    },
+    {
+     "x": 894,
+     "y": 69,
+     "width": 10,
+     "height": 37
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 69,
+     "bottom": 77
+    },
+    {
+     "top": 81,
+     "bottom": 90
+    },
+    {
+     "top": 94,
+     "bottom": 106
+    }
+   ],
+   "batteryBody": {
+    "x": 999,
+    "y": 68,
+    "width": 75,
+    "height": 39
+   },
+   "batteryNub": {
+    "x": 1077,
+    "y": 81,
+    "width": 4,
+    "height": 12
+   },
+   "sources": [
+    "iPhone-15__iOS-18-6",
+    "iPhone-15__iOS-26-5",
+    "iPhone-16__iOS-18-6",
+    "iPhone-16__iOS-26-5"
+   ]
+  },
+  {
+   "id": "1179x2556-a/ios27",
+   "group": "1179x2556-a",
+   "models": [
+    "iPhone 15",
+    "iPhone 16"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 1179,
+   "pixelHeight": 2556,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 65,
+   "inkBottom": 109,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 162,
+      "y": 67,
+      "width": 101,
+      "height": 40
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 142,
+      "y": 67,
+      "width": 146,
+      "height": 40
+     }
+    }
+   ],
+   "cellular": {
+    "x": 835,
+    "y": 68,
+    "width": 62,
+    "height": 41
+   },
+   "wifi": {
+    "x": 920,
+    "y": 66,
+    "width": 58,
+    "height": 43
+   },
+   "battery": {
+    "x": 1003,
+    "y": 65,
+    "width": 87,
+    "height": 43
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 835,
+     "y": 89,
+     "width": 11,
+     "height": 20
+    },
+    {
+     "x": 852,
+     "y": 83,
+     "width": 11,
+     "height": 26
+    },
+    {
+     "x": 869,
+     "y": 75,
+     "width": 11,
+     "height": 34
+    },
+    {
+     "x": 886,
+     "y": 68,
+     "width": 11,
+     "height": 41
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 66,
+     "bottom": 75
+    },
+    {
+     "top": 81,
+     "bottom": 90
+    },
+    {
+     "top": 96,
+     "bottom": 109
+    }
+   ],
+   "batteryBody": {
+    "x": 1003,
+    "y": 66,
+    "width": 79,
+    "height": 41
+   },
+   "batteryNub": {
+    "x": 1084,
+    "y": 79,
+    "width": 6,
+    "height": 15
+   },
+   "sources": [
+    "iPhone-15__iOS-27-0",
+    "iPhone-16__iOS-27-0"
+   ]
+  },
+  {
+   "id": "1206x2622-a/ios18-26",
+   "group": "1206x2622-a",
+   "models": [
+    "iPhone 17"
+   ],
+   "generation": "ios18-26",
+   "pixelWidth": 1206,
+   "pixelHeight": 2622,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 77,
+   "inkBottom": 118,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 173,
+      "y": 79,
+      "width": 96,
+      "height": 38
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 153,
+      "y": 79,
+      "width": 139,
+      "height": 38
+     }
+    }
+   ],
+   "cellular": {
+    "x": 865,
+    "y": 79,
+    "width": 58,
+    "height": 37
+   },
+   "wifi": {
+    "x": 945,
+    "y": 79,
+    "width": 51,
+    "height": 37
+   },
+   "battery": {
+    "x": 1018,
+    "y": 77,
+    "width": 82,
+    "height": 41
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 865,
+     "y": 102,
+     "width": 10,
+     "height": 14
+    },
+    {
+     "x": 881,
+     "y": 95,
+     "width": 10,
+     "height": 21
+    },
+    {
+     "x": 897,
+     "y": 87,
+     "width": 10,
+     "height": 29
+    },
+    {
+     "x": 913,
+     "y": 79,
+     "width": 10,
+     "height": 37
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 79,
+     "bottom": 87
+    },
+    {
+     "top": 91,
+     "bottom": 100
+    },
+    {
+     "top": 104,
+     "bottom": 116
+    }
+   ],
+   "batteryBody": {
+    "x": 1018,
+    "y": 78,
+    "width": 75,
+    "height": 39
+   },
+   "batteryNub": {
+    "x": 1096,
+    "y": 91,
+    "width": 4,
+    "height": 12
+   },
+   "sources": [
+    "iPhone-17__iOS-26-5"
+   ]
+  },
+  {
+   "id": "1206x2622-a/ios27",
+   "group": "1206x2622-a",
+   "models": [
+    "iPhone 17"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 1206,
+   "pixelHeight": 2622,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 76,
+   "inkBottom": 119,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 170,
+      "y": 77,
+      "width": 101,
+      "height": 40
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 149,
+      "y": 77,
+      "width": 146,
+      "height": 40
+     }
+    }
+   ],
+   "cellular": {
+    "x": 854,
+    "y": 78,
+    "width": 62,
+    "height": 41
+   },
+   "wifi": {
+    "x": 939,
+    "y": 76,
+    "width": 58,
+    "height": 43
+   },
+   "battery": {
+    "x": 1022,
+    "y": 76,
+    "width": 87,
+    "height": 42
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 854,
+     "y": 99,
+     "width": 11,
+     "height": 20
+    },
+    {
+     "x": 871,
+     "y": 93,
+     "width": 11,
+     "height": 26
+    },
+    {
+     "x": 888,
+     "y": 85,
+     "width": 11,
+     "height": 34
+    },
+    {
+     "x": 905,
+     "y": 78,
+     "width": 11,
+     "height": 41
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 76,
+     "bottom": 85
+    },
+    {
+     "top": 91,
+     "bottom": 100
+    },
+    {
+     "top": 106,
+     "bottom": 119
+    }
+   ],
+   "batteryBody": {
+    "x": 1022,
+    "y": 76,
+    "width": 79,
+    "height": 41
+   },
+   "batteryNub": {
+    "x": 1103,
+    "y": 89,
+    "width": 6,
+    "height": 15
+   },
+   "sources": [
+    "iPhone-17__iOS-27-0"
+   ]
+  },
+  {
+   "id": "1206x2622-b/ios27",
+   "group": "1206x2622-b",
+   "models": [
+    "iPhone 18 Pro"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 1206,
+   "pixelHeight": 2622,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 75,
+   "inkBottom": 119,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 193,
+      "y": 77,
+      "width": 101,
+      "height": 40
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 172,
+      "y": 77,
+      "width": 146,
+      "height": 40
+     }
+    }
+   ],
+   "cellular": {
+    "x": 831,
+    "y": 78,
+    "width": 62,
+    "height": 41
+   },
+   "wifi": {
+    "x": 917,
+    "y": 76,
+    "width": 58,
+    "height": 43
+   },
+   "battery": {
+    "x": 999,
+    "y": 75,
+    "width": 87,
+    "height": 43
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 831,
+     "y": 99,
+     "width": 11,
+     "height": 20
+    },
+    {
+     "x": 848,
+     "y": 93,
+     "width": 11,
+     "height": 26
+    },
+    {
+     "x": 865,
+     "y": 85,
+     "width": 11,
+     "height": 34
+    },
+    {
+     "x": 882,
+     "y": 78,
+     "width": 11,
+     "height": 41
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 76,
+     "bottom": 85
+    },
+    {
+     "top": 91,
+     "bottom": 100
+    },
+    {
+     "top": 106,
+     "bottom": 119
+    }
+   ],
+   "batteryBody": {
+    "x": 999,
+    "y": 76,
+    "width": 79,
+    "height": 41
+   },
+   "batteryNub": {
+    "x": 1080,
+    "y": 89,
+    "width": 6,
+    "height": 15
+   },
+   "sources": [
+    "iPhone-18-Pro__iOS-27-0"
+   ]
+  },
+  {
+   "id": "1242x2688-a/ios18-26",
+   "group": "1242x2688-a",
+   "models": [
+    "iPhone 11 Pro Max"
+   ],
+   "generation": "ios18-26",
+   "pixelWidth": 1242,
+   "pixelHeight": 2688,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 48,
+   "inkBottom": 86,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 124,
+      "y": 50,
+      "width": 91,
+      "height": 36
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 106,
+      "y": 50,
+      "width": 132,
+      "height": 36
+     }
+    }
+   ],
+   "cellular": {
+    "x": 957,
+    "y": 50,
+    "width": 55,
+    "height": 35
+   },
+   "wifi": {
+    "x": 1031,
+    "y": 49,
+    "width": 49,
+    "height": 36
+   },
+   "battery": {
+    "x": 1099,
+    "y": 48,
+    "width": 79,
+    "height": 38
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 957,
+     "y": 72,
+     "width": 10,
+     "height": 13
+    },
+    {
+     "x": 972,
+     "y": 66,
+     "width": 10,
+     "height": 19
+    },
+    {
+     "x": 987,
+     "y": 58,
+     "width": 10,
+     "height": 27
+    },
+    {
+     "x": 1002,
+     "y": 50,
+     "width": 10,
+     "height": 35
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 49,
+     "bottom": 57
+    },
+    {
+     "top": 62,
+     "bottom": 70
+    },
+    {
+     "top": 74,
+     "bottom": 85
+    }
+   ],
+   "batteryBody": {
+    "x": 1099,
+    "y": 49,
+    "width": 72,
+    "height": 37
+   },
+   "batteryNub": {
+    "x": 1174,
+    "y": 61,
+    "width": 4,
+    "height": 13
+   },
+   "sources": [
+    "iPhone-11-Pro-Max__iOS-18-6",
+    "iPhone-11-Pro-Max__iOS-26-5"
+   ]
+  },
+  {
+   "id": "1242x2688-a/ios27",
+   "group": "1242x2688-a",
+   "models": [
+    "iPhone 11 Pro Max"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 1242,
+   "pixelHeight": 2688,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 49,
+   "inkBottom": 87,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 124,
+      "y": 50,
+      "width": 91,
+      "height": 36
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 106,
+      "y": 50,
+      "width": 132,
+      "height": 36
+     }
+    }
+   ],
+   "cellular": {
+    "x": 957,
+    "y": 50,
+    "width": 55,
+    "height": 35
+   },
+   "wifi": {
+    "x": 1028,
+    "y": 49,
+    "width": 51,
+    "height": 38
+   },
+   "battery": {
+    "x": 1097,
+    "y": 49,
+    "width": 81,
+    "height": 38
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 957,
+     "y": 72,
+     "width": 10,
+     "height": 13
+    },
+    {
+     "x": 972,
+     "y": 66,
+     "width": 10,
+     "height": 19
+    },
+    {
+     "x": 987,
+     "y": 58,
+     "width": 10,
+     "height": 27
+    },
+    {
+     "x": 1002,
+     "y": 50,
+     "width": 10,
+     "height": 35
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 49,
+     "bottom": 57
+    },
+    {
+     "top": 62,
+     "bottom": 70
+    },
+    {
+     "top": 75,
+     "bottom": 87
+    }
+   ],
+   "batteryBody": {
+    "x": 1097,
+    "y": 50,
+    "width": 72,
+    "height": 37
+   },
+   "batteryNub": {
+    "x": 1172,
+    "y": 61,
+    "width": 6,
+    "height": 15
+   },
+   "sources": [
+    "iPhone-11-Pro-Max__iOS-27-0"
+   ]
+  },
+  {
+   "id": "1260x2736-a/ios18-26",
+   "group": "1260x2736-a",
+   "models": [
+    "iPhone Air"
+   ],
+   "generation": "ios18-26",
+   "pixelWidth": 1260,
+   "pixelHeight": 2736,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 93,
+   "inkBottom": 136,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 180,
+      "y": 96,
+      "width": 101,
+      "height": 40
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 160,
+      "y": 96,
+      "width": 146,
+      "height": 40
+     }
+    }
+   ],
+   "cellular": {
+    "x": 895,
+    "y": 94,
+    "width": 65,
+    "height": 41
+   },
+   "wifi": {
+    "x": 982,
+    "y": 93,
+    "width": 59,
+    "height": 42
+   },
+   "battery": {
+    "x": 1063,
+    "y": 93,
+    "width": 93,
+    "height": 43
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 895,
+     "y": 119,
+     "width": 11,
+     "height": 16
+    },
+    {
+     "x": 913,
+     "y": 112,
+     "width": 11,
+     "height": 23
+    },
+    {
+     "x": 931,
+     "y": 103,
+     "width": 11,
+     "height": 32
+    },
+    {
+     "x": 949,
+     "y": 94,
+     "width": 11,
+     "height": 41
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 93,
+     "bottom": 102
+    },
+    {
+     "top": 107,
+     "bottom": 117
+    },
+    {
+     "top": 122,
+     "bottom": 135
+    }
+   ],
+   "batteryBody": {
+    "x": 1063,
+    "y": 93,
+    "width": 85,
+    "height": 43
+   },
+   "batteryNub": {
+    "x": 1151,
+    "y": 107,
+    "width": 5,
+    "height": 15
+   },
+   "sources": [
+    "iPhone-Air__iOS-26-5"
+   ]
+  },
+  {
+   "id": "1260x2736-a/ios27",
+   "group": "1260x2736-a",
+   "models": [
+    "iPhone Air"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 1260,
+   "pixelHeight": 2736,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 91,
+   "inkBottom": 139,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 178,
+      "y": 93,
+      "width": 108,
+      "height": 43
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 156,
+      "y": 93,
+      "width": 154,
+      "height": 43
+     }
+    }
+   ],
+   "cellular": {
+    "x": 887,
+    "y": 94,
+    "width": 67,
+    "height": 45
+   },
+   "wifi": {
+    "x": 978,
+    "y": 93,
+    "width": 62,
+    "height": 46
+   },
+   "battery": {
+    "x": 1066,
+    "y": 91,
+    "width": 97,
+    "height": 47
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 887,
+     "y": 118,
+     "width": 12,
+     "height": 21
+    },
+    {
+     "x": 905,
+     "y": 111,
+     "width": 12,
+     "height": 28
+    },
+    {
+     "x": 924,
+     "y": 102,
+     "width": 12,
+     "height": 37
+    },
+    {
+     "x": 942,
+     "y": 94,
+     "width": 12,
+     "height": 45
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 93,
+     "bottom": 102
+    },
+    {
+     "top": 109,
+     "bottom": 118
+    },
+    {
+     "top": 125,
+     "bottom": 139
+    }
+   ],
+   "batteryBody": {
+    "x": 1066,
+    "y": 92,
+    "width": 88,
+    "height": 45
+   },
+   "batteryNub": {
+    "x": 1157,
+    "y": 107,
+    "width": 6,
+    "height": 15
+   },
+   "sources": [
+    "iPhone-Air__iOS-27-0"
+   ]
+  },
+  {
+   "id": "1284x2778-a/ios18-26",
+   "group": "1284x2778-a",
+   "models": [
+    "iPhone 14 Plus"
+   ],
+   "generation": "ios18-26",
+   "pixelWidth": 1284,
+   "pixelHeight": 2778,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 52,
+   "inkBottom": 93,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 139,
+      "y": 54,
+      "width": 96,
+      "height": 38
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 119,
+      "y": 54,
+      "width": 139,
+      "height": 38
+     }
+    }
+   ],
+   "cellular": {
+    "x": 973,
+    "y": 54,
+    "width": 58,
+    "height": 37
+   },
+   "wifi": {
+    "x": 1050,
+    "y": 54,
+    "width": 51,
+    "height": 37
+   },
+   "battery": {
+    "x": 1120,
+    "y": 52,
+    "width": 82,
+    "height": 41
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 973,
+     "y": 77,
+     "width": 10,
+     "height": 14
+    },
+    {
+     "x": 989,
+     "y": 70,
+     "width": 10,
+     "height": 21
+    },
+    {
+     "x": 1005,
+     "y": 62,
+     "width": 10,
+     "height": 29
+    },
+    {
+     "x": 1021,
+     "y": 54,
+     "width": 10,
+     "height": 37
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 54,
+     "bottom": 62
+    },
+    {
+     "top": 66,
+     "bottom": 75
+    },
+    {
+     "top": 79,
+     "bottom": 91
+    }
+   ],
+   "batteryBody": {
+    "x": 1120,
+    "y": 53,
+    "width": 75,
+    "height": 39
+   },
+   "batteryNub": {
+    "x": 1198,
+    "y": 66,
+    "width": 4,
+    "height": 13
+   },
+   "sources": [
+    "iPhone-14-Plus__iOS-18-6",
+    "iPhone-14-Plus__iOS-26-5"
+   ]
+  },
+  {
+   "id": "1284x2778-a/ios27",
+   "group": "1284x2778-a",
+   "models": [
+    "iPhone 14 Plus"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 1284,
+   "pixelHeight": 2778,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 53,
+   "inkBottom": 99,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 170,
+      "y": 57,
+      "width": 101,
+      "height": 40
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 149,
+      "y": 57,
+      "width": 146,
+      "height": 40
+     }
+    }
+   ],
+   "cellular": {
+    "x": 925,
+    "y": 53,
+    "width": 65,
+    "height": 43
+   },
+   "wifi": {
+    "x": 1011,
+    "y": 53,
+    "width": 60,
+    "height": 44
+   },
+   "battery": {
+    "x": 1092,
+    "y": 54,
+    "width": 95,
+    "height": 45
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 925,
+     "y": 75,
+     "width": 11,
+     "height": 21
+    },
+    {
+     "x": 943,
+     "y": 69,
+     "width": 11,
+     "height": 27
+    },
+    {
+     "x": 961,
+     "y": 61,
+     "width": 11,
+     "height": 35
+    },
+    {
+     "x": 979,
+     "y": 53,
+     "width": 11,
+     "height": 43
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 53,
+     "bottom": 62
+    },
+    {
+     "top": 68,
+     "bottom": 77
+    },
+    {
+     "top": 83,
+     "bottom": 97
+    }
+   ],
+   "batteryBody": {
+    "x": 1092,
+    "y": 55,
+    "width": 85,
+    "height": 43
+   },
+   "batteryNub": {
+    "x": 1180,
+    "y": 69,
+    "width": 7,
+    "height": 15
+   },
+   "sources": [
+    "iPhone-14-Plus__iOS-27-0"
+   ]
+  },
+  {
+   "id": "1290x2796-a/ios18-26",
+   "group": "1290x2796-a",
+   "models": [
+    "iPhone 16 Plus"
+   ],
+   "generation": "ios18-26",
+   "pixelWidth": 1290,
+   "pixelHeight": 2796,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 64,
+   "inkBottom": 109,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 190,
+      "y": 68,
+      "width": 101,
+      "height": 40
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 169,
+      "y": 68,
+      "width": 146,
+      "height": 40
+     }
+    }
+   ],
+   "cellular": {
+    "x": 916,
+    "y": 66,
+    "width": 65,
+    "height": 41
+   },
+   "wifi": {
+    "x": 1003,
+    "y": 65,
+    "width": 59,
+    "height": 42
+   },
+   "battery": {
+    "x": 1084,
+    "y": 64,
+    "width": 93,
+    "height": 45
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 916,
+     "y": 91,
+     "width": 11,
+     "height": 16
+    },
+    {
+     "x": 934,
+     "y": 84,
+     "width": 11,
+     "height": 23
+    },
+    {
+     "x": 952,
+     "y": 75,
+     "width": 11,
+     "height": 32
+    },
+    {
+     "x": 970,
+     "y": 66,
+     "width": 11,
+     "height": 41
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 65,
+     "bottom": 74
+    },
+    {
+     "top": 79,
+     "bottom": 89
+    },
+    {
+     "top": 94,
+     "bottom": 107
+    }
+   ],
+   "batteryBody": {
+    "x": 1084,
+    "y": 65,
+    "width": 85,
+    "height": 43
+   },
+   "batteryNub": {
+    "x": 1172,
+    "y": 79,
+    "width": 5,
+    "height": 15
+   },
+   "sources": [
+    "iPhone-16-Plus__iOS-18-6",
+    "iPhone-16-Plus__iOS-26-5"
+   ]
+  },
+  {
+   "id": "1290x2796-a/ios27",
+   "group": "1290x2796-a",
+   "models": [
+    "iPhone 16 Plus"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 1290,
+   "pixelHeight": 2796,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 63,
+   "inkBottom": 111,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 187,
+      "y": 65,
+      "width": 108,
+      "height": 43
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 165,
+      "y": 65,
+      "width": 154,
+      "height": 43
+     }
+    }
+   ],
+   "cellular": {
+    "x": 908,
+    "y": 66,
+    "width": 67,
+    "height": 45
+   },
+   "wifi": {
+    "x": 999,
+    "y": 65,
+    "width": 62,
+    "height": 46
+   },
+   "battery": {
+    "x": 1086,
+    "y": 63,
+    "width": 97,
+    "height": 47
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 908,
+     "y": 90,
+     "width": 12,
+     "height": 21
+    },
+    {
+     "x": 926,
+     "y": 83,
+     "width": 12,
+     "height": 28
+    },
+    {
+     "x": 945,
+     "y": 74,
+     "width": 12,
+     "height": 37
+    },
+    {
+     "x": 963,
+     "y": 66,
+     "width": 12,
+     "height": 45
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 65,
+     "bottom": 74
+    },
+    {
+     "top": 81,
+     "bottom": 90
+    },
+    {
+     "top": 97,
+     "bottom": 111
+    }
+   ],
+   "batteryBody": {
+    "x": 1086,
+    "y": 64,
+    "width": 88,
+    "height": 45
+   },
+   "batteryNub": {
+    "x": 1177,
+    "y": 79,
+    "width": 6,
+    "height": 15
+   },
+   "sources": [
+    "iPhone-16-Plus__iOS-27-0"
+   ]
+  },
+  {
+   "id": "1320x2868-a/ios27",
+   "group": "1320x2868-a",
+   "models": [
+    "iPhone 16 Pro Max"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 1320,
+   "pixelHeight": 2868,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 74,
+   "inkBottom": 119,
+   "timeSamples": [
+    {
+     "text": "3:16",
+     "ink": {
+      "x": 199,
+      "y": 78,
+      "width": 105,
+      "height": 40
+     }
+    }
+   ],
+   "cellular": {
+    "x": 937,
+    "y": 74,
+    "width": 65,
+    "height": 43
+   },
+   "wifi": {
+    "x": 1023,
+    "y": 74,
+    "width": 60,
+    "height": 43
+   },
+   "battery": {
+    "x": 1105,
+    "y": 76,
+    "width": 94,
+    "height": 43
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 937,
+     "y": 96,
+     "width": 11,
+     "height": 21
+    },
+    {
+     "x": 955,
+     "y": 90,
+     "width": 11,
+     "height": 27
+    },
+    {
+     "x": 973,
+     "y": 82,
+     "width": 11,
+     "height": 35
+    },
+    {
+     "x": 991,
+     "y": 74,
+     "width": 11,
+     "height": 43
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 74,
+     "bottom": 83
+    },
+    {
+     "top": 89,
+     "bottom": 98
+    },
+    {
+     "top": 104,
+     "bottom": 117
+    }
+   ],
+   "batteryBody": {
+    "x": 1105,
+    "y": 76,
+    "width": 85,
+    "height": 43
+   },
+   "batteryNub": {
+    "x": 1193,
+    "y": 90,
+    "width": 6,
+    "height": 15
+   },
+   "sources": [
+    "iPhone-16-Pro-Max__iOS-27-2"
+   ]
+  },
+  {
+   "id": "1320x2868-b/ios27",
+   "group": "1320x2868-b",
+   "models": [
+    "iPhone 18 Pro Max"
+   ],
+   "generation": "ios27",
+   "pixelWidth": 1320,
+   "pixelHeight": 2868,
+   "scale": 3,
+   "style": "leadingTime",
+   "inkTop": 73,
+   "inkBottom": 121,
+   "timeSamples": [
+    {
+     "text": "9:41",
+     "ink": {
+      "x": 219,
+      "y": 75,
+      "width": 108,
+      "height": 43
+     }
+    },
+    {
+     "text": "23:58",
+     "ink": {
+      "x": 197,
+      "y": 75,
+      "width": 154,
+      "height": 43
+     }
+    }
+   ],
+   "cellular": {
+    "x": 906,
+    "y": 76,
+    "width": 67,
+    "height": 45
+   },
+   "wifi": {
+    "x": 997,
+    "y": 75,
+    "width": 62,
+    "height": 46
+   },
+   "battery": {
+    "x": 1085,
+    "y": 73,
+    "width": 97,
+    "height": 47
+   },
+   "carrier": null,
+   "cellularBars": [
+    {
+     "x": 906,
+     "y": 100,
+     "width": 12,
+     "height": 21
+    },
+    {
+     "x": 924,
+     "y": 93,
+     "width": 12,
+     "height": 28
+    },
+    {
+     "x": 943,
+     "y": 84,
+     "width": 12,
+     "height": 37
+    },
+    {
+     "x": 961,
+     "y": 76,
+     "width": 12,
+     "height": 45
+    }
+   ],
+   "wifiBands": [
+    {
+     "top": 75,
+     "bottom": 84
+    },
+    {
+     "top": 91,
+     "bottom": 100
+    },
+    {
+     "top": 107,
+     "bottom": 121
+    }
+   ],
+   "batteryBody": {
+    "x": 1085,
+    "y": 74,
+    "width": 88,
+    "height": 45
+   },
+   "batteryNub": {
+    "x": 1176,
+    "y": 89,
+    "width": 6,
+    "height": 15
+   },
+   "sources": [
+    "iPhone-18-Pro-Max__iOS-27-0"
+   ]
+  }
+ ]
+}

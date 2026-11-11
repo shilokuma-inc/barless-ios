@@ -39,10 +39,14 @@ def measure(path):
     return {'width': W, 'height': H, 'scale': s, 'ink_top': y0, 'ink_bottom': y1,
             'elements': [box(g) for g in groups]}
 
-out = {}
-for p in sorted(glob.glob(os.path.join(sys.argv[1], '*__light-full.png'))):
-    dev, rt, _ = os.path.basename(p).split('__')
-    m = measure(p)
-    low = measure(p.replace('light-full', 'light-low'))
-    out[f'{dev}__{rt}'] = {'device': dev, 'runtime': rt, **(m or {}), 'low': low}
-json.dump(out, sys.stdout, ensure_ascii=False, indent=1)
+def main():
+    out = {}
+    for p in sorted(glob.glob(os.path.join(sys.argv[1], '*__light-full.png'))):
+        dev, rt, _ = os.path.basename(p).split('__')
+        m = measure(p)
+        low = measure(p.replace('light-full', 'light-low'))
+        out[f'{dev}__{rt}'] = {'device': dev, 'runtime': rt, **(m or {}), 'low': low}
+    json.dump(out, sys.stdout, ensure_ascii=False, indent=1)
+
+if __name__ == '__main__':  # make-catalog.py から measure() だけを使えるようにする
+    main()
