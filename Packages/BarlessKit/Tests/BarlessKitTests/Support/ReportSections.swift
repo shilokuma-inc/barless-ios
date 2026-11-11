@@ -29,7 +29,10 @@ struct ReportSections {
             var counts = (total: 0, withText: 0, withoutText: 0, undecided: 0, wrong: 0)
             for fixture in fixtures where fixture.variant == variant {
                 let strip = try fixture.loadStrip()
-                let expected = fixture.expectedLayout(in: catalog)?.id
+                // 期待する配置が無い画像を、判定が nil どうしで「正解」と数えないようにする
+                guard let expected = fixture.expectedLayout(in: catalog)?.id else {
+                    throw ReportError("カタログに配置が無い画像が混ざっている: \(fixture)")
+                }
                 let known = analyze(strip, fixture, timeText: fixture.time)
                 let blind = analyze(strip, fixture, timeText: nil)
                 counts.total += 1

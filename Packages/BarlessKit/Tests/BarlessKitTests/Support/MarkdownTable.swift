@@ -1,5 +1,15 @@
 import Foundation
 
+/// 検証結果を作る途中で、必ずできるはずの検証ができなかったときのエラー。
+/// 数値や画像が欠けたままレポートができあがらないよう、黙って飛ばさずに止める
+struct ReportError: Error, CustomStringConvertible {
+    let description: String
+
+    init(_ description: String) {
+        self.description = description
+    }
+}
+
 /// 検証結果の表（Markdown）を作る
 enum Markdown {
     static func table(_ header: [String], _ rows: [[String]]) -> String {

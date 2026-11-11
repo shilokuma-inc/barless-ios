@@ -20,7 +20,7 @@ struct ReportMeasurements {
             let background = Verification.flatBackground(of: strip, scale: fixture.scale)
             guard let (_, result) = Verification.erase(
                 fixture, input: strip, background: background, kind: "solid", catalog: catalog
-            ) else { continue }
+            ) else { throw ReportError("単色の背景なのに配置が決まらない: \(fixture)") }
             worst = max(worst, result.maxDifference)
             kinds[result.detected, default: 0] += 1
         }
@@ -39,11 +39,10 @@ struct ReportMeasurements {
                 let strip = try fixture.loadStrip()
                 let background = kind.make(width: strip.width, height: strip.height, isLight: fixture.appearance == "light")
                 let input = Synthetic.transplantInk(from: strip, onto: background, scale: fixture.scale)
-                if let (_, result) = Verification.erase(
+                guard let (_, result) = Verification.erase(
                     fixture, input: input, background: background, kind: kind.rawValue, catalog: catalog
-                ) {
-                    results.append(result)
-                }
+                ) else { throw ReportError("\(kind.rawValue) のグラデーションで配置が決まらない: \(fixture)") }
+                results.append(result)
             }
             let kinds = Dictionary(grouping: results, by: \.detected).mapValues(\.count)
             rows.append([
@@ -106,9 +105,10 @@ struct ReportMeasurements {
         for fixture in solid {
             let strip = try fixture.loadStrip()
             let background = Verification.flatBackground(of: strip, scale: fixture.scale)
-            if let (_, elements) = Verification.redraw(fixture, input: strip, background: background, catalog: catalog) {
-                results += elements
+            guard let (_, elements) = Verification.redraw(fixture, input: strip, background: background, catalog: catalog) else {
+                throw ReportError("単色の背景なのに描き直せない: \(fixture)")
             }
+            results += elements
         }
         var rows: [[String]] = []
         for element in ["time", "cellular", "wifi", "battery"] {

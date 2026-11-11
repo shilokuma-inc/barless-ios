@@ -11,7 +11,7 @@ struct ReportImages {
     let directory: URL
 
     private func fixture(_ name: String) throws -> Fixture {
-        guard let fixture = fixtures.first(where: { $0.name == name }) else { throw FixtureError.directoryNotFound }
+        guard let fixture = fixtures.first(where: { $0.name == name }) else { throw ReportError("画像が見つからない: \(name)") }
         return fixture
     }
 
@@ -25,7 +25,9 @@ struct ReportImages {
         let fixture = try fixture(name)
         let strip = try fixture.loadStrip()
         let background = Verification.flatBackground(of: strip, scale: fixture.scale)
-        guard let (output, _) = Verification.redraw(fixture, input: strip, background: background, catalog: catalog) else { return }
+        guard let (output, _) = Verification.redraw(fixture, input: strip, background: background, catalog: catalog) else {
+            throw ReportError("画像を作れない（配置が決まらない）: redraw-\(name)")
+        }
         let rows = [strip, output.erased, output.redrawn, ImageMetrics.heatmap(strip, output.redrawn)]
         try write(rows, layout: output.layout, timeTexts: [fixture.time], name: "redraw-\(name)")
     }
@@ -37,7 +39,7 @@ struct ReportImages {
         let reference = try fixture(referenceName).loadStrip()
         guard let output = Pipeline.run(
             try input.loadStrip(), pixelHeight: input.height, timeText: input.time, catalog: catalog, redraw: .tidy
-        ) else { return }
+        ) else { throw ReportError("画像を作れない（配置が決まらない）: tidy-\(inputName)") }
         let rows = [try input.loadStrip(), output.redrawn, reference, ImageMetrics.heatmap(output.redrawn, reference)]
         try write(rows, layout: output.layout, timeTexts: [input.time, "9:41"], name: "tidy-\(inputName)")
     }
@@ -50,7 +52,7 @@ struct ReportImages {
         let input = Synthetic.transplantInk(from: strip, onto: background, scale: fixture.scale)
         guard let output = Pipeline.run(
             input, pixelHeight: fixture.height, timeText: fixture.time, catalog: catalog, redraw: fixture.spec
-        ) else { return }
+        ) else { throw ReportError("画像を作れない（配置が決まらない）: gradient-\(kind.rawValue)-\(name)") }
         let rows = [input, output.erased, background, ImageMetrics.heatmap(output.erased, background), output.redrawn]
         try write(rows, layout: output.layout, timeTexts: [fixture.time], name: "gradient-\(kind.rawValue)-\(name)")
     }
@@ -59,7 +61,7 @@ struct ReportImages {
     func wallpaper(_ name: String) throws {
         let fixture = try fixture(name)
         let strip = try fixture.loadStrip()
-        guard let layout = fixture.expectedLayout(in: catalog) else { return }
+        guard let layout = fixture.expectedLayout(in: catalog) else { throw ReportError("カタログに配置が無い: \(name)") }
         let output = Pipeline.run(strip, pixelHeight: fixture.height, timeText: fixture.time, catalog: catalog, redraw: fixture.spec)
         let rows = output.map { [strip, $0.erased, $0.redrawn] } ?? [strip]
         try write(rows, layout: layout, timeTexts: [fixture.time], name: "wallpaper-\(name)")
