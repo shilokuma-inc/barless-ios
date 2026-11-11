@@ -11,7 +11,10 @@ let package = Package(
     name: "BarlessKit",
     platforms: [.iOS(.v18), .macOS(.v15)],
     products: [
-        .library(name: "BarlessKit", targets: ["DeviceCatalog", "ImageIOKit", "InpaintEngine", "StatusBarRenderer"])
+        .library(
+            name: "BarlessKit",
+            targets: ["DeviceCatalog", "ImageIOKit", "InpaintEngine", "StatusBarAnalyzer", "StatusBarRenderer"]
+        )
     ],
     targets: [
         // 画素の入れ物・デコード・メタデータ・書き出し
@@ -22,6 +25,12 @@ let package = Package(
         .target(name: "StatusBarRenderer", dependencies: ["DeviceCatalog", "ImageIOKit"], swiftSettings: optimized),
         // ステータスバーの消去（単色・グラデーション）
         .target(name: "InpaintEngine", dependencies: ["ImageIOKit"], swiftSettings: optimized),
+        // 機種と iOS の世代の判定、インクの検出
+        .target(
+            name: "StatusBarAnalyzer",
+            dependencies: ["DeviceCatalog", "ImageIOKit", "StatusBarRenderer"],
+            swiftSettings: optimized
+        ),
         // テスト用: Simulator と実機の画像（上端の切り出し）とその一覧
         .target(
             name: "BarlessTestSupport",
@@ -31,7 +40,9 @@ let package = Package(
         ),
         .testTarget(
             name: "BarlessKitTests",
-            dependencies: ["BarlessTestSupport", "DeviceCatalog", "ImageIOKit", "InpaintEngine", "StatusBarRenderer"],
+            dependencies: [
+                "BarlessTestSupport", "DeviceCatalog", "ImageIOKit", "InpaintEngine", "StatusBarAnalyzer", "StatusBarRenderer"
+            ],
             swiftSettings: optimized
         )
     ],
