@@ -5,8 +5,8 @@
 //  Created by 村石 拓海 on 2024/05/12.
 //
 
-import Foundation
 @testable import Barless
+import Foundation
 import Testing
 
 struct BarlessTests {
