@@ -91,6 +91,20 @@ struct LayoutDecisionTests {
         #expect(analysis.eraseMask() == nil)
     }
 
+    /// 上端の切り出しが短すぎて帯が入りきらない画像では、落ちずに「決められない」を返す
+    @Test
+    func doesNotCrashOnTooShortStrip() throws {
+        let catalog = try DeviceCatalog.bundled()
+        let fixture = try #require(try Fixtures.all().first { $0.name == "iPhone-17__iOS-27-0__light-full" })
+        let short = try fixture.loadStrip().cropped(x: 0, y: 0, width: fixture.width, height: 40)
+        let analysis = StatusBarAnalyzer.analyze(strip: short, pixelHeight: fixture.height, timeText: "9:41", catalog: catalog)
+        guard case .ambiguous = analysis.decision else {
+            Issue.record("決められないはず: \(analysis.decision)")
+            return
+        }
+        #expect(analysis.eraseMask() == nil)
+    }
+
     /// 背景の種類と文字の色も、単色の画像ではすべて正しく出る
     @Test
     func classifiesBackgroundAndAppearance() throws {

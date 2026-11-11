@@ -52,6 +52,11 @@ struct InkDetector {
 
     func scan(_ bitmap: Bitmap) -> InkScan {
         let margin = Self.sideMarginPt * scale
+        // 帯が入りきらない画像（上端の切り出しが短すぎる・幅が狭すぎる）では、何も拾わない
+        guard bottomRow > topRow + 1, bitmap.width > 2 * margin else {
+            let empty = PixelMask(originX: 0, originY: topRow, width: max(1, bitmap.width), height: 1)
+            return InkScan(mask: empty, blobs: [], background: .complex, inkIsDark: true)
+        }
         var mask = PixelMask(originX: 0, originY: topRow + 1, width: bitmap.width, height: max(1, bottomRow - topRow - 1))
         var noisy = 0
         var darker = 0

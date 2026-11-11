@@ -95,6 +95,7 @@ struct WiFiIcon {
     }
 
     func draw(activeBars: Int, palette: Palette, in context: CGContext) {
+        guard !layout.wifiBands.isEmpty else { return }
         for index in layout.wifiBands.indices {
             // 帯は外から 3 本目・2 本目・1 本目（根元）の順
             let isActive = layout.wifiBands.count - index <= activeBars

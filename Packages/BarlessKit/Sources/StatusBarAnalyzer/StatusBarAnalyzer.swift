@@ -73,12 +73,14 @@ public actor StatusBarAnalyzer {
     /// 文字認識に渡す画像。時刻がありそうな範囲だけを切り出して拡大する。
     /// 帯全体をそのまま渡すと、文字が小さく（高さ 12pt ほど）まれに見落とすため
     static func timeImage(strip: Bitmap, candidates: [StatusBarLayout]) throws -> CGImage {
-        let scale = candidates[0].scale
         let inks = candidates.flatMap { $0.timeSamples.map(\.ink) }
-        let bounds = inks.dropFirst().reduce(inks[0]) { $0.union($1) }
+        guard let scale = candidates.first?.scale, let first = inks.first else { throw BitmapError.emptyImage }
+        let bounds = inks.dropFirst().reduce(first) { $0.union($1) }
         // 「23:58」のように桁が多いと左右に広がるので、横は広めに取る
         let region = bounds.insetBy(dx: -Self.timeMarginXPt * scale, dy: -Self.timeMarginYPt * scale)
-        let crop = strip.cropped(x: region.x, y: region.y, width: region.width, height: region.height)
+        let visible = region.intersection(PixelRect(x: 0, y: 0, width: strip.width, height: strip.height))
+        guard !visible.isEmpty else { throw BitmapError.emptyImage }
+        let crop = strip.cropped(x: visible.x, y: visible.y, width: visible.width, height: visible.height)
         return try crop.enlarged(by: Self.timeMagnification).makeCGImage()
     }
 
