@@ -45,6 +45,16 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
+               BlueprintIdentifier = "BarlessKitTests"
+               BuildableName = "BarlessKitTests"
+               BlueprintName = "BarlessKitTests"
+               ReferencedContainer = "container:Packages/BarlessKit">
+            </BuildableReference>
+         </TestableReference>
+         <TestableReference
+            skipped = "NO">
+            <BuildableReference
+               BuildableIdentifier = "primary"
                BlueprintIdentifier = "4FC9E2022BF1049C00F630AB"
                BuildableName = "BarlessUITests.xctest"
                BlueprintName = "BarlessUITests"

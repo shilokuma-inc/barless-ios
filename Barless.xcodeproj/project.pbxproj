@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		4FB0000000000000000000A1 /* BarlessKit in Frameworks */ = {isa = PBXBuildFile; productRef = 4FB0000000000000000000A2 /* BarlessKit */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXContainerItemProxy section */
 		4FC9E1FA2BF1049C00F630AB /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -27,6 +31,7 @@
 		4FC9E1E92BF1049B00F630AB /* Barless.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Barless.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FC9E1F92BF1049C00F630AB /* BarlessTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BarlessTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		4FC9E2032BF1049C00F630AB /* BarlessUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = BarlessUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		4FB0000000000000000000A3 /* BarlessKit */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = BarlessKit; path = Packages/BarlessKit; sourceTree = "<group>"; };
 		4FA0000000000000000000C1 /* Project.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Project.xcconfig; sourceTree = "<group>"; };
 		4FA0000000000000000000C2 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		4FA0000000000000000000C3 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
@@ -68,6 +73,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4FB0000000000000000000A1 /* BarlessKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -94,6 +100,7 @@
 				4FA0000000000000000000B1 /* Barless */,
 				4FA0000000000000000000B2 /* BarlessTests */,
 				4FA0000000000000000000B3 /* BarlessUITests */,
+				4FB0000000000000000000A3 /* BarlessKit */,
 				4FC9E1EA2BF1049B00F630AB /* Products */,
 				4FA0000000000000000000C0 /* Configs */,
 			);
@@ -139,6 +146,9 @@
 				4FA0000000000000000000B1 /* Barless */,
 			);
 			name = Barless;
+			packageProductDependencies = (
+				4FB0000000000000000000A2 /* BarlessKit */,
+			);
 			productName = Barless;
 			productReference = 4FC9E1E92BF1049B00F630AB /* Barless.app */;
 			productType = "com.apple.product-type.application";
@@ -618,6 +628,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 4F27869D2BF373B800E9F5EF /* XCRemoteSwiftPackageReference "SwiftLintPlugins" */;
 			productName = "plugin:SwiftLintBuildToolPlugin";
+		};
+		4FB0000000000000000000A2 /* BarlessKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = BarlessKit;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
