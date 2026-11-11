@@ -16,9 +16,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4FC9E1E82BF1049B00F630AB"
-               BuildableName = "IOSTemplateApp.app"
-               BlueprintName = "IOSTemplateApp"
-               ReferencedContainer = "container:IOSTemplateApp.xcodeproj">
+               BuildableName = "Barless.app"
+               BlueprintName = "Barless"
+               ReferencedContainer = "container:Barless.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -36,9 +36,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4FC9E1F82BF1049C00F630AB"
-               BuildableName = "IOSTemplateAppTests.xctest"
-               BlueprintName = "IOSTemplateAppTests"
-               ReferencedContainer = "container:IOSTemplateApp.xcodeproj">
+               BuildableName = "BarlessTests.xctest"
+               BlueprintName = "BarlessTests"
+               ReferencedContainer = "container:Barless.xcodeproj">
             </BuildableReference>
          </TestableReference>
          <TestableReference
@@ -46,9 +46,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "4FC9E2022BF1049C00F630AB"
-               BuildableName = "IOSTemplateAppUITests.xctest"
-               BlueprintName = "IOSTemplateAppUITests"
-               ReferencedContainer = "container:IOSTemplateApp.xcodeproj">
+               BuildableName = "BarlessUITests.xctest"
+               BlueprintName = "BarlessUITests"
+               ReferencedContainer = "container:Barless.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -68,9 +68,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4FC9E1E82BF1049B00F630AB"
-            BuildableName = "IOSTemplateApp.app"
-            BlueprintName = "IOSTemplateApp"
-            ReferencedContainer = "container:IOSTemplateApp.xcodeproj">
+            BuildableName = "Barless.app"
+            BlueprintName = "Barless"
+            ReferencedContainer = "container:Barless.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </LaunchAction>
@@ -85,9 +85,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "4FC9E1E82BF1049B00F630AB"
-            BuildableName = "IOSTemplateApp.app"
-            BlueprintName = "IOSTemplateApp"
-            ReferencedContainer = "container:IOSTemplateApp.xcodeproj">
+            BuildableName = "Barless.app"
+            BlueprintName = "Barless"
+            ReferencedContainer = "container:Barless.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>
