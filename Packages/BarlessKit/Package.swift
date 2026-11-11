@@ -11,13 +11,15 @@ let package = Package(
     name: "BarlessKit",
     platforms: [.iOS(.v18), .macOS(.v15)],
     products: [
-        .library(name: "BarlessKit", targets: ["DeviceCatalog", "ImageIOKit"])
+        .library(name: "BarlessKit", targets: ["DeviceCatalog", "ImageIOKit", "StatusBarRenderer"])
     ],
     targets: [
         // 画素の入れ物・デコード・メタデータ・書き出し
         .target(name: "ImageIOKit", swiftSettings: optimized),
         // 機種グループ × iOS の世代ごとの配置（JSON とその読み込み）
         .target(name: "DeviceCatalog", resources: [.process("Resources")]),
+        // 時刻と自作アイコンの描画
+        .target(name: "StatusBarRenderer", dependencies: ["DeviceCatalog", "ImageIOKit"], swiftSettings: optimized),
         // テスト用: Simulator と実機の画像（上端の切り出し）とその一覧
         .target(
             name: "BarlessTestSupport",
@@ -27,7 +29,7 @@ let package = Package(
         ),
         .testTarget(
             name: "BarlessKitTests",
-            dependencies: ["BarlessTestSupport", "DeviceCatalog", "ImageIOKit"],
+            dependencies: ["BarlessTestSupport", "DeviceCatalog", "ImageIOKit", "StatusBarRenderer"],
             swiftSettings: optimized
         )
     ],
