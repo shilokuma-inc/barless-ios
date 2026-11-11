@@ -2868,7 +2868,11 @@
    "scale": 3,
    "appearance": "dark",
    "background": "solid",
-   "time": "3:16"
+   "time": "3:16",
+   "cellularBars": 4,
+   "wifiBars": 3,
+   "batteryLevel": 56,
+   "batteryState": "discharging"
   },
   {
    "file": "realshots/16ProMax_iOS27.2_std-light_top.png",
@@ -2881,7 +2885,11 @@
    "scale": 3,
    "appearance": "light",
    "background": "solid",
-   "time": "3:16"
+   "time": "3:16",
+   "cellularBars": 4,
+   "wifiBars": 3,
+   "batteryLevel": 56,
+   "batteryState": "discharging"
   }
  ]
 }

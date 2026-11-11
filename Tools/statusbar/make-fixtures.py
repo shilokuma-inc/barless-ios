@@ -26,14 +26,16 @@ VARIANTS = {
                   'cellularBars': 4, 'wifiBars': 3, 'batteryLevel': 100, 'batteryState': 'charged'},
 }
 
-# 実機で撮った画像（上端の切り出しだけを置いている）。元の大きさと写っている値は撮影時のメモから
+# 実機で撮った画像（上端の切り出しだけを置いている）。元の大きさと時刻は撮影時のメモから、電池の残量は画像の塗りの幅（48/85px）から
 REALSHOTS = {
     '16ProMax_iOS27.2_std-light_top.png': {'device': 'iPhone-16-Pro-Max', 'runtime': 'iOS-27-2', 'variant': 'light-real',
                                            'width': 1320, 'height': 2868, 'scale': 3,
-                                           'appearance': 'light', 'background': 'solid', 'time': '3:16'},
+                                           'appearance': 'light', 'background': 'solid', 'time': '3:16',
+                                           'cellularBars': 4, 'wifiBars': 3, 'batteryLevel': 56, 'batteryState': 'discharging'},
     '16ProMax_iOS27.2_std-dark_top.png': {'device': 'iPhone-16-Pro-Max', 'runtime': 'iOS-27-2', 'variant': 'dark-real',
                                           'width': 1320, 'height': 2868, 'scale': 3,
-                                          'appearance': 'dark', 'background': 'solid', 'time': '3:16'},
+                                          'appearance': 'dark', 'background': 'solid', 'time': '3:16',
+                                          'cellularBars': 4, 'wifiBars': 3, 'batteryLevel': 56, 'batteryState': 'discharging'},
 }
 
 
