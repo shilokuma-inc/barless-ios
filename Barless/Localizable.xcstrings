@@ -1,6 +1,17 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "9:41 · 4 bars · Full Wi-Fi · Battery 100%": {
+      "comment": "「整える」で描き直す中身",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "9:41・電波 4 本・Wi-Fi 最大・電池 100%"
+          }
+        }
+      }
+    },
     "Allow adding photos in Settings.": {
       "comment": "写真への追加が許可されていないときの説明",
       "localizations": {
@@ -122,6 +133,28 @@
         }
       }
     },
+    "Compare": {
+      "comment": "元の画像と見比べる表示の入り切り（読み上げ用）",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "比較"
+          }
+        }
+      }
+    },
+    "Comparison with the original": {
+      "comment": "画像の読み上げ（比較を出しているとき）",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "元の画像との比較"
+          }
+        }
+      }
+    },
     "Couldn't find the status bar": {
       "comment": "機種を決められない・文字やアイコンが見つからないとき",
       "localizations": {
@@ -199,6 +232,17 @@
         }
       }
     },
+    "Drag the handle to compare with the original": {
+      "comment": "比較の操作の説明",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "つまみを左右に動かして、元の画像と見比べます"
+          }
+        }
+      }
+    },
     "Format": {
       "comment": "書き出す画像の形式（PNG / HEIC）",
       "localizations": {
@@ -210,13 +254,24 @@
         }
       }
     },
-    "Hide the time, battery and signal": {
+    "Hide": {
+      "comment": "エディタのモード: ステータスバーを消す",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "隠す"
+          }
+        }
+      }
+    },
+    "Hide or tidy the time, battery and signal": {
       "comment": "ホームの主ボタンの説明",
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "時刻・電池・電波を隠す"
+            "value": "時刻・電池・電波を隠して整える"
           }
         }
       }
@@ -261,17 +316,6 @@
           "stringUnit": {
             "state": "translated",
             "value": "設定を開く"
-          }
-        }
-      }
-    },
-    "Original": {
-      "comment": "元の画像を出している間、画像の隅に出す札",
-      "localizations": {
-        "ja": {
-          "stringUnit": {
-            "state": "translated",
-            "value": "元の画像"
           }
         }
       }
@@ -327,6 +371,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存しています…"
+          }
+        }
+      }
+    },
+    "Screenshot with a tidied status bar": {
+      "comment": "画像の読み上げ（整える）",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ステータスバーを整えたスクリーンショット"
           }
         }
       }
@@ -404,6 +459,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "背景が写真や模様のため、跡が残ることがあります"
+          }
+        }
+      }
+    },
+    "Tidy": {
+      "comment": "エディタのモード: 定番の表示に描き直す",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "整える"
           }
         }
       }

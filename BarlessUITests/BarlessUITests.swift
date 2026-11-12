@@ -21,6 +21,31 @@ final class BarlessUITests: XCTestCase {
         XCTAssertTrue(app.buttons["home.pick"].waitForExistence(timeout: 10))
     }
 
+    /// 作り物のスクリーンショットで、「整える」に切り替え、比較を出し、そのまま書き出しへ進める
+    @MainActor
+    func testSampleScreenshotCanBeTidiedAndCompared() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-screenshot-demo", "-screenshot-scene", "editor"]
+        app.launch()
+
+        XCTAssertTrue(app.descendants(matching: .any)["editor.detected"].waitForExistence(timeout: 30))
+        XCTAssertFalse(app.descendants(matching: .any)["editor.tidySummary"].exists)
+
+        app.buttons["editor.mode.tidy"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["editor.tidySummary"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["editor.mode.tidy"].isSelected)
+
+        app.buttons["editor.compare"].tap()
+        XCTAssertTrue(app.buttons["editor.compare"].isSelected)
+
+        app.buttons["editor.save"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["export.share"].waitForExistence(timeout: 30))
+        // 戻っても、選んだモードと比較はそのまま
+        app.buttons["edit.back"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["editor.tidySummary"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["editor.compare"].isSelected)
+    }
+
     /// 作り物のスクリーンショットで、「隠す」の結果 → 書き出し → 編集へ戻る → ホームへ戻る、を通す。
     /// 写真の選択と写真への保存は iOS の画面なので、ここでは通さない
     @MainActor

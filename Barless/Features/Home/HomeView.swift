@@ -57,7 +57,7 @@ struct HomeView: View {
                 Text("Choose a screenshot")
                     .font(.title2.bold())
                 HStack(alignment: .center) {
-                    Text("Hide the time, battery and signal")
+                    Text("Hide or tidy the time, battery and signal")
                         .font(.subheadline)
                         .opacity(0.65)
                     Spacer(minLength: 12)
