@@ -172,6 +172,51 @@ struct ManualAdjustModelTests {
         #expect(rowsBelow.allSatisfy { y in stride(from: 0, to: 900, by: 7).allSatisfy { after[$0, y] == before[$0, y] } })
     }
 
+    /// 「続ける」の処理の途中は、調整を変えない（書き出す結果と、画面に残る調整が同じになる）
+    @Test
+    func ignoresChangesWhileFinishing() async throws {
+        let model = try model()
+        await model.start()
+        let before = model.adjustment
+
+        let finishing = Task { await model.finish() }
+        for _ in 0..<1000 where !model.isFinishing {
+            await Task.yield()
+        }
+        #expect(model.isFinishing)
+        model.setBandHeight(before.bandHeight + 30)
+        model.setTextColor(.white)
+        model.setBackgroundMode(.blur)
+        model.pickColor(x: 10, y: 10)
+        let result = try #require(await finishing.value)
+
+        #expect(model.adjustment == before)
+        #expect(result.manual?.adjustment == before)
+        #expect(!model.isFinishing)
+        // 終わった後は、また変えられる
+        model.setBackgroundMode(.blur)
+        #expect(model.adjustment.background == .blur)
+    }
+
+    /// 処理の途中で調整の画面から戻ったら、処理が終わっても、その結果は使わない
+    @Test
+    func discardsResultWhenCancelledWhileFinishing() async throws {
+        let model = try model()
+        await model.start()
+
+        let finishing = Task { await model.finish() }
+        for _ in 0..<1000 where !model.isFinishing {
+            await Task.yield()
+        }
+        #expect(model.isFinishing)
+        model.cancelFinish()
+
+        #expect(await finishing.value == nil)
+        #expect(!model.isFinishing)
+        // 取り消した後に、もう一度続ければ、結果が出る
+        #expect(await model.finish() != nil)
+    }
+
     /// 調整し直すとき（画面を出し直したとき）に、前の調整が残っている
     @Test
     func keepsAdjustmentWhenStartedAgain() async throws {

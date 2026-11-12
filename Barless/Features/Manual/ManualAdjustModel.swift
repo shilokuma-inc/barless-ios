@@ -37,6 +37,8 @@ final class ManualAdjustModel {
     private let outcome: HideOutcome
     private let processor = ManualProcessor()
     private var hasStarted = false
+    /// 「この設定で続ける」を数える番号。処理を待っている間に取り消されたら、番号が進んでいるので、結果を捨てる
+    private var finishGeneration = 0
     /// まだ途中の結果を作っていない、いちばん新しい調整
     private var pendingAdjustment: ManualAdjustment?
     /// 途中の結果を作っている処理。作り終えると `nil` に戻る
@@ -72,8 +74,10 @@ final class ManualAdjustModel {
         }
     }
 
+    // 調整は、「この設定で続ける」の処理の途中では変えない（書き出す結果と、画面に残る調整がずれないように）
+
     func setBandHeight(_ height: Int) {
-        guard case let .ready(canvas) = phase else { return }
+        guard !isFinishing, case let .ready(canvas) = phase else { return }
         let clamped = canvas.editor.clamped(height)
         guard clamped != bandHeight else { return }
         bandHeight = clamped
@@ -81,13 +85,13 @@ final class ManualAdjustModel {
     }
 
     func setTextColor(_ color: ManualAdjustment.TextColor) {
-        guard color != textColor else { return }
+        guard !isFinishing, color != textColor else { return }
         textColor = color
         render()
     }
 
     func setBackgroundMode(_ mode: BackgroundMode) {
-        guard mode != backgroundMode, case let .ready(canvas) = phase else { return }
+        guard !isFinishing, mode != backgroundMode, case let .ready(canvas) = phase else { return }
         backgroundMode = mode
         if mode == .pickColor, pickedColor == nil {
             // 最初は、帯のすぐ下の色にしておく（ステータスバーの下に続く背景の色であることが多い）
@@ -98,23 +102,32 @@ final class ManualAdjustModel {
 
     /// 画像のその位置（px）の色を拾う。「色を拾う」を選んでいるときだけ働く
     func pickColor(x: Int, y: Int) {
-        guard backgroundMode == .pickColor, case let .ready(canvas) = phase,
+        guard !isFinishing, backgroundMode == .pickColor, case let .ready(canvas) = phase,
               let color = processor.color(in: canvas, x: x, y: y), color != pickedColor else { return }
         pickedColor = color
         render()
     }
 
-    /// 画像の全体に、いまの調整を当てた結果。作れなければ `nil` を返し、「開けませんでした」の表示に切り替える
+    /// 画像の全体に、いまの調整を当てた結果。作れなければ `nil` を返し、「開けませんでした」の表示に切り替える。
+    /// 待っている間に `cancelFinish()` で取り消されたときも `nil`（結果は使わない）
     func finish() async -> EditedScreenshot? {
         guard case let .ready(canvas) = phase, !isFinishing else { return nil }
         isFinishing = true
         defer { isFinishing = false }
+        finishGeneration += 1
+        let generation = finishGeneration
         do {
-            return try await processor.apply(adjustment, to: canvas, source: source, outcome: outcome)
+            let result = try await processor.apply(adjustment, to: canvas, source: source, outcome: outcome)
+            return generation == finishGeneration ? result : nil
         } catch {
             phase = .failed
             return nil
         }
+    }
+
+    /// 「この設定で続ける」の処理の途中で、調整の画面から戻るとき。処理が終わっても、その結果は使わない
+    func cancelFinish() {
+        finishGeneration += 1
     }
 
     /// 途中の結果が、いまの調整に追いつくまで待つ（テスト用）
