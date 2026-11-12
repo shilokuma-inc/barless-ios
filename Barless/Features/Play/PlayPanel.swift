@@ -78,7 +78,7 @@ struct PlayPanel: View {
             .disabled(!model.canDrawWiFi)
             .opacity(model.canDrawWiFi ? 1 : 0.4)
             if !model.canDrawWiFi {
-                Text("There's no room to draw Wi-Fi next to the carrier name")
+                Text("There's no room to draw Wi-Fi next to the carrier name.")
                     .font(.caption)
                     .foregroundStyle(Theme.darkInkSecondary)
                     .frame(maxWidth: .infinity, alignment: .trailing)
