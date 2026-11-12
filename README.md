@@ -27,7 +27,7 @@
 
 ### アプリの画面
 
-画面は [Barless/Features](Barless/Features) にあります。ホームは明るく、編集と書き出しは黒い画面にしています。文言は日本語と英語（[Barless/Localizable.xcstrings](Barless/Localizable.xcstrings)）。
+画面は [Barless/Features](Barless/Features) にあります。ホームは明るく、編集と書き出しは黒い画面にしています。iPhone は縦向きだけです。文言は日本語と英語（[Barless/Localizable.xcstrings](Barless/Localizable.xcstrings)）。
 
 | フォルダ | 画面 |
 |---|---|

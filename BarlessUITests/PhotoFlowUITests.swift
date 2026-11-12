@@ -22,7 +22,7 @@ final class PhotoFlowUITests: XCTestCase {
             throw XCTSkip("BARLESS_E2E_DIR を渡したときだけ動かす")
         }
         let output = URL(fileURLWithPath: path, isDirectory: true)
-        // 起動テストが横向きでも流れるので、その後に動かすと横向きのまま残っていることがある
+        // 端末が横向きのまま残っていると、画面の画像が横倒しで撮れるので、縦に戻しておく
         XCUIDevice.shared.orientation = .portrait
         let app = XCUIApplication()
         app.launch()
