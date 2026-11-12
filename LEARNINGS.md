@@ -32,3 +32,14 @@
 - このリポジトリは公開している。仕様書と企画時の資料（価格・収益化・審査対策・商標の下調べなど）は非公開の `shilokuma-inc/barless-spec` に置き、ここには書き写さない。コードやドキュメントからは「仕様書 §5-2」のように節の番号だけで参照する（2026-11-12）
 - 一度 PR に入ったファイルは、ブランチから消しても GitHub 上の PR の履歴（コミット一覧・force push の前後の比較）から読める。公開したくないファイルを入れてしまったら、公開する前にリポジトリを作り直すしかない（このリポジトリは 2026-11-12 に、仕様書を含まない履歴で作り直した）（2026-11-12）
 - Upload（TestFlight への配信）は有効にしてある（リポジトリ変数 `ENABLE_DELIVERY=true`）。App Store Connect にアプリ（Bundle ID `jp.shilokuma.Barless`）を作るまでは、develop への push のたびに Upload が「App Store Connect にアプリがありません」で失敗する。Job Summary に出る手順でアプリを作ってから、失敗した実行をやり直す（2026-11-12）
+
+## 画面・UI テスト
+
+- アプリのターゲットは、既定のアクター分離が MainActor（`SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor`）で、`SWIFT_APPROACHABLE_CONCURRENCY` も有効。何も書かない型と関数はメインスレッドで動き、`nonisolated` を付けただけの `async` 関数も呼び出し元（メイン）で動く。画像の展開・解析・書き出しのように重い処理は、型に `nonisolated`、関数に `@concurrent` を付けてメインの外へ出す（クロージャは `{ @concurrent in … }`）。パッケージ（BarlessKit）はこの設定の外なので、`async` 関数はそのままメインの外で動く（2026-11-12）
+- `PhotosPicker` のインライン表示（`.photosPickerStyle(.inline)`）に `.screenshots` を指定すると、Simulator では「写真がありません」になる。`simctl addmedia` で入れた画像は、全画面の選択では「スクリーンショット」と読み上げられるのに、この絞り込みには入らない。Simulator で中身を確かめられないので、ホームの「最近のスクショ」は入れていない。入れるなら実機で確かめる。インライン表示は、初回に iOS の説明（「写真へのプライベートアクセス」）が枠いっぱいに出る点にも注意（2026-11-12）
+- 写真の選択の画面（`PhotosPicker`）は UI テストから操作できる。写真は `app.images.matching(identifier: "PXGGridLayout-Info")` で取れるが、別のプロセスが描いているので `tap()` は「not hittable」で失敗する。`coordinate(withNormalizedOffset:).tap()` で画面の位置を押す（iOS 26.5 の Simulator）。並びは新しい順で、アプリから保存した画像が先頭に入るので、流すたびに番号がずれる（2026-11-12）
+- 写真への追加の許可の確認は SpringBoard が出す。UI テストでは `XCUIApplication(bundleIdentifier: "com.apple.springboard").alerts` で押せる。拒否した状態は `xcrun simctl privacy <udid> revoke photos-add <Bundle ID>`、元に戻すのは `reset` で作れる（2026-11-12）
+- UI テストの中で撮った画面は、`XCUIScreen.main.screenshot().pngRepresentation` を Mac のパスにそのまま書き出せる（Simulator のテストランナーは Mac のファイルに書ける）。出力先は `TEST_RUNNER_` を付けた環境変数で渡す。PR 用の画像をこれで撮ると、iOS の画面（写真の選択・許可の確認）も写せる（2026-11-12）
+- Simulator の言語は `xcrun simctl spawn <udid> defaults write "Apple Global Domain" AppleLanguages -array ja`（と `AppleLocale ja_JP`）のあと、shutdown → boot で変わる。アプリに `-AppleLanguages` を渡すだけでは、iOS が出す確認（権限の文言）は端末の言語のままになる（2026-11-12）
+- 文字サイズを大きくした表示は `xcrun simctl ui <udid> content_size accessibility-large`、戻すのは `content_size large`（2026-11-12）
+- 文言のカタログ（`Localizable.xcstrings`）は、コマンドラインのビルドでは書き換わらない（コードから文言を拾ってカタログに足すのは Xcode の画面でビルドしたときだけ）。文言を足したら、カタログにも手で足す。カタログに無い文言は、日本語でも英語のまま出る（2026-11-12）
