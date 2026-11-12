@@ -23,6 +23,8 @@ final class EditSession: Identifiable {
         var isComparing = false
         /// 書き出しの画面を出しておくか
         var isExporting = false
+        /// 手動調整の画面を出しておくか（自動で消せなかった画像のときだけ働く）
+        var isAdjusting = false
     }
 
     nonisolated let id = UUID()
@@ -52,5 +54,11 @@ final class EditSession: Identifiable {
         } catch {
             phase = .failed
         }
+    }
+
+    /// 手動調整の結果に置き換える
+    func apply(_ screenshot: EditedScreenshot) {
+        guard case .ready = phase else { return }
+        phase = .ready(screenshot)
     }
 }
