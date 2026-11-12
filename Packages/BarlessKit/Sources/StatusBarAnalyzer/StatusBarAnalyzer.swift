@@ -32,11 +32,17 @@ public struct StatusBarAnalysis: Sendable, Equatable {
     /// 消すと、何も無かったところの輪郭がぼやけるため
     public func eraseMask() -> PixelMask? {
         guard let scan, let layout = decision.layout else { return nil }
+        let background = backgroundInk()
         var ink = scan.mask
-        for pixel in backgroundInk() {
+        for pixel in background {
             ink[pixel.x, pixel.y] = false
         }
-        return ink.dilated(by: layout.scale)
+        var mask = ink.dilated(by: layout.scale)
+        // 広げたときに、外した背景のインクへ戻らないようにする
+        for pixel in background {
+            mask[pixel.x, pixel.y] = false
+        }
+        return mask
     }
 
     /// 背景の輪郭（建物の縁・壁紙の模様など）が、文字・アイコンの後ろを通っているか。

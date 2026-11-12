@@ -69,6 +69,11 @@ struct StructureDetectionTests {
             #expect(analysis.mayLeaveTraces, "\(fixture)")
             // 背景の種類だけでは見分けられない（だから別に見ている）
             #expect(analysis.background != .complex, "\(fixture)")
+            // 電池の範囲の外にある輪郭は、マスクを広げた後も消去の対象に入らない
+            let mask = try #require(analysis.eraseMask(), "\(fixture)")
+            let background = analysis.backgroundInk()
+            #expect(!background.isEmpty, "\(fixture)")
+            #expect(background.allSatisfy { !mask[$0.x, $0.y] }, "\(fixture)")
             warned += 1
         }
         #expect(fixtures.count == 48)
