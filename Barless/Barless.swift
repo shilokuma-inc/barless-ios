@@ -21,9 +21,11 @@ struct Barless: App {
         case .home, nil:
             HomeView()
         case .editor:
-            HomeView(initialSession: ScreenshotDemo.sampleSession(startsInExport: false))
+            HomeView(initialSession: ScreenshotDemo.sampleSession())
+        case .tidy:
+            HomeView(initialSession: ScreenshotDemo.sampleSession(opening: .init(mode: .tidy, isComparing: true)))
         case .export:
-            HomeView(initialSession: ScreenshotDemo.sampleSession(startsInExport: true))
+            HomeView(initialSession: ScreenshotDemo.sampleSession(opening: .init(isExporting: true)))
         }
     }
 }

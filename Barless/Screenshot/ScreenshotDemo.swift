@@ -20,6 +20,8 @@ enum ScreenshotDemo {
         case home
         /// 「隠す」の結果（作り物のスクリーンショットを開いた状態）
         case editor
+        /// 「整える」の結果を、元の画像と比較している状態
+        case tidy
         /// 書き出し
         case export
     }
@@ -41,8 +43,8 @@ enum ScreenshotDemo {
 
     /// 作り物のスクリーンショットを開いた編集。写真の選択を通らずに、編集と書き出しの画面を出せる
     @MainActor
-    static func sampleSession(startsInExport: Bool) -> EditSession {
+    static func sampleSession(opening: EditSession.Opening = EditSession.Opening()) -> EditSession {
         // 絵を描いて PNG にするのは重いので、メインスレッドの外で作る
-        EditSession(source: { @concurrent in try SampleScreenshot.pngData() }, startsInExport: startsInExport)
+        EditSession(source: { @concurrent in try SampleScreenshot.pngData() }, opening: opening)
     }
 }
