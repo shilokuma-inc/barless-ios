@@ -66,7 +66,7 @@ private struct ManualCanvasView: View {
     var body: some View {
         GeometryReader { proxy in
             let image = canvas.original
-            let size = Self.fittedSize(of: image, in: proxy.size)
+            let size = image.fittedSize(in: proxy.size, sideInset: Self.sideInset)
             let pixelsPerPoint = CGFloat(image.height) / size.height
             let lineY = CGFloat(model.bandHeight) / pixelsPerPoint
             picture(size: size, lineY: lineY)
@@ -144,15 +144,6 @@ private struct ManualCanvasView: View {
         // つまみの中心を、線の右端（画像の 14pt 外側）に合わせる
         .frame(width: width + 2 * Self.lineOverhang + Self.knobHitSize / 2, height: Self.knobHitSize)
         .accessibilityHidden(true)
-    }
-
-    /// 縦横比を保ったまま、`container` に収まる大きさ
-    private static func fittedSize(of image: CGImage, in container: CGSize) -> CGSize {
-        let width = CGFloat(max(1, image.width))
-        let height = CGFloat(max(1, image.height))
-        let available = CGSize(width: max(1, container.width - 2 * sideInset), height: max(1, container.height))
-        let scale = min(available.width / width, available.height / height)
-        return CGSize(width: width * scale, height: height * scale)
     }
 }
 

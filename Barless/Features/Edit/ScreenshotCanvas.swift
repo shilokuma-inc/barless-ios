@@ -30,7 +30,8 @@ struct ScreenshotCanvas: View {
     var body: some View {
         GeometryReader { proxy in
             let topSpace = bandHeight == nil ? 0 : Self.labelSpace
-            let size = fittedSize(in: CGSize(width: proxy.size.width, height: proxy.size.height - topSpace))
+            let container = CGSize(width: proxy.size.width, height: proxy.size.height - topSpace)
+            let size = image.fittedSize(in: container, sideInset: Self.sideInset)
             let bandPoints = bandHeight.map { size.height * CGFloat($0) / CGFloat(max(1, image.height)) } ?? 0
             picture(size: size)
                 .clipShape(RoundedRectangle(cornerRadius: 10, style: .continuous))
@@ -140,13 +141,16 @@ struct ScreenshotCanvas: View {
         Theme.accent.frame(width: 1.5)
     }
 
-    /// 縦横比を保ったまま、`container` に収まる大きさ
-    private func fittedSize(in container: CGSize) -> CGSize {
-        let width = CGFloat(max(1, image.width))
-        let height = CGFloat(max(1, image.height))
-        let available = CGSize(width: max(1, container.width - 2 * Self.sideInset), height: max(1, container.height))
-        let scale = min(available.width / width, available.height / height)
-        return CGSize(width: width * scale, height: height * scale)
+}
+
+extension CGImage {
+    /// 縦横比を保ったまま、`container` に収まる大きさ（pt）。左右には `sideInset` ずつ空ける
+    func fittedSize(in container: CGSize, sideInset: CGFloat) -> CGSize {
+        let imageWidth = CGFloat(max(1, width))
+        let imageHeight = CGFloat(max(1, height))
+        let available = CGSize(width: max(1, container.width - 2 * sideInset), height: max(1, container.height))
+        let scale = min(available.width / imageWidth, available.height / imageHeight)
+        return CGSize(width: imageWidth * scale, height: imageHeight * scale)
     }
 }
 
