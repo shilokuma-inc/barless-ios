@@ -107,6 +107,20 @@ public struct StatusBarAnalysis: Sendable, Equatable {
         return false
     }
 
+    /// 時刻の文字がある範囲（px。`elementMarginPt` だけ広げてある）。配置が決まっていなければ `nil`。
+    ///
+    /// 「遊ぶ」で時刻をそのまま残すときに、消さない範囲として使う。読めた文字列を描いたときの範囲と、
+    /// 画像から測ったかたまりの、両方を覆う（どちらかが少しずれていても、時刻が欠けないように）
+    public var timeRect: PixelRect? {
+        guard case let .resolved(match, _) = decision else { return nil }
+        let layout = match.layout
+        let drawn = timeText.map { TimeTypography(layout: layout).inkRect(for: $0) }
+        let rects = [drawn, match.timeBlob].compactMap { $0 }
+        guard let first = rects.first else { return nil }
+        let margin = Self.elementMarginPt * layout.scale
+        return rects.dropFirst().reduce(first) { $0.union($1) }.insetBy(dx: -margin, dy: -margin)
+    }
+
     /// 配置から見て、文字とアイコンがある範囲（`elementMarginPt` だけ広げてある）
     private func elementRects(of match: LayoutMatch) -> [PixelRect] {
         let layout = match.layout
