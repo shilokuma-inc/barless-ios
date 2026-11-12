@@ -122,6 +122,28 @@
         }
       }
     },
+    "Battery": {
+      "comment": "「遊ぶ」の項目。電池の残量",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電池"
+          }
+        }
+      }
+    },
+    "Battery level": {
+      "comment": "「遊ぶ」のスライダーの読み上げ",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電池の残量"
+          }
+        }
+      }
+    },
     "Black": {
       "comment": "手動調整の選択肢（文字の色）",
       "localizations": {
@@ -397,6 +419,17 @@
         }
       }
     },
+    "Keep": {
+      "comment": "「遊ぶ」の時刻の選択肢。元の時刻を残す",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "そのまま"
+          }
+        }
+      }
+    },
     "Location and capture date are not included.": {
       "comment": "書き出す画像のメタデータについての説明",
       "localizations": {
@@ -430,6 +463,17 @@
         }
       }
     },
+    "Off": {
+      "comment": "「遊ぶ」の Wi-Fi の選択肢。Wi-Fi の表示を消す",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "オフ"
+          }
+        }
+      }
+    },
     "Open Settings": {
       "comment": "設定アプリを開くボタン",
       "localizations": {
@@ -459,6 +503,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "色を拾う"
+          }
+        }
+      }
+    },
+    "Play": {
+      "comment": "エディタのモード。時刻・電池・電波・Wi-Fi を好きな値に描き直す",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "遊ぶ"
           }
         }
       }
@@ -503,6 +558,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存しています…"
+          }
+        }
+      }
+    },
+    "Screenshot with a customized status bar": {
+      "comment": "「遊ぶ」の結果の画像の読み上げ",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ステータスバーの表示を変えたスクショ"
           }
         }
       }
@@ -573,6 +639,17 @@
         }
       }
     },
+    "Signal": {
+      "comment": "「遊ぶ」の項目。電波の本数",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "電波"
+          }
+        }
+      }
+    },
     "Status bar": {
       "comment": "画像のステータスバーの帯に付ける印",
       "localizations": {
@@ -628,6 +705,17 @@
         }
       }
     },
+    "There's no room to draw Wi-Fi next to the carrier name.": {
+      "comment": "「遊ぶ」で、キャリア名が長くて Wi-Fi を描けない画像のときの説明",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キャリア名の右に Wi-Fi を描く場所がありません"
+          }
+        }
+      }
+    },
     "Tidy": {
       "comment": "エディタのモード: 定番の表示に描き直す",
       "localizations": {
@@ -635,6 +723,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "整える"
+          }
+        }
+      }
+    },
+    "Time": {
+      "comment": "「遊ぶ」の項目",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "時刻"
           }
         }
       }
@@ -679,6 +778,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "白"
+          }
+        }
+      }
+    },
+    "Wi-Fi": {
+      "comment": "「遊ぶ」の項目。Wi-Fi の本数",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "Wi-Fi"
           }
         }
       }

@@ -193,12 +193,12 @@ private struct ManualPanel: View {
         VStack(spacing: 0) {
             message
                 .padding(.bottom, 12)
-            separator
-            row("Height") {
+            OptionSeparator()
+            OptionRow("Height") {
                 heightSlider
             }
-            separator
-            row("Text color") {
+            OptionSeparator()
+            OptionRow("Text color") {
                 SegmentPicker(
                     options: [
                         .init(value: .automatic, title: "Auto", identifier: "manual.textColor.automatic"),
@@ -213,8 +213,8 @@ private struct ManualPanel: View {
             // 文字の色は、文字とアイコンを拾って消すとき（背景が「自動」）だけ使う
             .disabled(model.backgroundMode != .automatic)
             .opacity(model.backgroundMode == .automatic ? 1 : 0.4)
-            separator
-            row("Background") {
+            OptionSeparator()
+            OptionRow("Background") {
                 SegmentPicker(
                     options: [
                         .init(value: .automatic, title: "Auto", identifier: "manual.background.automatic"),
@@ -226,7 +226,7 @@ private struct ManualPanel: View {
                     track: Theme.darkSurface
                 )
             }
-            separator
+            OptionSeparator()
             // 補足が出たり消えたりしても、画像の大きさが変わらないように、いつも同じ高さを取っておく
             ZStack {
                 footnote
@@ -271,6 +271,8 @@ private struct ManualPanel: View {
             Text(verbatim: "\(model.bandHeight) px")
                 .font(.subheadline.monospacedDigit())
                 .foregroundStyle(Theme.darkInkSecondary)
+                .lineLimit(1)
+                .fixedSize()
                 .frame(minWidth: 58, alignment: .trailing)
                 .accessibilityHidden(true)
         }
@@ -299,31 +301,6 @@ private struct ManualPanel: View {
                 .multilineTextAlignment(.center)
                 .accessibilityIdentifier("manual.traces")
         }
-    }
-
-    private var separator: some View {
-        Theme.darkLine.frame(height: 1)
-    }
-
-    private func row(_ title: LocalizedStringKey, @ViewBuilder content: () -> some View) -> some View {
-        let label = Text(title)
-            .font(.body)
-            .foregroundStyle(Theme.darkInk)
-        // 文字を大きくしていて横に入りきらないときは、項目の名前の下に置く
-        return ViewThatFits(in: .horizontal) {
-            HStack(spacing: 16) {
-                label
-                content()
-                    .frame(maxWidth: .infinity, alignment: .trailing)
-            }
-            VStack(alignment: .leading, spacing: 8) {
-                label
-                content()
-            }
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .padding(.vertical, 10)
-        }
-        .frame(minHeight: 52)
     }
 }
 

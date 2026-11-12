@@ -8,6 +8,8 @@ struct EditorView: View {
     @Binding var mode: EditMode
     /// 比較（つまみを動かして、元の画像と見比べる）を出しているか
     @Binding var isComparing: Bool
+    /// 「遊ぶ」の状態。自動で消せた画像のときだけある
+    let play: PlayModel?
     let onClose: () -> Void
     let onSave: () -> Void
     /// 手動調整の画面を開く
@@ -32,7 +34,9 @@ struct EditorView: View {
                         .accessibilityIdentifier("editor.save")
                 }
             }
+            // 「遊ぶ」の行が長くなっても、画像にはこの高さを残す
             canvas
+                .frame(minHeight: 160)
                 .padding(.top, 4)
                 .padding(.bottom, 12)
             if let hidden = screenshot.hidden {
@@ -42,6 +46,11 @@ struct EditorView: View {
                 }
                 .padding(.horizontal, Theme.margin)
                 .padding(.bottom, 12)
+                if mode == .play, let play {
+                    PlayPanel(model: play)
+                        .layoutPriority(1)
+                        .padding(.bottom, 8)
+                }
                 HiddenSummaryView(hidden: hidden, mode: mode, isComparing: isComparing)
             } else if let manual = screenshot.manual {
                 // 手動調整の結果。配置が分からないので「整える」は無い
@@ -63,7 +72,7 @@ struct EditorView: View {
     @ViewBuilder private var canvas: some View {
         if let bandHeight = screenshot.bandHeight {
             ScreenshotCanvas(
-                image: isShowingOriginal ? screenshot.before : screenshot.image(for: mode),
+                image: isShowingOriginal ? screenshot.before : resultImage,
                 bandHeight: bandHeight,
                 tag: isShowingOriginal ? "BEFORE" : nil,
                 comparison: isComparing ? .init(before: screenshot.before, position: $comparePosition) : nil
@@ -86,11 +95,21 @@ struct EditorView: View {
         }
     }
 
+    /// 選んでいるモードの結果の画像。「遊ぶ」では、値を変えた画像
+    private var resultImage: CGImage {
+        if mode == .play, let play { return play.image }
+        return screenshot.image(for: mode)
+    }
+
     private var canvasLabel: Text {
         if isComparing { return Text("Comparison with the original") }
         if isShowingOriginal { return Text("Original screenshot") }
-        let isTidied = mode == .tidy && screenshot.tidied != nil
-        return isTidied ? Text("Screenshot with a tidied status bar") : Text("Screenshot with the status bar hidden")
+        guard screenshot.tidied != nil else { return Text("Screenshot with the status bar hidden") }
+        switch mode {
+        case .hide: return Text("Screenshot with the status bar hidden")
+        case .tidy: return Text("Screenshot with a tidied status bar")
+        case .play: return Text("Screenshot with a customized status bar")
+        }
     }
 }
 
@@ -135,16 +154,21 @@ private struct HiddenSummaryView: View {
                     .foregroundStyle(Theme.darkInkSecondary)
                     .accessibilityIdentifier("editor.tidySummary")
             }
-            StatusRow(color: Theme.accent, text: Text("Detected as \(screenSize)-inch · \(generationName)"))
-                .accessibilityIdentifier("editor.detected")
+            // 「遊ぶ」では、値を変える行に場所を使うので、判定の結果と見比べ方の説明は出さない（注意だけ出す）
+            if mode != .play {
+                StatusRow(color: Theme.accent, text: Text("Detected as \(screenSize)-inch · \(generationName)"))
+                    .accessibilityIdentifier("editor.detected")
+            }
             if hidden.mayLeaveTraces {
                 TracesWarningRow()
             }
-            CompareHint(isComparing: isComparing)
+            if mode != .play {
+                CompareHint(isComparing: isComparing)
+            }
         }
         .multilineTextAlignment(.center)
         .padding(.horizontal, Theme.margin)
-        .padding(.bottom, 20)
+        .padding(.bottom, mode == .play ? 8 : 20)
     }
 
     /// 画面の大きさ（「6.3」）。機種名は出さない。同じ大きさの画面を持つ機種がいくつもあり、

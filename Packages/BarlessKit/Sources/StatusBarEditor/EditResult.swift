@@ -38,7 +38,7 @@ public enum HideOutcome: Sendable, Equatable {
     case notHidden(HideFailure)
 }
 
-/// 編集の結果。「隠す」と「整える」の両方の画像を持つ
+/// 編集の結果。「隠す」と「整える」の画像と、「遊ぶ」で描き直すための入れ物を持つ
 public struct EditResult: Sendable {
     /// 元の画像
     public let original: CGImage
@@ -47,12 +47,15 @@ public struct EditResult: Sendable {
     /// 「整える」: 消したうえで、定番の表示に描き直した画像。消せなかったときは `nil`
     public let tidied: CGImage?
     public let outcome: HideOutcome
+    /// 「遊ぶ」: 中身を変えて描き直すための入れ物。消せなかったときは `nil`
+    public let composer: StatusBarComposer?
 
-    public init(original: CGImage, hidden: CGImage, tidied: CGImage?, outcome: HideOutcome) {
+    public init(original: CGImage, hidden: CGImage, tidied: CGImage?, outcome: HideOutcome, composer: StatusBarComposer? = nil) {
         self.original = original
         self.hidden = hidden
         self.tidied = tidied
         self.outcome = outcome
+        self.composer = composer
     }
 
     /// 消せたときの情報

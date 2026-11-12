@@ -14,6 +14,8 @@ nonisolated struct EditedScreenshot: Sendable {
     let tidied: CGImage?
     /// 自動の判定の結果
     let outcome: HideOutcome
+    /// 「遊ぶ」で、中身を変えて描き直すための入れ物。消せなかったとき・手動調整の結果では `nil`
+    var composer: StatusBarComposer?
     /// 自動で消せなかった画像で、手動調整へ進めるなら、その元のデータ
     var manualSource: ManualSource?
     /// 手動調整の結果なら、その中身（`after` が、帯を手動で合わせて消した画像）
@@ -73,7 +75,9 @@ nonisolated struct ScreenshotProcessor: ScreenshotProcessing {
         guard result.statusBar != nil else {
             return try preview(of: imageData, outcome: result.outcome)
         }
-        return EditedScreenshot(before: result.original, after: result.hidden, tidied: result.tidied, outcome: result.outcome)
+        return EditedScreenshot(
+            before: result.original, after: result.hidden, tidied: result.tidied, outcome: result.outcome, composer: result.composer
+        )
     }
 
     /// 消せなかった画像の結果。画面に出すだけなので、縮めた画像を持つ。

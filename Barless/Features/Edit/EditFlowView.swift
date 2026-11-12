@@ -56,18 +56,33 @@ struct EditFlowView: View {
                 })
             } else if isExporting, screenshot.hasResult {
                 // 選んでいるモードの画像を書き出す
-                ExportView(image: screenshot.image(for: mode), onBack: { isExporting = false }, onDone: close)
+                ExportView(image: exportImage(of: screenshot), onBack: { isExporting = false }, onDone: close)
             } else {
                 EditorView(
                     screenshot: screenshot,
                     mode: $mode,
                     isComparing: $isComparing,
+                    play: session.play,
                     onClose: close,
-                    onSave: { isExporting = true },
+                    onSave: startExport,
                     onAdjust: { openManualAdjust(for: screenshot) }
                 )
             }
         }
+    }
+
+    /// 書き出しの画面へ進む。「遊ぶ」で値を変えた直後でも、その値で描き終えた画像を書き出す
+    private func startExport() {
+        Task {
+            await session.play?.waitForRender()
+            isExporting = true
+        }
+    }
+
+    /// 書き出す画像。「遊ぶ」では、値を変えた画像
+    private func exportImage(of screenshot: EditedScreenshot) -> CGImage {
+        if mode == .play, let play = session.play { return play.image }
+        return screenshot.image(for: mode)
     }
 
     /// 手動調整の画面を開く。扱えない画像（元のデータを持っていない）では何もしない
