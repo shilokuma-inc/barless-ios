@@ -1,6 +1,7 @@
 import BarlessTestSupport
 import DeviceCatalog
 import ImageIOKit
+import StatusBarAnalyzer
 import StatusBarEditor
 import Testing
 
@@ -159,6 +160,16 @@ struct ManualEditorTests {
         #expect(result.mayLeaveTraces)
         // 暗い点は消さない（白い文字だけを消す）
         #expect(result.bitmap[21 * scale, 5 * scale] == RGB(red: 20, green: 20, blue: 20))
+    }
+
+    /// 幅がとても狭い画像でも止まらない（何も拾わない）
+    @Test(arguments: [(17, 6), (16, 6), (9, 40), (1, 3)])
+    func scansNothingOnNarrowImage(width: Int, height: Int) {
+        let bitmap = Bitmap(width: width, height: height, fill: .white)
+
+        let scan = ManualBandScanner(scale: 2).scan(bitmap, bandHeight: height)
+
+        #expect(scan?.eraseMask.isEmpty == true)
     }
 
     /// 1 色で塗る: 帯の全体がその色になり、帯の下は変わらない

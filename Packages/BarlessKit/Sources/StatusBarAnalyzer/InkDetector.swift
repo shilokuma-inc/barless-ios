@@ -91,8 +91,9 @@ struct InkDetector {
     /// - Parameter tone: 拾うインクの明るさ。背景の種類と `inkIsDark` は、明るさで絞る前のインクから決める
     func scan(_ bitmap: Bitmap, keeping tone: InkTone = .any) -> InkScan {
         let margin = Self.sideMarginPt * scale
-        // 帯が入りきらない画像（上端の切り出しが短すぎる・幅が狭すぎる）では、何も拾わない
-        guard bottomRow > topRow + 1, bitmap.width > 2 * margin else {
+        // 帯が入りきらない画像（上端の切り出しが短すぎる・幅が狭すぎる）では、何も拾わない。
+        // 幅は、左右の端を除いたうえで、輪郭を見る 1pt 先の画素（`edgeColumns`）まで入る分が要る
+        guard bottomRow > topRow + 1, bitmap.width >= 2 * margin + scale else {
             let empty = PixelMask(originX: 0, originY: topRow, width: max(1, bitmap.width), height: 1)
             return InkScan(
                 mask: empty, structure: empty, edgesAbove: [], edgesBelow: [], blobs: [], background: .complex, inkIsDark: true
