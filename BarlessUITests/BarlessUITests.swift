@@ -63,6 +63,9 @@ final class BarlessUITests: XCTestCase {
         XCTAssertTrue(app.buttons["play.cellular.4"].isSelected)
         XCTAssertTrue(app.buttons["play.wifi.3"].isSelected)
 
+        // 無料の残りの回数は、値を変える前から出ている
+        XCTAssertTrue(app.descendants(matching: .any)["play.quota"].exists)
+
         app.buttons["play.wifi.off"].tap()
         XCTAssertTrue(app.buttons["play.wifi.off"].isSelected)
         app.buttons["play.cellular.2"].tap()
@@ -79,11 +82,34 @@ final class BarlessUITests: XCTestCase {
 
         app.buttons["editor.save"].tap()
         XCTAssertTrue(app.descendants(matching: .any)["export.share"].waitForExistence(timeout: 30))
+        // 値を変えた画像なので、無料の回数を使うことが書き出しの画面に出る
+        XCTAssertTrue(app.descendants(matching: .any)["export.freeUse"].exists)
         // 戻っても、選んだ値はそのまま
         app.buttons["edit.back"].tap()
         XCTAssertTrue(app.buttons["play.wifi.off"].waitForExistence(timeout: 10))
         XCTAssertTrue(app.buttons["play.wifi.off"].isSelected)
         XCTAssertTrue(app.buttons["play.cellular.2"].isSelected)
+    }
+
+    /// 無料の回数を使い切っていると、値を変えた画像は保存へ進めない。値を戻せば進める。「整える」は、いつでも進める
+    @MainActor
+    func testPlayCannotExportCustomizedImageWhenFreeQuotaIsUsedUp() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-screenshot-demo", "-screenshot-scene", "play", "-screenshot-play-used", "3"]
+        app.launch()
+
+        XCTAssertTrue(app.buttons["play.cellular.4"].waitForExistence(timeout: 30))
+        XCTAssertTrue(app.buttons["editor.save"].isEnabled)
+
+        app.buttons["play.cellular.2"].tap()
+        XCTAssertFalse(app.buttons["editor.save"].isEnabled)
+
+        app.buttons["play.cellular.4"].tap()
+        XCTAssertTrue(app.buttons["editor.save"].isEnabled)
+
+        app.buttons["play.cellular.2"].tap()
+        app.buttons["editor.mode.tidy"].tap()
+        XCTAssertTrue(app.buttons["editor.save"].isEnabled)
     }
 
     /// 大きさが変わった作り物のスクリーンショットで、消せなかった → 手動調整 → 結果 → 調整し直す → 書き出し、を通す
