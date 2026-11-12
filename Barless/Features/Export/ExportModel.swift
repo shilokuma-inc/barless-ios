@@ -36,16 +36,24 @@ final class ExportModel {
 
     private let image: CGImage
     private let saver: any PhotoSaving
+    private let directory: URL
     private let writer: Writer
+    /// 前の書き出しで残ったファイルの片付け。最初の用意の前に 1 回だけ行う
+    private var cleanup: Task<Void, Never>?
 
+    /// - Parameters:
+    ///   - directory: 書き出すファイルを置くフォルダ（テストでは、テストごとに別の場所を渡す）
+    ///   - writer: ファイルに書く処理。渡さなければ `directory` に書く
     init(
         image: CGImage,
         saver: any PhotoSaving = PhotoLibrarySaver(),
-        writer: @escaping Writer = { try await ExportFile.write($0, format: $1) }
+        directory: URL = ExportFile.defaultDirectory,
+        writer: Writer? = nil
     ) {
         self.image = image
         self.saver = saver
-        self.writer = writer
+        self.directory = directory
+        self.writer = writer ?? { try await ExportFile.write($0, format: $1, in: directory) }
     }
 
     /// 用意できたファイル
@@ -59,10 +67,18 @@ final class ExportModel {
         let format = format
         preparation = .preparing
         saveState = .idle
+        // 片付けが済むまでは書き始めない（途中で形式が変わって呼び直されても、同じ片付けを待つ）
+        let directory = directory
+        let cleanup = cleanup ?? Task { await ExportFile.removeAll(in: directory) }
+        self.cleanup = cleanup
+        await cleanup.value
         do {
             let url = try await writer(image, format)
-            // 待っている間に形式が変わっていたら、新しいほうの結果に任せる
-            guard format == self.format else { return }
+            // 待っている間に形式が変わっていたら、新しいほうの結果に任せる。このファイルは誰も使わないので消す
+            guard format == self.format else {
+                ExportFile.remove(url)
+                return
+            }
             preparation = .ready(url)
         } catch {
             guard format == self.format else { return }

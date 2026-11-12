@@ -133,7 +133,7 @@ struct ExportView: View {
                     .foregroundStyle(Theme.darkInk)
                 Spacer(minLength: 12)
                 FormatPicker(selection: $model.format)
-                    // 保存の途中で形式を変えると、保存しているファイルを作り直してしまう
+                    // 保存の途中で形式を変えると、どちらの形式を保存したのか分からなくなる
                     .disabled(model.saveState == .saving)
             }
             .frame(minHeight: 50)

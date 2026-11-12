@@ -22,14 +22,40 @@ struct ExportModelTests {
         }
     }
 
+    /// 開けるまで待たせる門（書き出しが終わる順を、テストから決めるために使う）
+    private actor Gate {
+        private var isOpen = false
+        private var waiters: [CheckedContinuation<Void, Never>] = []
+
+        func wait() async {
+            guard !isOpen else { return }
+            await withCheckedContinuation { waiters.append($0) }
+        }
+
+        func open() {
+            isOpen = true
+            waiters.forEach { $0.resume() }
+            waiters = []
+        }
+    }
+
     private func image() throws -> CGImage {
         try Bitmap(width: 30, height: 60, fill: RGB(red: 20, green: 120, blue: 220)).makeCGImage()
+    }
+
+    /// テストごとに別の書き出し先（テストは並んで走るので、同じ場所を使うと互いのファイルを消してしまう）
+    private func model(saver: StubSaver = StubSaver(), directory: URL? = nil, writer: ExportModel.Writer? = nil) throws -> ExportModel {
+        ExportModel(image: try image(), saver: saver, directory: directory ?? Self.temporaryDirectory(), writer: writer)
+    }
+
+    private static func temporaryDirectory() -> URL {
+        FileManager.default.temporaryDirectory.appendingPathComponent("ExportTests-\(UUID().uuidString)", isDirectory: true)
     }
 
     /// Software 欄にアプリ名が入り、位置情報は入らない（仕様書 §5-4a）
     @Test
     func preparesPNGWithSoftwareName() async throws {
-        let model = ExportModel(image: try image(), saver: StubSaver())
+        let model = try model()
 
         await model.prepare()
 
@@ -45,7 +71,7 @@ struct ExportModelTests {
     @Test
     func savesPreparedFile() async throws {
         let saver = StubSaver()
-        let model = ExportModel(image: try image(), saver: saver)
+        let model = try model(saver: saver)
         await model.prepare()
 
         await model.save()
@@ -59,7 +85,7 @@ struct ExportModelTests {
     @Test
     func savesOnlyOncePerFile() async throws {
         let saver = StubSaver()
-        let model = ExportModel(image: try image(), saver: saver)
+        let model = try model(saver: saver)
 
         await model.save()
         #expect(model.saveState == .idle)
@@ -73,7 +99,7 @@ struct ExportModelTests {
 
     @Test
     func reportsDeniedPermission() async throws {
-        let model = ExportModel(image: try image(), saver: StubSaver(error: PhotoSaveError.notAuthorized))
+        let model = try model(saver: StubSaver(error: PhotoSaveError.notAuthorized))
         await model.prepare()
 
         await model.save()
@@ -84,7 +110,7 @@ struct ExportModelTests {
 
     @Test
     func reportsSaveFailure() async throws {
-        let model = ExportModel(image: try image(), saver: StubSaver(error: CocoaError(.fileWriteUnknown)))
+        let model = try model(saver: StubSaver(error: CocoaError(.fileWriteUnknown)))
         await model.prepare()
 
         await model.save()
@@ -96,7 +122,7 @@ struct ExportModelTests {
     /// 形式を変えると、その形式のファイルを作り直し、保存済みの印を戻す
     @Test
     func changingFormatPreparesNewFile() async throws {
-        let model = ExportModel(image: try image(), saver: StubSaver())
+        let model = try model()
         await model.prepare()
         await model.save()
 
@@ -110,9 +136,56 @@ struct ExportModelTests {
         #expect(ImageMetadata.softwareName(of: data) == "Barless")
     }
 
+    /// 形式を切り替えた直後は 2 つの書き出しが同時に進む。前の形式が後から終わっても、使っているファイルは消えない
+    @Test
+    func keepsReadyFileWhenEarlierExportFinishesLater() async throws {
+        let directory = Self.temporaryDirectory()
+        let started = Gate()
+        let release = Gate()
+        let model = try model(directory: directory) { image, format in
+            // PNG の書き出しだけを、HEIC が終わるまで待たせる
+            if format == .png {
+                await started.open()
+                await release.wait()
+            }
+            return try await ExportFile.write(image, format: format, in: directory)
+        }
+        let earlier = Task { await model.prepare() }
+        await started.wait()
+
+        model.format = .heic
+        await model.prepare()
+        let ready = try #require(model.fileURL)
+        #expect(ready.pathExtension == "heic")
+
+        await release.open()
+        await earlier.value
+
+        #expect(model.fileURL == ready)
+        #expect(FileManager.default.fileExists(atPath: ready.path))
+        // 使われなかった PNG は残さない
+        let folders = try FileManager.default.contentsOfDirectory(atPath: directory.path)
+        #expect(folders == [ready.deletingLastPathComponent().lastPathComponent])
+    }
+
+    /// 前の書き出しで残ったファイルは、新しく書く前に片付ける
+    @Test
+    func removesLeftoversBeforeFirstExport() async throws {
+        let directory = Self.temporaryDirectory()
+        let leftover = directory.appendingPathComponent("old/leftover.png")
+        try FileManager.default.createDirectory(at: leftover.deletingLastPathComponent(), withIntermediateDirectories: true)
+        try Data([1]).write(to: leftover)
+        let model = try model(directory: directory)
+
+        await model.prepare()
+
+        #expect(!FileManager.default.fileExists(atPath: leftover.path))
+        #expect(FileManager.default.fileExists(atPath: try #require(model.fileURL).path))
+    }
+
     @Test
     func reportsPreparationFailure() async throws {
-        let model = ExportModel(image: try image(), saver: StubSaver()) { _, _ in
+        let model = try model { _, _ in
             throw ImageCodecError.cannotEncode
         }
 
@@ -133,6 +206,23 @@ struct ExportFileTests {
 
         #expect(ExportFile.fileName(format: .png, date: date) == "Barless-20261112-185203.png")
         #expect(ExportFile.fileName(format: .heic, date: date) == "Barless-20261112-185203.heic")
+    }
+
+    /// 書き出しごとに別のフォルダへ書くので、後の書き出しが前のファイルを消さない
+    @Test
+    func writesEachExportToItsOwnFolder() async throws {
+        let directory = FileManager.default.temporaryDirectory.appendingPathComponent("ExportTests-\(UUID().uuidString)", isDirectory: true)
+        let image = try Bitmap(width: 8, height: 8).makeCGImage()
+
+        let first = try await ExportFile.write(image, format: .png, in: directory)
+        let second = try await ExportFile.write(image, format: .png, in: directory)
+
+        #expect(first.deletingLastPathComponent() != second.deletingLastPathComponent())
+        #expect(FileManager.default.fileExists(atPath: first.path))
+        #expect(FileManager.default.fileExists(atPath: second.path))
+
+        await ExportFile.removeAll(in: directory)
+        #expect(!FileManager.default.fileExists(atPath: directory.path))
     }
 }
 
