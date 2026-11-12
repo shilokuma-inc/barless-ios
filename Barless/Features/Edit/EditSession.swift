@@ -16,19 +16,27 @@ final class EditSession: Identifiable {
     /// 画像のデータを取り出す処理（写真の選択なら `PhotosPickerItem` から読む）。取り出せなければ `nil`
     typealias ImageSource = @Sendable () async throws -> Data?
 
+    /// 開いた直後の画面の状態。ふだんは既定のまま（「隠す」の結果）。撮影モードで、ほかの状態から始めるのに使う
+    struct Opening: Sendable {
+        var mode = EditMode.hide
+        /// 比較（つまみを動かして見比べる）を出しておくか
+        var isComparing = false
+        /// 書き出しの画面を出しておくか
+        var isExporting = false
+    }
+
     nonisolated let id = UUID()
     private(set) var phase: Phase = .loading
-    /// 開いた直後に書き出しの画面を出すか（撮影モード用）
-    let startsInExport: Bool
+    let opening: Opening
 
     private let source: ImageSource
-    private let hider: any ScreenshotHiding
+    private let processor: any ScreenshotProcessing
     private var hasStarted = false
 
-    init(source: @escaping ImageSource, hider: any ScreenshotHiding = StatusBarHider(), startsInExport: Bool = false) {
+    init(source: @escaping ImageSource, processor: any ScreenshotProcessing = ScreenshotProcessor(), opening: Opening = Opening()) {
         self.source = source
-        self.hider = hider
-        self.startsInExport = startsInExport
+        self.processor = processor
+        self.opening = opening
     }
 
     /// 読み込んで解析する。2 回目以降の呼び出しでは何もしない（画面が出るたびに呼ばれてもよいように）
@@ -40,7 +48,7 @@ final class EditSession: Identifiable {
                 phase = .failed
                 return
             }
-            phase = .ready(try await hider.hide(imageData: data))
+            phase = .ready(try await processor.process(imageData: data))
         } catch {
             phase = .failed
         }
