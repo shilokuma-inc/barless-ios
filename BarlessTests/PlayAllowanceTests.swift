@@ -67,56 +67,138 @@ struct PlayAllowanceTests {
 
     /// キーチェーンの保存先は、書いた回数を読み戻せる
     @Test
-    func keychainStoreRoundTrips() {
+    func keychainStoreRoundTrips() throws {
         let name = "jp.shilokuma.Barless.tests.\(UUID().uuidString)"
         let store = KeychainPlayUsageStore(service: name, backupSuiteName: name)
         defer { store.remove() }
 
-        #expect(store.load() == nil)
-        store.save(PlayUsage(day: "2026-11-13", count: 1))
-        store.save(PlayUsage(day: "2026-11-13", count: 2))
+        #expect(try store.load() == nil)
+        try store.save(PlayUsage(day: "2026-11-13", count: 1))
+        try store.save(PlayUsage(day: "2026-11-13", count: 2))
 
-        #expect(store.load() == PlayUsage(day: "2026-11-13", count: 2))
+        #expect(try store.load() == PlayUsage(day: "2026-11-13", count: 2))
         store.remove()
-        #expect(store.load() == nil)
+        #expect(try store.load() == nil)
     }
 
-    /// キーチェーンを読めない・書けないときも、回数を「まだ使っていない」と扱わない（控えから読む）
+    /// キーチェーンを読めない・書けないことは、呼び出し元に伝わる。回数は控えに残る
     @Test
-    func keepsCountWhenKeychainFails() {
+    func reportsKeychainFailures() throws {
         let name = "jp.shilokuma.Barless.tests.\(UUID().uuidString)"
         let keychain = FakeKeychain()
         let store = KeychainPlayUsageStore(service: name, keychain: keychain, backupSuiteName: name)
         defer { store.remove() }
+        let usage = PlayUsage(day: "2026-11-13", count: 2)
 
-        // 書けないときも、控えに残る
+        // 書けないときは投げる。控えには残る
         keychain.setFailure(read: false, write: true)
-        store.save(PlayUsage(day: "2026-11-13", count: 2))
-        #expect(store.load() == PlayUsage(day: "2026-11-13", count: 2))
+        #expect(throws: KeychainError.self) { try store.save(usage) }
+        #expect(try store.load() == usage)
 
-        // 読めないときも、控えの回数を返す
+        // 読めないときは投げる。控えの回数を持たせる
         keychain.setFailure(read: true, write: false)
-        store.save(PlayUsage(day: "2026-11-13", count: 3))
-        #expect(store.load() == PlayUsage(day: "2026-11-13", count: 3))
+        #expect(throws: PlayUsageUnreadableError(known: usage)) { try store.load() }
     }
 
-    /// キーチェーンと控えで回数が違うときは、進んでいるほう（日付が新しいほう、同じ日なら回数が多いほう）を使う
+    /// キーチェーンと控えで回数が違うときは、日付が新しいほうを使う。同じ日なら、
+    /// キーチェーンを読めない間に数えた分を、キーチェーンの回数に足す
     @Test
-    func usesTheMoreAdvancedCount() throws {
-        let name = "jp.shilokuma.Barless.tests.\(UUID().uuidString)"
-        let keychain = FakeKeychain()
-        let store = KeychainPlayUsageStore(service: name, keychain: keychain, backupSuiteName: name)
-        defer { store.remove() }
-        func encoded(_ usage: PlayUsage) throws -> Data { try JSONEncoder().encode(usage) }
+    func mergesKeychainAndBackup() {
+        func merged(_ stored: PlayUsage?, _ copied: PlayUsage?) -> PlayUsage? {
+            KeychainPlayUsageStore.merged(stored: stored, copied: copied)
+        }
+        let day = "2026-11-13"
 
         // アプリを入れ直した後（控えは消えて、キーチェーンだけに残っている）
-        try keychain.write(encoded(PlayUsage(day: "2026-11-13", count: 3)), service: name, account: "daily")
-        #expect(store.load() == PlayUsage(day: "2026-11-13", count: 3))
+        #expect(merged(PlayUsage(day: day, count: 3), nil) == PlayUsage(day: day, count: 3))
+        // キーチェーンに書けなかった後（控えのほうが進んでいる）
+        #expect(merged(PlayUsage(day: day, count: 2), PlayUsage(day: day, count: 3)) == PlayUsage(day: day, count: 3))
+        #expect(merged(PlayUsage(day: day, count: 3), PlayUsage(day: "2026-11-14", count: 1)) == PlayUsage(day: "2026-11-14", count: 1))
+        // 入れ直した後に読めないまま 2 回書き出した（控えは、読めない間の 2 回だけ）
+        #expect(merged(PlayUsage(day: day, count: 2), PlayUsage(day: day, count: 2, unconfirmed: 2)) == PlayUsage(day: day, count: 4))
+        // 控えに 2 回ある状態から、読めないまま 1 回書き出した（足しすぎない）
+        #expect(merged(PlayUsage(day: day, count: 2), PlayUsage(day: day, count: 3, unconfirmed: 1)) == PlayUsage(day: day, count: 3))
+        // キーチェーンに何も無かった（読めない間の分も、そのままの回数）
+        #expect(merged(nil, PlayUsage(day: day, count: 2, unconfirmed: 2)) == PlayUsage(day: day, count: 2))
+    }
 
-        // キーチェーンに書けなかった日の後（控えのほうが新しい）
+    /// キーチェーンに書けなかった回数は、次の機会に書き直す（入れ直して控えが消えても、回数が戻らない）
+    @Test
+    func retriesSavingAfterKeychainWriteFails() throws {
+        let name = "jp.shilokuma.Barless.tests.\(UUID().uuidString)"
+        let keychain = FakeKeychain()
+        let store = KeychainPlayUsageStore(service: name, keychain: keychain, backupSuiteName: name)
+        defer { store.remove() }
+        let clock = TestClock()
+        let allowance = clock.allowance(store: store)
+
         keychain.setFailure(read: false, write: true)
-        store.save(PlayUsage(day: "2026-11-14", count: 1))
+        allowance.recordExport()
+        allowance.recordExport()
+        #expect(allowance.usedToday == 2)
+        #expect(try keychain.read(service: name, account: "daily") == nil)
+
         keychain.setFailure(read: false, write: false)
-        #expect(store.load() == PlayUsage(day: "2026-11-14", count: 1))
+        allowance.sync()
+
+        // 入れ直した後（控えが無い）でも、キーチェーンから 2 回と読める
+        let reinstalled = KeychainPlayUsageStore(service: name, keychain: keychain, backupSuiteName: "\(name).reinstalled")
+        defer { reinstalled.remove() }
+        #expect(clock.allowance(store: reinstalled).usedToday == 2)
+    }
+
+    /// 起動し直したときも、キーチェーンに書けなかった回数を書き直す
+    @Test
+    func retriesSavingOnNextLaunch() throws {
+        let name = "jp.shilokuma.Barless.tests.\(UUID().uuidString)"
+        let keychain = FakeKeychain()
+        let store = KeychainPlayUsageStore(service: name, keychain: keychain, backupSuiteName: name)
+        defer { store.remove() }
+        let clock = TestClock()
+
+        keychain.setFailure(read: false, write: true)
+        clock.allowance(store: store).recordExport()
+        keychain.setFailure(read: false, write: false)
+        #expect(clock.allowance(store: store).usedToday == 1)
+
+        let reinstalled = KeychainPlayUsageStore(service: name, keychain: keychain, backupSuiteName: "\(name).reinstalled")
+        defer { reinstalled.remove() }
+        #expect(clock.allowance(store: reinstalled).usedToday == 1)
+    }
+
+    /// 入れ直した後（控えが無い）にキーチェーンを読めないときは、読めるようになったところで、
+    /// 読めない間に数えた分を、キーチェーンに残っていた回数へ足す
+    @Test
+    func addsExportsMadeWhileKeychainWasUnreadable() throws {
+        let name = "jp.shilokuma.Barless.tests.\(UUID().uuidString)"
+        let keychain = FakeKeychain()
+        let store = KeychainPlayUsageStore(service: name, keychain: keychain, backupSuiteName: name)
+        defer { store.remove() }
+        let clock = TestClock()
+        let seeded = clock.allowance(store: KeychainPlayUsageStore(service: name, keychain: keychain, backupSuiteName: "\(name).before"))
+        defer { KeychainPlayUsageStore(service: name, keychain: keychain, backupSuiteName: "\(name).before").remove() }
+        seeded.recordExport()
+        seeded.recordExport()
+        let before = try keychain.read(service: name, account: "daily")
+
+        keychain.setFailure(read: true, write: false)
+        let allowance = clock.allowance(store: store)
+        allowance.recordExport()
+        // 読めない間は、キーチェーンに残っている回数を書き換えない
+        keychain.setFailure(read: false, write: false)
+        #expect(try keychain.read(service: name, account: "daily") == before)
+
+        // 読めない間に起動し直しても、数えた分は控えから続く
+        keychain.setFailure(read: true, write: false)
+        let relaunched = clock.allowance(store: store)
+        #expect(relaunched.usedToday == 1)
+
+        // 読めるようになったら、2 回 + 1 回 = 3 回（使い切り）になり、キーチェーンにも書き戻す
+        keychain.setFailure(read: false, write: false)
+        relaunched.sync()
+        #expect(relaunched.usedToday == 3 && !relaunched.canExport)
+        #expect(try store.load() == PlayUsage(day: relaunched.today, count: 3))
+        let stored = try #require(try keychain.read(service: name, account: "daily"))
+        #expect(try JSONDecoder().decode(PlayUsage.self, from: stored) == PlayUsage(day: relaunched.today, count: 3))
     }
 }

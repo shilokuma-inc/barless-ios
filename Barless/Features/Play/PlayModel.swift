@@ -68,6 +68,8 @@ final class PlayModel {
         self.watermark = watermark
         self.locale = locale
         self.wifiBars = composer.canDrawWiFi ? 3 : nil
+        // 回数の保存先を読めなかった・書けなかったときは、ここでやり直す
+        allowance.sync()
     }
 
     /// 時刻を「そのまま」残せるか（時刻の位置が分からなかった画像では残せない）
