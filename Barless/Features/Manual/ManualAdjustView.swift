@@ -52,8 +52,9 @@ struct ManualAdjustView: View {
 private struct ManualCanvasView: View {
     let model: ManualAdjustModel
     let canvas: ManualCanvas
-    /// つまみを動かし始めたときの、帯の高さ（px）
-    @State private var heightAtDragStart: Int?
+    /// つまみを動かし始めたときの、帯の高さ（px）。動かしている間だけ値が入る。
+    /// 指を離したときも、ジェスチャーが取り消されたとき（着信・通知など）も `nil` に戻る
+    @GestureState private var heightAtDragStart: Int?
 
     /// 画像の左右に空けておく幅。線（画像の 14pt 外側まで）と、その右端のつまみが画面の端にかからないようにする
     private static let sideInset: CGFloat = 28
@@ -130,12 +131,14 @@ private struct ManualCanvasView: View {
                 // 線は指と一緒に動くので、動かない画面の座標で移動量を読む
                 .gesture(
                     DragGesture(minimumDistance: 0, coordinateSpace: .global)
+                        .updating($heightAtDragStart) { _, start, _ in
+                            start = start ?? model.bandHeight
+                        }
                         .onChanged { value in
+                            // 動かし始めの 1 回目は、まだ値が入っていないので、いまの高さを使う（移動量は 0）
                             let start = heightAtDragStart ?? model.bandHeight
-                            heightAtDragStart = start
                             model.setBandHeight(start + Int((value.translation.height * pixelsPerPoint).rounded()))
                         }
-                        .onEnded { _ in heightAtDragStart = nil }
                 )
         }
         // つまみの中心を、線の右端（画像の 14pt 外側）に合わせる
