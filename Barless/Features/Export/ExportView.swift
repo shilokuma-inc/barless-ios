@@ -139,7 +139,7 @@ struct ExportView: View {
             .frame(minHeight: 50)
             Divider()
                 .overlay(Theme.darkLine)
-            Text("Location and capture date are not included")
+            Text("Location and capture date are not included.")
                 .font(.footnote)
                 .foregroundStyle(Theme.darkInkSecondary)
                 .padding(.top, 12)
