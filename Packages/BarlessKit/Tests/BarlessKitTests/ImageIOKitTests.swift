@@ -1,8 +1,10 @@
 import BarlessTestSupport
 import CoreGraphics
 import Foundation
+import ImageIO
 import ImageIOKit
 import Testing
+import UniformTypeIdentifiers
 
 struct BitmapTests {
     @Test
@@ -107,6 +109,20 @@ struct ImageCodecTests {
         let data = try ImageEncoder.encode(sample())
         let thumbnail = try ImageDecoder.decodeThumbnail(data: data, maxPixelSize: 10)
         #expect(max(thumbnail.width, thumbnail.height) == 10)
+    }
+
+    /// 向きの情報が付いた画像（カメラの写真など）は、見たとおりの向きで読む
+    @Test
+    func appliesOrientationWhenDecoding() throws {
+        let output = NSMutableData()
+        let destination = try #require(CGImageDestinationCreateWithData(output, UTType.jpeg.identifier as CFString, 1, nil))
+        // 6 = 時計回りに 90 度回して表示する
+        CGImageDestinationAddImage(destination, try sample(), [kCGImagePropertyOrientation: 6] as CFDictionary)
+        #expect(CGImageDestinationFinalize(destination))
+
+        let image = try ImageDecoder.decode(data: output as Data)
+
+        #expect(image.width == 20 && image.height == 40)
     }
 
     @Test
