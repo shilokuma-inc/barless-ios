@@ -84,7 +84,9 @@ struct EditFlowView: View {
     /// 書き出しで無料の回数を使うなら、その枠。「遊ぶ」で値を変えた画像を、無料で書き出すときだけある
     private var freeUse: ExportFreeUse? {
         guard mode == .play, let play = session.play, play.usesAllowanceOnExport else { return nil }
-        return ExportFreeUse(allowance: play.allowance) { play.markExported() }
+        // 書き出す画像の中身を、ここで固定する（保存が終わる前に編集へ戻って値を変えても、この中身で数える）
+        let spec = play.spec
+        return ExportFreeUse(allowance: play.allowance) { play.markExported(spec) }
     }
 
     /// 書き出す画像。「遊ぶ」では、値を変えた画像

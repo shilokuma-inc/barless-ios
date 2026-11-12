@@ -35,20 +35,19 @@ struct PlayModelTests {
     /// - Parameters:
     ///   - used: 無料の回数を、今日すでに使ったことにする数
     ///   - isPro: Pro として扱うか
-    private func sample(locale: String = "ja_JP", used: Int = 0, isPro: Bool = false) async throws -> Sample {
+    ///   - clock: 日付を進めるテストで使う時計。渡さなければ、いまの時刻
+    private func sample(
+        locale: String = "ja_JP", used: Int = 0, isPro: Bool = false, clock: TestClock? = nil
+    ) async throws -> Sample {
         let screenshot = try await ScreenshotProcessor().process(imageData: SampleScreenshot.pngData())
         let composer = try #require(screenshot.composer)
         let tidied = try #require(screenshot.tidied)
-        let allowance = PlayAllowance(store: InMemoryPlayUsageStore(count: used), proStatus: FixedPlan(isPro: isPro))
+        let allowance = clock?.allowance(isPro: isPro)
+            ?? PlayAllowance(store: InMemoryPlayUsageStore(count: used), proStatus: FixedPlan(isPro: isPro))
         let model = PlayModel(
             composer: composer, initialImage: tidied, allowance: allowance, watermark: "Barless", locale: Locale(identifier: locale)
         )
         return Sample(screenshot: screenshot, model: model)
-    }
-
-    /// 決まった答えを返す、Pro かどうかの判定
-    nonisolated private struct FixedPlan: ProStatusProviding {
-        let isPro: Bool
     }
 
     /// 画像の右下（透かしが入るあたり）で、2 枚の画像が違っているか
@@ -148,7 +147,7 @@ struct PlayModelTests {
 
         #expect(try !differsInBottomRight(model.image, tidied))
         #expect(model.canExport && !model.usesAllowanceOnExport)
-        model.markExported()
+        model.markExported(model.spec)
         #expect(model.allowance.usedToday == 3)
     }
 
@@ -171,22 +170,60 @@ struct PlayModelTests {
         let model = try await sample().model
 
         // 値を変えていない画像は、回数を使わない
-        model.markExported()
+        model.markExported(model.spec)
         #expect(model.allowance.remainingToday == 3)
 
         model.setBatteryPercent(40)
         #expect(model.usesAllowanceOnExport)
-        model.markExported()
+        model.markExported(model.spec)
         #expect(model.allowance.remainingToday == 2)
         #expect(!model.usesAllowanceOnExport)
-        model.markExported()
+        model.markExported(model.spec)
         #expect(model.allowance.remainingToday == 2)
 
         // 値を変えたら、また 1 回使う
         model.setBatteryPercent(41)
         #expect(model.usesAllowanceOnExport)
-        model.markExported()
+        model.markExported(model.spec)
         #expect(model.allowance.remainingToday == 1)
+    }
+
+    /// 回数は、書き出した画像の中身で数える。保存が終わる前に編集へ戻って値を変えても、書き出した中身の 1 回になる
+    @Test
+    func countsTheSpecThatWasExported() async throws {
+        let model = try await sample().model
+        model.setBatteryPercent(40)
+        let exported = model.spec
+
+        // 保存の途中で編集へ戻り、値を「整える」と同じに戻した
+        model.setBatteryPercent(100)
+        model.markExported(exported)
+        #expect(model.allowance.remainingToday == 2)
+
+        // 別の値に変えた画像は、まだ書き出していないので、次に 1 回使う
+        model.setBatteryPercent(55)
+        #expect(model.usesAllowanceOnExport)
+        // 書き出した中身に戻せば、使わない
+        model.setBatteryPercent(40)
+        #expect(!model.usesAllowanceOnExport)
+    }
+
+    /// 同じ中身でも、日付が変わったら、また 1 回使う
+    @Test
+    func countsAgainWhenTheDayChanges() async throws {
+        let clock = TestClock()
+        let model = try await sample(clock: clock).model
+        model.setBatteryPercent(40)
+        model.markExported(model.spec)
+        #expect(!model.usesAllowanceOnExport)
+        #expect(model.allowance.usedToday == 1)
+
+        clock.advance(hours: 24)
+
+        #expect(model.usesAllowanceOnExport)
+        model.markExported(model.spec)
+        #expect(model.allowance.usedToday == 1 && model.allowance.remainingToday == 2)
+        #expect(!model.usesAllowanceOnExport)
     }
 
     /// 時刻を「そのまま」にすると、元の時刻（2:47）が残る

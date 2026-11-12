@@ -36,8 +36,8 @@ final class PlayModel {
     private(set) var wifiBars: Int?
     /// いまの中身で描いた画像
     private(set) var image: CGImage
-    /// 最後に書き出した（保存か共有をした）中身。同じ中身をもう一度書き出しても、無料の回数は使わない
-    private(set) var exportedSpec: PlaySpec?
+    /// 最後に書き出した（保存か共有をした）中身と、その日付。同じ日に同じ中身をもう一度書き出しても、無料の回数は使わない
+    private(set) var lastExport: (spec: PlaySpec, day: String)?
 
     /// 無料の枠（1 日の回数と、透かしを入れるかどうか）
     let allowance: PlayAllowance
@@ -112,9 +112,9 @@ final class PlayModel {
         spec.isCustomized
     }
 
-    /// いまの中身を書き出すと、無料の回数を 1 回使うか（値を変えていて、まだ書き出していない中身のとき）
+    /// いまの中身を書き出すと、無料の回数を 1 回使うか（値を変えていて、今日まだ書き出していない中身のとき）
     var usesAllowanceOnExport: Bool {
-        isCustomized && !allowance.isPro && exportedSpec != spec
+        usesAllowance(toExport: spec)
     }
 
     /// いまの中身を書き出せるか。無料の回数を使い切っていると、値を変えた画像は書き出せない
@@ -122,11 +122,22 @@ final class PlayModel {
         !usesAllowanceOnExport || allowance.canExport
     }
 
-    /// いまの中身を書き出した（保存か共有をした）。必要なら、無料の回数を 1 回使う
-    func markExported() {
-        guard usesAllowanceOnExport else { return }
+    /// その中身を書き出すと、無料の回数を 1 回使うか。
+    /// 同じ日に同じ中身を書き出していれば使わない。日付が変わっていれば、同じ中身でも使う
+    private func usesAllowance(toExport spec: PlaySpec) -> Bool {
+        guard spec.isCustomized, !allowance.isPro else { return false }
+        guard let lastExport else { return true }
+        return lastExport.spec != spec || lastExport.day != allowance.today
+    }
+
+    /// `spec` の中身を書き出した（保存か共有をした）。必要なら、無料の回数を 1 回使う。
+    ///
+    /// 書き出しの画面を開いたときの中身を渡す。保存が終わる前に編集へ戻って値を変えても、
+    /// 書き出した画像の中身で数えるため
+    func markExported(_ spec: PlaySpec) {
+        guard usesAllowance(toExport: spec) else { return }
         allowance.recordExport()
-        exportedSpec = spec
+        lastExport = (spec, allowance.today)
     }
 
     func setTimeChoice(_ choice: TimeChoice) {
