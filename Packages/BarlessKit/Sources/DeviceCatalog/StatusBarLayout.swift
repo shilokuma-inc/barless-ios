@@ -20,6 +20,11 @@ public struct PixelRect: Codable, Hashable, Sendable {
     public var midY: Double { Double(y) + Double(height) / 2 }
     public var isEmpty: Bool { width <= 0 || height <= 0 }
 
+    /// その画素が矩形の中にあるか
+    public func contains(x pixelX: Int, y pixelY: Int) -> Bool {
+        x <= pixelX && pixelX < maxX && y <= pixelY && pixelY < maxY
+    }
+
     /// 外側に広げる（負の値で縮める）
     public func insetBy(dx: Int, dy: Int) -> PixelRect {
         PixelRect(x: x + dx, y: y + dy, width: width - 2 * dx, height: height - 2 * dy)

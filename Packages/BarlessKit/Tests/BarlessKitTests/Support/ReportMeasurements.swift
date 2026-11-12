@@ -2,6 +2,7 @@ import BarlessTestSupport
 import DeviceCatalog
 import Foundation
 import ImageIOKit
+@testable import StatusBarAnalyzer
 
 /// docs/verification/results.md の、消去と描き直しの節を作る
 struct ReportMeasurements {
@@ -89,13 +90,53 @@ struct ReportMeasurements {
     func wallpaper() throws -> String {
         var kinds: [String: Int] = [:]
         var decided = 0
+        var keptStructure = 0
+        var warned = 0
         let targets = fixtures.filter { !$0.isSolidBackground }
         for fixture in targets {
             let output = Pipeline.run(try fixture.loadStrip(), pixelHeight: fixture.height, timeText: fixture.time, catalog: catalog)
-            if output != nil { decided += 1 }
+            if let output {
+                decided += 1
+                if !output.analysis.backgroundInk().isEmpty { keptStructure += 1 }
+                if output.analysis.mayLeaveTraces { warned += 1 }
+            }
             kinds[output?.analysis.background?.rawValue ?? "（決められない）", default: 0] += 1
         }
-        return Markdown.table(["枚数", "配置が決まった", "背景の判定"], [["\(targets.count)", "\(decided)", describe(kinds)]])
+        let header = ["枚数", "配置が決まった", "背景の判定", "背景の輪郭を拾い、消さずに残した", "跡の注意あり"]
+        return Markdown.table(header, [["\(targets.count)", "\(decided)", describe(kinds), "\(keptStructure)", "\(warned)"]])
+    }
+
+    /// 斜めの輪郭が帯を横切る背景（作った背景に Simulator のインクを移した画像）
+    func eraseOnEdges() throws -> String {
+        let targets = try Verification.representatives(in: catalog, variants: ["light-full", "dark-full"])
+        var rows: [[String]] = []
+        for placement in EdgePlacement.allCases {
+            var decided = 0
+            var correct = 0
+            var warned = 0
+            var maximum = 0
+            for fixture in targets {
+                guard let layout = fixture.expectedLayout(in: catalog) else { throw ReportError("カタログに配置が無い: \(fixture)") }
+                let strip = try fixture.loadStrip()
+                let background = placement.edge(for: layout, timeText: fixture.time)
+                    .make(width: strip.width, height: strip.height, isLight: fixture.appearance == "light")
+                let input = Synthetic.transplantInk(from: strip, onto: background, scale: fixture.scale)
+                // 電池の形で世代を決める機種は、輪郭が電池の後ろを通ると「決められない」になる
+                guard let (output, result) = Verification.erase(
+                    fixture, input: input, background: background, kind: placement.rawValue, catalog: catalog
+                ) else { continue }
+                decided += 1
+                if result.isLayoutCorrect { correct += 1 }
+                if output.analysis.mayLeaveTraces { warned += 1 }
+                maximum = max(maximum, result.maxDifference)
+            }
+            rows.append([
+                Self.edgeLabels[placement] ?? placement.rawValue,
+                "\(targets.count)", "\(correct)", "\(targets.count - decided)", "\(decided - correct)", "\(warned)", "\(maximum)"
+            ])
+        }
+        let header = ["輪郭が通る場所", "枚数", "判定が正解", "決められない", "誤った配置", "跡の注意あり", "差の最大（0〜255）"]
+        return Markdown.table(header, rows)
     }
 
     // MARK: - 描き直し
@@ -140,6 +181,9 @@ struct ReportMeasurements {
 
     private static let gradientLabels: [SyntheticBackground: String] = [
         .vertical: "縦のグラデーション", .horizontal: "横のグラデーション", .diagonal: "斜めのグラデーション", .radial: "円形のグラデーション"
+    ]
+    private static let edgeLabels: [EdgePlacement: String] = [
+        .behindBattery: "電池の後ろ（斜め）", .verticalBehindBattery: "電池の後ろ（縦）", .awayFromInk: "文字もアイコンも無い所"
     ]
     private static let elementLabels = ["time": "時刻", "cellular": "電波", "wifi": "Wi-Fi", "battery": "電池"]
     private static let generationLabels: [OSGeneration: String] = [.iOS18to26: "iOS 18〜26", .iOS27: "iOS 27"]

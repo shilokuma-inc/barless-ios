@@ -1,7 +1,9 @@
 import CoreGraphics
+import DeviceCatalog
 import Foundation
 import ImageIO
 import ImageIOKit
+import StatusBarRenderer
 import UniformTypeIdentifiers
 
 /// 検証用に作る背景
@@ -40,6 +42,59 @@ enum SyntheticBackground: String, CaseIterable {
         case .horizontal: x
         case .diagonal: (x + y) / 2
         case .radial: ((x - 0.3) * (x - 0.3) * 4 + (y - 1.2) * (y - 1.2)).squareRoot() / 1.6
+        }
+    }
+}
+
+/// 検証用に作る「輪郭のある背景」。斜めの線を境に 2 つの色に分かれる（空と建物の縁、のような背景の代わり）
+struct SyntheticEdge {
+    /// 境の線が通る点（px）
+    let throughX: Int
+    let throughY: Int
+    /// 1 行下がるごとに、境が右へ動く幅（px）
+    var slope = 0.6
+
+    /// - Parameter isLight: 明るい背景（黒い文字用）か、暗い背景（白い文字用）か
+    func make(width: Int, height: Int, isLight: Bool) -> Bitmap {
+        let base = isLight ? RGB(red: 232, green: 236, blue: 240) : RGB(red: 18, green: 24, blue: 44)
+        let other = isLight ? RGB(red: 150, green: 132, blue: 120) : RGB(red: 150, green: 140, blue: 130)
+        var bitmap = Bitmap(width: width, height: height, fill: base)
+        for y in 0..<height {
+            let boundary = Int((Double(throughX) + slope * Double(y - throughY)).rounded())
+            for x in min(width, max(0, boundary))..<width {
+                bitmap[x, y] = other
+            }
+        }
+        return bitmap
+    }
+}
+
+/// 輪郭を通す場所
+enum EdgePlacement: String, CaseIterable {
+    /// 電池の後ろを斜めに通る（消すと、輪郭がぼやけた跡が残る）
+    case behindBattery
+    /// 電池の後ろをまっすぐ縦に通る（上下の基準の行で色が同じなので、インクとしては拾えない）
+    case verticalBehindBattery
+    /// 文字もアイコンも無い所（消去とは関係ないので、そのまま残るべき）
+    case awayFromInk
+
+    /// その配置で、輪郭が通る点（帯の高さの中央）
+    func edge(for layout: StatusBarLayout, timeText: String) -> SyntheticEdge {
+        let middleY = (layout.inkTop + layout.inkBottom) / 2
+        switch self {
+        case .behindBattery:
+            return SyntheticEdge(throughX: Int(layout.battery.midX), throughY: middleY)
+        case .verticalBehindBattery:
+            return SyntheticEdge(throughX: Int(layout.battery.midX), throughY: middleY, slope: 0)
+        case .awayFromInk:
+            // 文字・アイコンのあいだの、いちばん広いすき間の中央
+            let time = TimeTypography(layout: layout).inkRect(for: timeText)
+            let rects = [time, layout.cellular, layout.wifi, layout.battery, layout.carrier].compactMap { $0 }.sorted { $0.x < $1.x }
+            var widest = (x: layout.pixelWidth / 2, width: 0)
+            for (left, right) in zip(rects, rects.dropFirst()) where right.x - left.maxX > widest.width {
+                widest = ((left.maxX + right.x) / 2, right.x - left.maxX)
+            }
+            return SyntheticEdge(throughX: widest.x, throughY: middleY)
         }
     }
 }

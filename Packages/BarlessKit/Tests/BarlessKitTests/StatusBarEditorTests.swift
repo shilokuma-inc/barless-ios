@@ -108,6 +108,28 @@ struct StatusBarEditorTests {
         #expect(hidden.mayLeaveTraces)
     }
 
+    /// 建物の縁のような輪郭が電池の後ろを通る背景: 背景の種類は「複雑」にならないが、跡が残りうることを伝える
+    @Test
+    func flagsEdgeBehindBattery() async throws {
+        let catalog = try DeviceCatalog.bundled()
+        let fixture = try fixture(named: "iPhone-17__iOS-27-0__dark-full")
+        let layout = try #require(fixture.expectedLayout(in: catalog))
+        let strip = try fixture.loadStrip()
+        let background = EdgePlacement.behindBattery.edge(for: layout, timeText: fixture.time)
+            .make(width: fixture.width, height: fixture.height, isLight: false)
+        let top = background.cropped(x: 0, y: 0, width: strip.width, height: strip.height)
+        let inked = Synthetic.transplantInk(from: strip, onto: top, scale: fixture.scale)
+        let input = fullSize(inked, fixture: fixture, background: background)
+        let editor = StatusBarEditor(catalog: catalog, recognizer: FixedTime(time: fixture.time))
+
+        let result = try await editor.hide(input.makeCGImage())
+
+        let hidden = try #require(result.hidden, "\(result.outcome)")
+        #expect(hidden.layout.id == layout.id)
+        #expect(hidden.background != .complex)
+        #expect(hidden.mayLeaveTraces)
+    }
+
     /// カタログに無い大きさ・対象外の機種・ステータスバーが無い画像は、元の画像のまま返す
     @Test(arguments: [
         (1000, 2000, HideFailure.unknownSize),

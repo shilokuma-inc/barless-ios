@@ -27,7 +27,8 @@ public struct StatusBarEditor: Sendable {
     /// ステータスバーの文字とアイコンを、背景になじませて消す（「隠す」の「埋める」）。
     ///
     /// 機種を決められないときは、誤った位置を消さずに元の画像のまま返す（`HideOutcome.notHidden`）。
-    /// 背景が写真・模様のときも消すが、跡が残ることがあるので `HiddenStatusBar.mayLeaveTraces` で分かるようにしている。
+    /// 背景が写真・模様のときと、輪郭が文字・アイコンの後ろを通っているときも消すが、
+    /// 跡が残ることがあるので `HiddenStatusBar.mayLeaveTraces` で分かるようにしている。
     public func hide(_ image: CGImage) async throws -> HideResult {
         let analysis = try await analyzer.analyze(image)
         guard let layout = analysis.decision.layout else {
@@ -39,7 +40,12 @@ public struct StatusBarEditor: Sendable {
         // 単色なら 1 色で塗り、それ以外は周りから補間する
         let inpainter: any Inpainter = background == .solid ? SolidFillInpainter() : GradientInpainter()
         let erased = try await inpainter.inpaint(image, mask: mask)
-        let hidden = HiddenStatusBar(layout: layout, background: background, bandHeight: Self.bandHeight(of: layout, in: image))
+        let hidden = HiddenStatusBar(
+            layout: layout,
+            background: background,
+            bandHeight: Self.bandHeight(of: layout, in: image),
+            mayLeaveTraces: analysis.mayLeaveTraces
+        )
         return HideResult(original: image, image: erased, outcome: .hidden(hidden))
     }
 
