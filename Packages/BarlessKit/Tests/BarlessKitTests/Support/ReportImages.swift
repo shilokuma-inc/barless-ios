@@ -57,6 +57,22 @@ struct ReportImages {
         try write(rows, layout: output.layout, timeTexts: [fixture.time], name: "gradient-\(kind.rawValue)-\(name)")
     }
 
+    /// 輪郭が横切る背景: 上から「入力 / 消去後 / 元の背景 / 消去後と背景の差」。輪郭のまわり（左右 40pt）を切り出す
+    func edge(_ name: String, placement: EdgePlacement) throws {
+        let fixture = try fixture(name)
+        let strip = try fixture.loadStrip()
+        guard let layout = fixture.expectedLayout(in: catalog) else { throw ReportError("カタログに配置が無い: \(name)") }
+        let edge = placement.edge(for: layout, timeText: fixture.time)
+        let background = edge.make(width: strip.width, height: strip.height, isLight: fixture.appearance == "light")
+        let input = Synthetic.transplantInk(from: strip, onto: background, scale: fixture.scale)
+        guard let output = Pipeline.run(input, pixelHeight: fixture.height, timeText: fixture.time, catalog: catalog) else {
+            throw ReportError("画像を作れない（配置が決まらない）: edge-\(placement.rawValue)-\(name)")
+        }
+        let rows = [input, output.erased, background, ImageMetrics.heatmap(output.erased, background)]
+        let image = Montage.stack(rows.map { Montage.window(of: $0, layout: layout, centerX: edge.throughX, halfWidthPt: 40) })
+        try ImageEncoder.encode(image.makeCGImage()).write(to: directory.appendingPathComponent("edge-\(placement.rawValue)-\(name).png"))
+    }
+
     /// 壁紙: 上から「入力 / 消去後 / 描き直し」。配置が決まらない画像は入力だけ
     func wallpaper(_ name: String) throws {
         let fixture = try fixture(name)

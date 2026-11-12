@@ -53,6 +53,16 @@ enum Montage {
         return row(ranges.map { bitmap.cropped(x: $0.lowerBound, y: top, width: $0.count, height: height) })
     }
 
+    /// 帯の高さ（まわり 6pt を含む）で、`centerX` の左右 `halfWidthPt` を切り出す
+    static func window(of bitmap: Bitmap, layout: StatusBarLayout, centerX: Int, halfWidthPt: Int) -> Bitmap {
+        let margin = 6 * layout.scale
+        let top = max(0, layout.inkTop - margin)
+        let height = min(bitmap.height, layout.inkBottom + margin) - top
+        let left = max(0, centerX - halfWidthPt * layout.scale)
+        let right = min(bitmap.width, centerX + halfWidthPt * layout.scale)
+        return bitmap.cropped(x: left, y: top, width: right - left, height: height)
+    }
+
     private static func paste(_ image: Bitmap, into canvas: inout Bitmap, x: Int, y: Int) {
         for row in 0..<image.height {
             for column in 0..<image.width {
