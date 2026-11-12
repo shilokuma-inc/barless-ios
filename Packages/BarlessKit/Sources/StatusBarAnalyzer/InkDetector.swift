@@ -15,6 +15,8 @@ public enum BackgroundKind: String, Sendable, Equatable {
 public struct InkScan: Sendable, Equatable {
     /// インクの画素。帯の範囲だけを覆う
     public let mask: PixelMask
+    /// インクのうち、帯を横切る背景の輪郭とみなしたもの（建物の縁・壁紙の模様など）。`mask` の一部
+    public let structure: PixelMask
     /// 横に 3pt 以上あいたところで分けた、インクのかたまり（左から）
     public let blobs: [PixelRect]
     public let background: BackgroundKind
@@ -35,6 +37,9 @@ struct InkDetector {
     static let blobGapPt = 3
     /// 画面の左右の端からこの幅（pt）は見ない。Simulator や Mac で保存した画像は四隅が黒く欠けることがある
     static let sideMarginPt = 4
+    /// 帯の上端・下端からこの幅（pt）にインクがあれば、帯の外から続く背景の輪郭とみなす。
+    /// 文字とアイコンは、帯の端（基準の行）から 3pt 離れている
+    static let structureEdgePt = 1
 
     let scale: Int
     /// 背景の基準にする行（帯のすぐ上とすぐ下）
@@ -55,7 +60,7 @@ struct InkDetector {
         // 帯が入りきらない画像（上端の切り出しが短すぎる・幅が狭すぎる）では、何も拾わない
         guard bottomRow > topRow + 1, bitmap.width > 2 * margin else {
             let empty = PixelMask(originX: 0, originY: topRow, width: max(1, bitmap.width), height: 1)
-            return InkScan(mask: empty, blobs: [], background: .complex, inkIsDark: true)
+            return InkScan(mask: empty, structure: empty, blobs: [], background: .complex, inkIsDark: true)
         }
         var mask = PixelMask(originX: 0, originY: topRow + 1, width: bitmap.width, height: max(1, bottomRow - topRow - 1))
         var noisy = 0
@@ -76,7 +81,35 @@ struct InkDetector {
         }
         let blobs = Self.blobs(in: mask, gap: Self.blobGapPt * scale)
         let kind = backgroundKind(bitmap, inkCount: darker + lighter, noisyCount: noisy, blobs: blobs)
-        return InkScan(mask: mask, blobs: blobs, background: kind, inkIsDark: darker >= lighter)
+        let structure = Self.structure(in: mask, edge: Self.structureEdgePt * scale)
+        return InkScan(mask: mask, structure: structure, blobs: blobs, background: kind, inkIsDark: darker >= lighter)
+    }
+
+    /// インクのうち、帯の上端か下端まで届いている、ひと続きのかたまり。
+    ///
+    /// 背景の見込み（上下の行の直線補間）は、斜めの輪郭があると外れ、輪郭の一部をインクとして拾う。
+    /// そういうインクは帯の外の背景から続いているので、帯の端まで届く。文字とアイコンは端まで届かない
+    static func structure(in mask: PixelMask, edge: Int) -> PixelMask {
+        var result = PixelMask(originX: mask.originX, originY: mask.originY, width: mask.width, height: mask.height)
+        let topRows = mask.originY..<min(mask.originY + edge, mask.originY + mask.height)
+        let bottomRows = max(mask.originY, mask.originY + mask.height - edge)..<(mask.originY + mask.height)
+        var pending: [(x: Int, y: Int)] = []
+        for y in Array(topRows) + Array(bottomRows) {
+            for x in mask.originX..<(mask.originX + mask.width) where mask[x, y] && !result[x, y] {
+                result[x, y] = true
+                pending.append((x, y))
+            }
+        }
+        // 端のインクから、隣り合うインク（斜めを含む）をたどる
+        while let pixel = pending.popLast() {
+            for y in (pixel.y - 1)...(pixel.y + 1) {
+                for x in (pixel.x - 1)...(pixel.x + 1) where mask[x, y] && !result[x, y] {
+                    result[x, y] = true
+                    pending.append((x, y))
+                }
+            }
+        }
+        return result
     }
 
     /// その画素が背景だった場合の色（上下の基準の行を直線で補間）
