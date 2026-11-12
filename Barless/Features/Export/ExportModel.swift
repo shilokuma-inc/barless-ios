@@ -34,6 +34,11 @@ final class ExportModel {
     private(set) var saveState = SaveState.idle
     var problem: SaveProblem?
 
+    /// 保存か共有を、最初にしたときに呼ぶ（無料の回数を数えるのに使う）
+    var onFirstExport: (() -> Void)?
+    /// 保存か共有を、すでにしたか
+    private(set) var hasExported = false
+
     private let image: CGImage
     private let saver: any PhotoSaving
     private let directory: URL
@@ -86,6 +91,13 @@ final class ExportModel {
         }
     }
 
+    /// 保存か共有をした。最初の 1 回だけ `onFirstExport` を呼ぶ（保存してから共有しても、1 回と数える）
+    func noteExported() {
+        guard !hasExported else { return }
+        hasExported = true
+        onFirstExport?()
+    }
+
     /// 写真ライブラリに保存する
     func save() async {
         guard let fileURL, saveState == .idle else { return }
@@ -96,6 +108,7 @@ final class ExportModel {
         do {
             try await saver.save(imageAt: fileURL)
             saveState = .saved
+            noteExported()
         } catch PhotoSaveError.notAuthorized {
             saveState = .idle
             problem = .notAuthorized
