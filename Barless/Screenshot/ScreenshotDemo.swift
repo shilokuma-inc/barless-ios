@@ -18,6 +18,10 @@ enum ScreenshotDemo {
     /// 撮る画面。rawValue が AppStore/screenshots.json の scene と対応する
     enum Scene: String {
         case home
+        /// 「隠す」の結果（作り物のスクリーンショットを開いた状態）
+        case editor
+        /// 書き出し
+        case export
     }
 
     /// 撮影モードで起動しているか
@@ -34,4 +38,11 @@ enum ScreenshotDemo {
         }
         return Scene(rawValue: arguments[index + 1])
     }()
+
+    /// 作り物のスクリーンショットを開いた編集。写真の選択を通らずに、編集と書き出しの画面を出せる
+    @MainActor
+    static func sampleSession(startsInExport: Bool) -> EditSession {
+        // 絵を描いて PNG にするのは重いので、メインスレッドの外で作る
+        EditSession(source: { @concurrent in try SampleScreenshot.pngData() }, startsInExport: startsInExport)
+    }
 }

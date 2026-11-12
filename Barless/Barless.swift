@@ -20,6 +20,10 @@ struct Barless: App {
         switch ScreenshotDemo.scene {
         case .home, nil:
             HomeView()
+        case .editor:
+            HomeView(initialSession: ScreenshotDemo.sampleSession(startsInExport: false))
+        case .export:
+            HomeView(initialSession: ScreenshotDemo.sampleSession(startsInExport: true))
         }
     }
 }
