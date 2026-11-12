@@ -26,6 +26,10 @@ struct Barless: App {
             HomeView(initialSession: ScreenshotDemo.sampleSession(opening: .init(mode: .tidy, isComparing: true)))
         case .export:
             HomeView(initialSession: ScreenshotDemo.sampleSession(opening: .init(isExporting: true)))
+        case .unrecognized:
+            HomeView(initialSession: ScreenshotDemo.resavedSession())
+        case .manual:
+            HomeView(initialSession: ScreenshotDemo.resavedSession(opening: .init(isAdjusting: true)))
         }
     }
 }

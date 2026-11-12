@@ -39,6 +39,23 @@ nonisolated enum SampleScreenshot {
         return try ImageEncoder.encode(bitmap.makeCGImage())
     }
 
+    /// SNS などで保存し直して、大きさが変わった画像に見立てたもの（幅 900px に縮める）。
+    /// 対応している機種のどれとも大きさが合わないので、自動では消せず、手動調整に進む
+    static func resavedPNGData() throws -> Data {
+        let original = try ImageDecoder.decode(data: pngData())
+        let width = 900
+        let height = Int((Double(original.height) * Double(width) / Double(original.width)).rounded())
+        var bitmap = Bitmap(width: width, height: height, colorSpace: original.colorSpace)
+        try bitmap.draw { context in
+            // `draw` の座標は下向きが正なので、画像が逆さにならないように、上下を戻してから描く
+            context.translateBy(x: 0, y: CGFloat(height))
+            context.scaleBy(x: 1, y: -1)
+            context.interpolationQuality = .high
+            context.draw(original, in: CGRect(x: 0, y: 0, width: width, height: height))
+        }
+        return try ImageEncoder.encode(bitmap.makeCGImage())
+    }
+
     /// 角丸の四角をグレーで塗る。`rect` と `radius` は pt で渡す
     private static func fill(_ rect: CGRect, radius: CGFloat, gray: CGFloat, scale: CGFloat, in context: CGContext) {
         let scaled = rect.applying(CGAffineTransform(scaleX: scale, y: scale))

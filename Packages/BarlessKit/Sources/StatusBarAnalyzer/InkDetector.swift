@@ -11,6 +11,24 @@ public enum BackgroundKind: String, Sendable, Equatable {
     case complex
 }
 
+/// 拾うインクの明るさ。文字の色が分かっているときに、背景の模様を拾わないために使う
+public enum InkTone: String, Sendable, CaseIterable {
+    /// 背景より明るいものも暗いものも拾う
+    case any
+    /// 背景より明るいものだけを拾う（白い文字）
+    case light
+    /// 背景より暗いものだけを拾う（黒い文字）
+    case dark
+
+    func keeps(isDarker: Bool) -> Bool {
+        switch self {
+        case .any: true
+        case .light: !isDarker
+        case .dark: isDarker
+        }
+    }
+}
+
 /// ステータスバーの帯から拾った「インク」（文字・アイコン）
 public struct InkScan: Sendable, Equatable {
     /// インクの画素。帯の範囲だけを覆う
@@ -63,16 +81,28 @@ struct InkDetector {
         self.bottomRow = min(imageHeight - 1, inkBottom + 3 * scale)
     }
 
-    func scan(_ bitmap: Bitmap) -> InkScan {
+    /// 基準の行をじかに決める。手動調整（配置が分からない画像）で、利用者が合わせた帯の上端と下端を使う
+    init(scale: Int, topRow: Int, bottomRow: Int) {
+        self.scale = scale
+        self.topRow = topRow
+        self.bottomRow = bottomRow
+    }
+
+    /// - Parameter tone: 拾うインクの明るさ。背景の種類と `inkIsDark` は、明るさで絞る前のインクから決める
+    func scan(_ bitmap: Bitmap, keeping tone: InkTone = .any) -> InkScan {
         let margin = Self.sideMarginPt * scale
-        // 帯が入りきらない画像（上端の切り出しが短すぎる・幅が狭すぎる）では、何も拾わない
-        guard bottomRow > topRow + 1, bitmap.width > 2 * margin else {
+        // 帯が入りきらない画像（上端の切り出しが短すぎる・幅が狭すぎる）では、何も拾わない。
+        // 幅は、左右の端を除いたうえで、輪郭を見る 1pt 先の画素（`edgeColumns`）まで入る分が要る
+        guard bottomRow > topRow + 1, bitmap.width >= 2 * margin + scale else {
             let empty = PixelMask(originX: 0, originY: topRow, width: max(1, bitmap.width), height: 1)
             return InkScan(
                 mask: empty, structure: empty, edgesAbove: [], edgesBelow: [], blobs: [], background: .complex, inkIsDark: true
             )
         }
         var mask = PixelMask(originX: 0, originY: topRow + 1, width: bitmap.width, height: max(1, bottomRow - topRow - 1))
+        // 明るさで絞るときは、絞る前のインクも別に持つ。背景の種類は、絞る前のかたまりの数で決める
+        // （絞った後で数えると、反対の明るさの模様が数に入らず、模様のある背景を単色とみなしてしまう）
+        var unfiltered = tone == .any ? nil : mask
         var noisy = 0
         var darker = 0
         var lighter = 0
@@ -82,15 +112,18 @@ struct InkDetector {
                 let expected = expectedColor(bitmap, x: x, y: y)
                 let difference = pixel.distance(to: expected)
                 if difference > Self.inkThreshold {
-                    mask[x, y] = true
-                    if pixel.luma < expected.luma { darker += 1 } else { lighter += 1 }
+                    let isDarker = pixel.luma < expected.luma
+                    if isDarker { darker += 1 } else { lighter += 1 }
+                    if tone.keeps(isDarker: isDarker) { mask[x, y] = true }
+                    unfiltered?[x, y] = true
                 } else if difference > Self.noiseThreshold {
                     noisy += 1
                 }
             }
         }
         let blobs = Self.blobs(in: mask, gap: Self.blobGapPt * scale)
-        let kind = backgroundKind(bitmap, inkCount: darker + lighter, noisyCount: noisy, blobs: blobs)
+        let allBlobs = unfiltered.map { Self.blobs(in: $0, gap: Self.blobGapPt * scale) } ?? blobs
+        let kind = backgroundKind(bitmap, inkCount: darker + lighter, noisyCount: noisy, blobs: allBlobs)
         let structure = Self.structure(in: mask, edge: Self.structureEdgePt * scale)
         return InkScan(
             mask: mask,

@@ -94,7 +94,7 @@ struct StatusBarEditorTests {
         let catalog = try DeviceCatalog.bundled()
         let fixture = try fixture(named: "iPhone-17__iOS-27-0__dark-full")
         let strip = try fixture.loadStrip()
-        let noise = Self.noise(width: fixture.width, height: fixture.height, base: strip[strip.width / 2, 4 * fixture.scale])
+        let noise = Synthetic.noise(width: fixture.width, height: fixture.height, base: strip[strip.width / 2, 4 * fixture.scale])
         let noisyTop = noise.cropped(x: 0, y: 0, width: strip.width, height: strip.height)
         let noisyStrip = Synthetic.transplantInk(from: strip, onto: noisyTop, scale: fixture.scale)
         let input = fullSize(noisyStrip, fixture: fixture, background: noise)
@@ -168,24 +168,5 @@ struct StatusBarEditorTests {
         for layout in catalog.layouts {
             #expect(editor.failureKnownFromSize(pixelWidth: layout.pixelWidth, pixelHeight: layout.pixelHeight) == nil)
         }
-    }
-
-    /// 背景の色のまわりで、画素ごとに少しずつ色が揺れる画像（写真や模様の代わり）
-    private static func noise(width: Int, height: Int, base: RGB) -> Bitmap {
-        var bitmap = Bitmap(width: width, height: height, fill: base)
-        var state: UInt32 = 20_261_112
-        func next() -> Int {
-            state = state &* 1_664_525 &+ 1_013_904_223
-            return Int(state >> 24) % 17 - 8
-        }
-        func shift(_ value: UInt8) -> UInt8 {
-            UInt8(min(255, max(0, Int(value) + next())))
-        }
-        for y in 0..<height {
-            for x in 0..<width {
-                bitmap[x, y] = RGB(red: shift(base.red), green: shift(base.green), blue: shift(base.blue))
-            }
-        }
-        return bitmap
     }
 }

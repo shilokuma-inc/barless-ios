@@ -7,6 +7,9 @@ struct EditFlowView: View {
     @State private var mode: EditMode
     @State private var isComparing: Bool
     @State private var isExporting: Bool
+    @State private var isAdjusting = false
+    /// 手動調整の状態。調整し直すときに前の調整が残るように、編集を閉じるまで持ち続ける
+    @State private var manualModel: ManualAdjustModel?
 
     init(session: EditSession) {
         self.session = session
@@ -22,6 +25,9 @@ struct EditFlowView: View {
         }
         .task {
             await session.start()
+            if session.opening.isAdjusting, case let .ready(screenshot) = session.phase {
+                openManualAdjust(for: screenshot)
+            }
         }
         .preferredColorScheme(.dark)
     }
@@ -43,15 +49,34 @@ struct EditFlowView: View {
                     .accessibilityIdentifier("edit.loadFailed")
             }
         case let .ready(screenshot):
-            if isExporting, screenshot.hidden != nil {
+            if isAdjusting, let manualModel {
+                ManualAdjustView(model: manualModel, onCancel: { isAdjusting = false }, onContinue: { result in
+                    session.apply(result)
+                    isAdjusting = false
+                })
+            } else if isExporting, screenshot.hasResult {
                 // 選んでいるモードの画像を書き出す
                 ExportView(image: screenshot.image(for: mode), onBack: { isExporting = false }, onDone: close)
             } else {
                 EditorView(
-                    screenshot: screenshot, mode: $mode, isComparing: $isComparing, onClose: close, onSave: { isExporting = true }
+                    screenshot: screenshot,
+                    mode: $mode,
+                    isComparing: $isComparing,
+                    onClose: close,
+                    onSave: { isExporting = true },
+                    onAdjust: { openManualAdjust(for: screenshot) }
                 )
             }
         }
+    }
+
+    /// 手動調整の画面を開く。扱えない画像（元のデータを持っていない）では何もしない
+    private func openManualAdjust(for screenshot: EditedScreenshot) {
+        guard let source = screenshot.manualSource else { return }
+        if manualModel == nil {
+            manualModel = ManualAdjustModel(source: source, outcome: screenshot.outcome)
+        }
+        isAdjusting = true
     }
 
     /// 編集をやめてホームへ戻る

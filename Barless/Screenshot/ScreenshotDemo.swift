@@ -24,6 +24,10 @@ enum ScreenshotDemo {
         case tidy
         /// 書き出し
         case export
+        /// 自動で消せなかったとき（大きさが変わった画像を開いた状態）
+        case unrecognized
+        /// 手動調整（大きさが変わった画像で、調整の画面を開いた状態）
+        case manual
     }
 
     /// 撮影モードで起動しているか
@@ -46,5 +50,11 @@ enum ScreenshotDemo {
     static func sampleSession(opening: EditSession.Opening = EditSession.Opening()) -> EditSession {
         // 絵を描いて PNG にするのは重いので、メインスレッドの外で作る
         EditSession(source: { @concurrent in try SampleScreenshot.pngData() }, opening: opening)
+    }
+
+    /// 大きさが変わった作り物のスクリーンショットを開いた編集。自動では消せないので、手動調整の画面を出せる
+    @MainActor
+    static func resavedSession(opening: EditSession.Opening = EditSession.Opening()) -> EditSession {
+        EditSession(source: { @concurrent in try SampleScreenshot.resavedPNGData() }, opening: opening)
     }
 }
