@@ -35,6 +35,19 @@ public struct PlaySpec: Sendable, Equatable {
     /// 「整える」と同じ中身（9:41・電波 4 本・Wi-Fi 最大・電池満タン）
     public static let standard = PlaySpec(StatusBarSpec.tidy)
 
+    /// 自由に決めた値（「整える」に無い値）を含むか。
+    ///
+    /// 「そのまま」「隠す」と、「整える」と同じ値（9:41・電波 4 本・Wi-Fi 最大・電池満タン）は、自由な値に数えない。
+    /// アプリは、これを含む画像に透かしを入れる
+    public var isCustomized: Bool {
+        let standard = PlaySpec.standard
+        if case .set = time, time != standard.time { return true }
+        if let cellularBars, cellularBars != standard.cellularBars { return true }
+        if let wifiBars, wifiBars != standard.wifiBars { return true }
+        if let battery, battery != standard.battery { return true }
+        return false
+    }
+
     /// 時刻があれば描き直し、無ければ消す中身にする
     public init(_ spec: StatusBarSpec) {
         self.init(
@@ -111,12 +124,13 @@ public struct StatusBarComposer: Sendable {
     }
 
     /// `spec` の中身に描き直した画像（全体）を作る
-    public func render(_ spec: PlaySpec) throws -> CGImage {
-        try renderBitmap(spec).makeCGImage()
+    /// - Parameter watermark: 右下に小さく載せる文字（アプリ名）。`nil` なら載せない
+    public func render(_ spec: PlaySpec, watermark: String? = nil) throws -> CGImage {
+        try renderBitmap(spec, watermark: watermark).makeCGImage()
     }
 
     /// `spec` の中身に描き直した画像（全体）。テストで画素を比べるのに使う
-    public func renderBitmap(_ spec: PlaySpec) throws -> Bitmap {
+    public func renderBitmap(_ spec: PlaySpec, watermark: String? = nil) throws -> Bitmap {
         var content = StatusBarSpec(cellularBars: spec.cellularBars, wifiBars: spec.wifiBars, battery: spec.battery)
         if case let .set(time) = spec.time { content.time = time }
         // キャリア名が長くて Wi-Fi の入る場所が無い画像では、Wi-Fi は描かない
@@ -124,6 +138,9 @@ public struct StatusBarComposer: Sendable {
         var bitmap = erased
         bitmap.replaceTopRows(with: spec.time == .keep ? timeKeptStrip : clearedStrip)
         try StatusBarRenderer().render(content, layout: layout, appearance: appearance, into: &bitmap, wifiShiftX: plan.wifiShiftX)
+        if let watermark {
+            try WatermarkRenderer().draw(watermark, into: &bitmap)
+        }
         return bitmap
     }
 }
