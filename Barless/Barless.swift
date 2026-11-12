@@ -19,7 +19,11 @@ struct Barless: App {
     @ViewBuilder private var rootView: some View {
         switch ScreenshotDemo.scene {
         case .home, nil:
-            ContentView()
+            HomeView()
+        case .editor:
+            HomeView(initialSession: ScreenshotDemo.sampleSession(startsInExport: false))
+        case .export:
+            HomeView(initialSession: ScreenshotDemo.sampleSession(startsInExport: true))
         }
     }
 }

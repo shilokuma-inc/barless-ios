@@ -8,6 +8,7 @@
 - 同じ大きさでも配置が違う機種は、別の機種グループにする（例: 1206×2622 の iPhone 17 と iPhone 18 Pro）
 - 実機で撮った画像（Fixtures/realshots/）は、manifest.json の情報を使ってここで測って足す
 - アイコンを描くための細部（電波の棒 4 本・Wi-Fi の 3 つの帯・電池の本体と突起）も、Fixtures の画像から測って入れる
+- 画面の大きさ（インチ）は測れないので、下の SCREEN_INCHES に機種ごとに書く（アプリが「6.3 インチ」のように表示する）
 - 単位は px（左上が原点）。pt にするには scale で割る"""
 import json
 import os
@@ -20,6 +21,17 @@ import analyze  # noqa: E402
 
 GENERATION = {'iOS-18': 'ios18-26', 'iOS-26': 'ios18-26', 'iOS-27': 'ios27'}
 GENERATION_ORDER = ['ios18-26', 'ios27']
+# 画面の大きさ（対角のインチ。Apple の製品仕様の表記）。新しい機種を足したら、ここにも足す
+SCREEN_INCHES = {
+    'iPhone-SE-3rd-generation': 4.7,
+    'iPhone-13-mini': 5.4,
+    'iPhone-11-Pro': 5.8,
+    'iPhone-11': 6.1, 'iPhone-12': 6.1, 'iPhone-15': 6.1, 'iPhone-16': 6.1, 'iPhone-16e': 6.1, 'iPhone-17e': 6.1,
+    'iPhone-17': 6.3, 'iPhone-18-Pro': 6.3,
+    'iPhone-11-Pro-Max': 6.5, 'iPhone-Air': 6.5,
+    'iPhone-14-Plus': 6.7, 'iPhone-16-Plus': 6.7,
+    'iPhone-16-Pro-Max': 6.9, 'iPhone-18-Pro-Max': 6.9,
+}
 # 自動判定の対象にしない大きさ（配置が「上端に横 1 列」ではない）
 UNSUPPORTED_REASON = {'iPhone-Duo': 'vertical-layout'}
 
@@ -202,11 +214,14 @@ def main():
         for group in sorted({group_of[m['device']] for m in c}):
             members = [m for m in c if group_of[m['device']] == group]
             newest = max(members, key=lambda m: [int(n) for n in m['runtime'].split('-')[1:]])
+            inches = {SCREEN_INCHES[m['device']] for m in members}
+            assert len(inches) == 1, f'{group}: 同じ機種グループに、画面の大きさが違う機種がある {inches}'
             layouts.append({
                 'id': f"{group}/{newest['generation']}", 'group': group,
                 'models': sorted({model_name(m['device']) for m in members}),
                 'generation': newest['generation'],
                 'pixelWidth': newest['width'], 'pixelHeight': newest['height'], 'scale': newest['scale'],
+                'screenInches': inches.pop(),
                 'style': newest['style'], 'inkTop': newest['inkTop'], 'inkBottom': newest['inkBottom'],
                 'timeSamples': newest['samples'],
                 'cellular': rect(newest['parts']['cellular']), 'wifi': rect(newest['parts']['wifi']),

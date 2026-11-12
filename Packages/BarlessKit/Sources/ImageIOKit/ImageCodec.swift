@@ -22,10 +22,18 @@ public enum ImageFileFormat: String, Sendable, CaseIterable {
 
 /// 画像の読み込み。処理はすべて端末の中で行う
 public enum ImageDecoder {
-    /// 原寸で読み込む
+    /// 原寸で読み込む。
+    ///
+    /// 向きの情報が付いた画像（カメラで撮った写真など）は、見たとおりの向きに直して読む。
+    /// スクリーンショットには向きの情報が付かないので、画素はそのまま読む
     public static func decode(data: Data) throws -> CGImage {
-        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
-              let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
+            throw ImageCodecError.cannotDecode
+        }
+        if let longSide = longSideIfRotated(source) {
+            return try thumbnail(from: source, maxPixelSize: longSide)
+        }
+        guard let image = CGImageSourceCreateImageAtIndex(source, 0, nil) else {
             throw ImageCodecError.cannotDecode
         }
         return image
@@ -35,18 +43,49 @@ public enum ImageDecoder {
         try decode(data: Data(contentsOf: url))
     }
 
+    /// 画像の大きさ（px）を、画素を展開せずに読む。向きの情報が付いていれば、見たとおりの縦横で返す
+    public static func pixelSize(of data: Data) -> (width: Int, height: Int)? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              let width = properties[kCGImagePropertyPixelWidth] as? Int,
+              let height = properties[kCGImagePropertyPixelHeight] as? Int else {
+            return nil
+        }
+        // 5〜8 は、90 度回して表示する向き
+        let orientation = properties[kCGImagePropertyOrientation] as? Int ?? 1
+        return orientation >= 5 ? (height, width) : (width, height)
+    }
+
     /// 長辺が `maxPixelSize` 以下になるように縮小して読み込む（プレビュー用。原寸を展開しないのでメモリを抑えられる）
     public static func decodeThumbnail(data: Data, maxPixelSize: Int) throws -> CGImage {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
+            throw ImageCodecError.cannotDecode
+        }
+        return try thumbnail(from: source, maxPixelSize: maxPixelSize)
+    }
+
+    /// 向きの情報を反映して読み込む（`maxPixelSize` より大きければ縮める）
+    private static func thumbnail(from source: CGImageSource, maxPixelSize: Int) throws -> CGImage {
         let options: [CFString: Any] = [
             kCGImageSourceCreateThumbnailFromImageAlways: true,
             kCGImageSourceCreateThumbnailWithTransform: true,
             kCGImageSourceThumbnailMaxPixelSize: maxPixelSize
         ]
-        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
-              let image = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else {
+        guard let image = CGImageSourceCreateThumbnailAtIndex(source, 0, options as CFDictionary) else {
             throw ImageCodecError.cannotDecode
         }
         return image
+    }
+
+    /// 向きの情報が「そのまま（上が上）」以外なら、画像の長辺（px）を返す
+    private static func longSideIfRotated(_ source: CGImageSource) -> Int? {
+        guard let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              let orientation = properties[kCGImagePropertyOrientation] as? Int, orientation != 1,
+              let width = properties[kCGImagePropertyPixelWidth] as? Int,
+              let height = properties[kCGImagePropertyPixelHeight] as? Int else {
+            return nil
+        }
+        return max(width, height)
     }
 }
 

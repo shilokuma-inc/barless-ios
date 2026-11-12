@@ -51,6 +51,22 @@ struct DeviceCatalogTests {
         }
     }
 
+    /// 画面の大きさ（インチ）は、同じ px の画面なら同じ値になる
+    @Test
+    func screenInchesFollowPixelSize() throws {
+        let catalog = try DeviceCatalog.bundled()
+        var inchesBySize: [String: Double] = [:]
+        for layout in catalog.layouts {
+            #expect((4.0...7.5).contains(layout.screenInches), "\(layout.id)")
+            let size = "\(layout.pixelWidth)x\(layout.pixelHeight)"
+            #expect(inchesBySize[size, default: layout.screenInches] == layout.screenInches, "\(layout.id)")
+            inchesBySize[size] = layout.screenInches
+        }
+        #expect(inchesBySize["750x1334"] == 4.7)
+        #expect(inchesBySize["1206x2622"] == 6.3)
+        #expect(inchesBySize["1320x2868"] == 6.9)
+    }
+
     @Test
     func rejectsUnknownSchemaVersion() {
         let json = Data(#"{"schemaVersion": 99, "updatedAt": "2026-11-12", "unsupported": [], "layouts": []}"#.utf8)

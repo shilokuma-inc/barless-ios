@@ -1,0 +1,42 @@
+{
+  "sourceLanguage": "en",
+  "strings": {
+    "CFBundleDisplayName": {
+      "comment": "ホーム画面に出るアプリの名前",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Barless"
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キレスク"
+          }
+        }
+      }
+    },
+    "NSPhotoLibraryAddUsageDescription": {
+      "comment": "写真への追加の許可を求めるときの説明",
+      "extractionState": "extracted_with_value",
+      "localizations": {
+        "en": {
+          "stringUnit": {
+            "state": "new",
+            "value": "Barless saves the edited screenshot to your photo library."
+          }
+        },
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "編集したスクリーンショットを写真に保存するために使います。"
+          }
+        }
+      }
+    }
+  },
+  "version": "1.0"
+}

@@ -1,8 +1,10 @@
 import BarlessTestSupport
 import CoreGraphics
 import Foundation
+import ImageIO
 import ImageIOKit
 import Testing
+import UniformTypeIdentifiers
 
 struct BitmapTests {
     @Test
@@ -107,6 +109,45 @@ struct ImageCodecTests {
         let data = try ImageEncoder.encode(sample())
         let thumbnail = try ImageDecoder.decodeThumbnail(data: data, maxPixelSize: 10)
         #expect(max(thumbnail.width, thumbnail.height) == 10)
+    }
+
+    /// 向きの情報が付いた画像（カメラの写真など）は、見たとおりの向きで読む
+    @Test
+    func appliesOrientationWhenDecoding() throws {
+        let output = NSMutableData()
+        let destination = try #require(CGImageDestinationCreateWithData(output, UTType.jpeg.identifier as CFString, 1, nil))
+        // 6 = 時計回りに 90 度回して表示する
+        CGImageDestinationAddImage(destination, try sample(), [kCGImagePropertyOrientation: 6] as CFDictionary)
+        #expect(CGImageDestinationFinalize(destination))
+
+        let image = try ImageDecoder.decode(data: output as Data)
+
+        #expect(image.width == 20 && image.height == 40)
+    }
+
+    /// 大きさは、画素を展開しなくても読める。向きの情報が付いていれば、見たとおりの縦横になる
+    @Test
+    func readsPixelSizeWithoutDecoding() throws {
+        let plain = try #require(ImageDecoder.pixelSize(of: ImageEncoder.encode(sample())))
+        #expect(plain == (40, 20))
+
+        let output = NSMutableData()
+        let destination = try #require(CGImageDestinationCreateWithData(output, UTType.jpeg.identifier as CFString, 1, nil))
+        CGImageDestinationAddImage(destination, try sample(), [kCGImagePropertyOrientation: 6] as CFDictionary)
+        #expect(CGImageDestinationFinalize(destination))
+        let rotated = try #require(ImageDecoder.pixelSize(of: output as Data))
+        #expect(rotated == (20, 40))
+
+        #expect(ImageDecoder.pixelSize(of: Data([0, 1, 2, 3])) == nil)
+    }
+
+    /// HEIC でも書き出せて、Software 欄も残る
+    @Test
+    func encodesHEIC() throws {
+        let data = try ImageEncoder.encode(sample(), options: ExportOptions(format: .heic, softwareName: "Barless"))
+        let image = try ImageDecoder.decode(data: data)
+        #expect(image.width == 40 && image.height == 20)
+        #expect(ImageMetadata.softwareName(of: data) == "Barless")
     }
 
     @Test
