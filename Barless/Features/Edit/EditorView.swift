@@ -221,7 +221,7 @@ private struct StatusRow: View {
 /// 消した跡が残りうることの注意
 private struct TracesWarningRow: View {
     var body: some View {
-        StatusRow(color: Theme.warning, text: Text("The background is a photo or pattern, so some traces may remain"))
+        StatusRow(color: Theme.warning, text: Text("The background is a photo or pattern, so some traces may remain."))
             .accessibilityIdentifier("editor.traces")
     }
 }

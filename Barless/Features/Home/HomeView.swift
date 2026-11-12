@@ -26,7 +26,7 @@ struct HomeView: View {
                 .accessibilityAddTraits(.isHeader)
             pickButton
             Spacer(minLength: 24)
-            Text("Your photos never leave this device")
+            Text("Your photos never leave this device.")
                 .font(.caption)
                 .foregroundStyle(Theme.inkSecondary)
                 .frame(maxWidth: .infinity)
