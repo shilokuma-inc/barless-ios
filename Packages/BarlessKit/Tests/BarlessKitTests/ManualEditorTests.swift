@@ -138,6 +138,19 @@ struct ManualEditorTests {
         }
     }
 
+    /// まっすぐ縦に通る輪郭が、電池の後ろにある背景: 輪郭はインクとして拾えないが、跡が残りうることを伝える
+    @Test
+    func flagsVerticalEdgeBehindInk() throws {
+        let sample = try sample("iPhone-17__iOS-27-0__dark-full")
+        let background = EdgePlacement.verticalBehindBattery.edge(for: sample.layout, timeText: sample.fixture.time)
+            .make(width: sample.strip.width, height: sample.strip.height, isLight: false)
+        let input = Synthetic.transplantInk(from: sample.strip, onto: background, scale: sample.scale)
+
+        let result = sample.editor.apply(ManualAdjustment(bandHeight: sample.bandHeight), to: input)
+
+        #expect(result.mayLeaveTraces)
+    }
+
     /// 文字の色を選んでいても、反対の明るさの模様があれば、模様のある背景として扱う（単色とみなさない）
     @Test
     func countsPatternOfOtherToneAsBackground() throws {

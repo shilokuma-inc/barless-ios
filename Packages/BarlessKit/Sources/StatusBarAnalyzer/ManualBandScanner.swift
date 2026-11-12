@@ -5,7 +5,7 @@ public struct ManualBandScan: Sendable, Equatable {
     /// 消す画素。インクを、縁のにじみまで覆うように 2pt 広げたもの
     public let eraseMask: PixelMask
     public let background: BackgroundKind
-    /// 消した跡が残りそうか（背景が写真・模様、または背景の輪郭が帯を横切っている）
+    /// 消した跡が残りそうか（背景が写真・模様、背景の輪郭が帯を横切っている、または消す範囲を縦の輪郭が通っている）
     public let mayLeaveTraces: Bool
 }
 
@@ -34,11 +34,18 @@ public struct ManualBandScanner: Sendable {
         guard bandHeight >= 3, bandHeight <= bitmap.height else { return nil }
         let detector = InkDetector(scale: scale, topRow: 0, bottomRow: bandHeight - 1)
         let scan = detector.scan(bitmap, keeping: tone)
-        let structure = scan.structure.count
+        let padding = Self.erasePaddingPt * scale
+        let hasStructure = scan.structure.count >= Self.visibleStructureAreaPt * scale * scale
+        // まっすぐ縦に通る輪郭は、上下の基準の行で色が同じなので、インクとしては拾えない。
+        // 消す範囲（インクのかたまりを広げた列）を、上下の両方の行で輪郭が通っていれば、埋めたときに輪郭がぼける
+        let hasEdgeThroughInk = scan.blobs.contains { blob in
+            let columns = (blob.x - padding)..<(blob.maxX + padding)
+            return scan.edgesAbove.contains(where: columns.contains) && scan.edgesBelow.contains(where: columns.contains)
+        }
         return ManualBandScan(
-            eraseMask: scan.mask.dilated(by: Self.erasePaddingPt * scale),
+            eraseMask: scan.mask.dilated(by: padding),
             background: scan.background,
-            mayLeaveTraces: scan.background == .complex || structure >= Self.visibleStructureAreaPt * scale * scale
+            mayLeaveTraces: scan.background == .complex || hasStructure || hasEdgeThroughInk
         )
     }
 }
