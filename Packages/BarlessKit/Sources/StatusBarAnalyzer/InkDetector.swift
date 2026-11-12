@@ -99,6 +99,9 @@ struct InkDetector {
             )
         }
         var mask = PixelMask(originX: 0, originY: topRow + 1, width: bitmap.width, height: max(1, bottomRow - topRow - 1))
+        // 明るさで絞るときは、絞る前のインクも別に持つ。背景の種類は、絞る前のかたまりの数で決める
+        // （絞った後で数えると、反対の明るさの模様が数に入らず、模様のある背景を単色とみなしてしまう）
+        var unfiltered = tone == .any ? nil : mask
         var noisy = 0
         var darker = 0
         var lighter = 0
@@ -111,13 +114,15 @@ struct InkDetector {
                     let isDarker = pixel.luma < expected.luma
                     if isDarker { darker += 1 } else { lighter += 1 }
                     if tone.keeps(isDarker: isDarker) { mask[x, y] = true }
+                    unfiltered?[x, y] = true
                 } else if difference > Self.noiseThreshold {
                     noisy += 1
                 }
             }
         }
         let blobs = Self.blobs(in: mask, gap: Self.blobGapPt * scale)
-        let kind = backgroundKind(bitmap, inkCount: darker + lighter, noisyCount: noisy, blobs: blobs)
+        let allBlobs = unfiltered.map { Self.blobs(in: $0, gap: Self.blobGapPt * scale) } ?? blobs
+        let kind = backgroundKind(bitmap, inkCount: darker + lighter, noisyCount: noisy, blobs: allBlobs)
         let structure = Self.structure(in: mask, edge: Self.structureEdgePt * scale)
         return InkScan(
             mask: mask,

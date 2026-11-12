@@ -137,6 +137,30 @@ struct ManualEditorTests {
         }
     }
 
+    /// 文字の色を選んでいても、反対の明るさの模様があれば、模様のある背景として扱う（単色とみなさない）
+    @Test
+    func countsPatternOfOtherToneAsBackground() throws {
+        let sample = try sample("iPhone-17__iOS-27-0__dark-full")
+        let scale = sample.scale
+        // グレーの背景に白い文字。帯の上のほうに、背景より暗い点を 16 個、離して並べる（帯の端には届かない）
+        let gray = Bitmap(width: sample.strip.width, height: sample.strip.height, fill: RGB(red: 120, green: 120, blue: 120))
+        var input = Synthetic.transplantInk(from: sample.strip, onto: gray, scale: scale)
+        for index in 0..<16 {
+            let left = (20 + index * 22) * scale
+            for y in (4 * scale)..<(8 * scale) {
+                for x in left..<(left + 4 * scale) {
+                    input[x, y] = RGB(red: 20, green: 20, blue: 20)
+                }
+            }
+        }
+
+        let result = sample.editor.apply(ManualAdjustment(bandHeight: sample.bandHeight, textColor: .white), to: input)
+
+        #expect(result.mayLeaveTraces)
+        // 暗い点は消さない（白い文字だけを消す）
+        #expect(result.bitmap[21 * scale, 5 * scale] == RGB(red: 20, green: 20, blue: 20))
+    }
+
     /// 1 色で塗る: 帯の全体がその色になり、帯の下は変わらない
     @Test
     func fillsBandWithChosenColor() throws {
