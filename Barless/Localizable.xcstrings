@@ -705,6 +705,17 @@
         }
       }
     },
+    "There's no room to draw Wi-Fi next to the carrier name": {
+      "comment": "「遊ぶ」で、キャリア名が長くて Wi-Fi を描けない画像のときの説明",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "キャリア名の右に、Wi-Fi を描く場所がありません"
+          }
+        }
+      }
+    },
     "Tidy": {
       "comment": "エディタのモード: 定番の表示に描き直す",
       "localizations": {

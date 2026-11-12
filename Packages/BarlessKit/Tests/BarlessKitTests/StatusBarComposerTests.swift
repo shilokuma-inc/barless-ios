@@ -1,6 +1,7 @@
 import BarlessTestSupport
 import CoreGraphics
 import DeviceCatalog
+import Foundation
 import ImageIOKit
 import StatusBarAnalyzer
 import StatusBarEditor
@@ -9,10 +10,13 @@ import Testing
 
 /// 「遊ぶ」: 解析した 1 枚のステータスバーを、中身を変えて描き直す
 struct StatusBarComposerTests {
+    /// 文字認識の代わりに、決まった時刻を返す（`nil` なら、読めなかったことにする）
     private struct FixedTime: TimeTextRecognizing {
-        let time: String
+        let time: String?
 
-        func recognizeTimes(in image: CGImage) async throws -> [String] { [time] }
+        func recognizeTimes(in image: CGImage) async throws -> [String] {
+            time.map { [$0] } ?? []
+        }
     }
 
     /// 編集した 1 枚と、比べるのに使うもの
@@ -40,16 +44,27 @@ struct StatusBarComposerTests {
         }
     }
 
-    private func sample(_ name: String) async throws -> Sample {
-        let catalog = try DeviceCatalog.bundled()
+    /// - Parameters:
+    ///   - readsTime: 文字認識で時刻を読めたことにするか
+    ///   - onlyExpectedLayout: カタログを、この画像の配置 1 つだけにするか（大きさだけで配置が決まるようになる）
+    ///   - prepare: 解析の前に、上端の切り出しに手を加える（キャリア名を長くする・時刻を消す など）
+    private func sample(
+        _ name: String,
+        readsTime: Bool = true,
+        onlyExpectedLayout: Bool = false,
+        prepare: (inout Bitmap, StatusBarLayout, RGB) -> Void = { _, _, _ in }
+    ) async throws -> Sample {
+        let bundled = try DeviceCatalog.bundled()
         let fixture = try #require(try Fixtures.all().first { $0.name == name }, "\(name) が無い")
-        let layout = try #require(fixture.expectedLayout(in: catalog))
+        let layout = try #require(fixture.expectedLayout(in: bundled))
+        let catalog = onlyExpectedLayout ? try Self.catalog(bundled, only: layout.id) : bundled
         // 上端の切り出しの下に、背景の色を足して、スクリーンショット全体の大きさにする
-        let strip = try fixture.loadStrip()
+        var strip = try fixture.loadStrip()
         let fill = strip[strip.width / 2, 4 * fixture.scale]
+        prepare(&strip, layout, fill)
         var input = Bitmap(width: fixture.width, height: fixture.height, fill: fill, colorSpace: strip.colorSpace)
         input.replaceTopRows(with: strip)
-        let editor = StatusBarEditor(catalog: catalog, recognizer: FixedTime(time: fixture.time))
+        let editor = StatusBarEditor(catalog: catalog, recognizer: FixedTime(time: readsTime ? fixture.time : nil))
         let result = try await editor.edit(input.makeCGImage())
         return Sample(
             fixture: fixture,
@@ -76,6 +91,52 @@ struct StatusBarComposerTests {
 
         #expect(rendered.width == sample.input.width && rendered.height == sample.input.height)
         #expect(rendered.data == sample.tidied.data)
+        #expect(sample.composer.canKeepTime && sample.composer.canDrawWiFi)
+    }
+
+    /// 時刻の位置が分からない画像（文字を読めず、時刻のかたまりも無い）では、時刻を「そのまま」残せない。
+    /// 「そのまま」を渡しても、隠したときと同じ画像になる
+    @Test
+    func cannotKeepTimeWhenTimeIsNotFound() async throws {
+        // いまのカタログは、どの大きさにも配置が 2 つ以上あり、時刻が無いと配置が決まらない。
+        // 配置が 1 つだけの大きさ（大きさだけで決まる）を、カタログを絞って作る
+        let name = "iPhone-SE-3rd-generation__iOS-18-6__light-low"
+        let sample = try await sample(name, readsTime: false, onlyExpectedLayout: true) { strip, layout, fill in
+            let time = TimeTypography(layout: layout).inkRect(for: "23:58").insetBy(dx: -4 * layout.scale, dy: -2 * layout.scale)
+            for y in time.y..<time.maxY {
+                for x in time.x..<time.maxX { strip[x, y] = fill }
+            }
+        }
+        var keep = PlaySpec.standard
+        keep.time = .keep
+        var hide = PlaySpec.standard
+        hide.time = .hide
+
+        #expect(!sample.composer.canKeepTime)
+        #expect(try sample.composer.renderBitmap(keep).data == sample.composer.renderBitmap(hide).data)
+    }
+
+    /// キャリア名が長くて、時刻との間に Wi-Fi が入らない画像では、Wi-Fi を描けない。本数を渡しても描かない
+    @Test
+    func cannotDrawWiFiNextToLongCarrierName() async throws {
+        let sample = try await sample("iPhone-SE-3rd-generation__iOS-18-6__light-full") { strip, layout, fill in
+            guard let carrier = layout.carrier else { return }
+            // Wi-Fi を消して、キャリア名を 3 つ、時刻のすぐ手前まで並べる
+            let original = strip
+            let shift = carrier.width + 9 * layout.scale
+            for y in 0..<strip.height {
+                for x in layout.wifi.x..<layout.wifi.maxX { strip[x, y] = fill }
+                for copy in 1...2 {
+                    for x in carrier.x..<carrier.maxX { strip[x + copy * shift, y] = original[x, y] }
+                }
+            }
+        }
+        var off = PlaySpec.standard
+        off.wifiBars = nil
+
+        #expect(!sample.composer.canDrawWiFi)
+        #expect(sample.composer.canKeepTime)
+        #expect(try sample.composer.renderBitmap(.standard).data == sample.composer.renderBitmap(off).data)
     }
 
     /// 時刻を「そのまま」にすると、時刻は元の画像のまま残り、ほかは描き直す
@@ -152,6 +213,15 @@ struct StatusBarComposerTests {
     func convertsFromStatusBarSpec() {
         #expect(PlaySpec.standard == PlaySpec(time: .set("9:41"), cellularBars: 4, wifiBars: 3, battery: BatterySpec(level: 1)))
         #expect(PlaySpec(StatusBarSpec(cellularBars: 2)) == PlaySpec(time: .hide, cellularBars: 2, wifiBars: nil, battery: nil))
+    }
+
+    /// 配置を 1 つだけにしたカタログ
+    private static func catalog(_ catalog: DeviceCatalog, only layoutID: String) throws -> DeviceCatalog {
+        let encoded = try JSONEncoder().encode(catalog)
+        var object = try #require(try JSONSerialization.jsonObject(with: encoded) as? [String: Any])
+        let layouts = try #require(object["layouts"] as? [[String: Any]])
+        object["layouts"] = layouts.filter { $0["id"] as? String == layoutID }
+        return try DeviceCatalog(data: JSONSerialization.data(withJSONObject: object))
     }
 
     /// `area` の外で、2 枚の画像が違っている画素の数

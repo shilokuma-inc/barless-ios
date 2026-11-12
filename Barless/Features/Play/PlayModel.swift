@@ -32,8 +32,8 @@ final class PlayModel {
     private(set) var batteryPercent = 100
     /// 電波の本数（0〜4）
     private(set) var cellularBars = 4
-    /// Wi-Fi の本数（0〜3）。`nil` はオフ（消す）
-    private(set) var wifiBars: Int? = 3
+    /// Wi-Fi の本数（0〜3）。`nil` はオフ（消す）。Wi-Fi を描けない画像では、最初からオフ
+    private(set) var wifiBars: Int?
     /// いまの中身で描いた画像
     private(set) var image: CGImage
 
@@ -52,6 +52,17 @@ final class PlayModel {
         self.composer = composer
         self.image = initialImage
         self.locale = locale
+        self.wifiBars = composer.canDrawWiFi ? 3 : nil
+    }
+
+    /// 時刻を「そのまま」残せるか（時刻の位置が分からなかった画像では残せない）
+    var canKeepTime: Bool {
+        composer.canKeepTime
+    }
+
+    /// Wi-Fi を描けるか（ホームボタンの機種で、キャリア名が長くて場所が無い画像では描けない）
+    var canDrawWiFi: Bool {
+        composer.canDrawWiFi
     }
 
     /// 描き直す時刻の文字列。12 時間制の地域では午前・午後を付けない（ステータスバーの表示と同じ）。
@@ -82,7 +93,7 @@ final class PlayModel {
     }
 
     func setTimeChoice(_ choice: TimeChoice) {
-        guard choice != timeChoice else { return }
+        guard choice != timeChoice, choice != .keep || canKeepTime else { return }
         timeChoice = choice
         render()
     }
@@ -114,7 +125,7 @@ final class PlayModel {
     /// - Parameter bars: `nil` はオフ
     func setWiFiBars(_ bars: Int?) {
         let bars = bars.map { min(max($0, Self.wifiRange.lowerBound), Self.wifiRange.upperBound) }
-        guard bars != wifiBars else { return }
+        guard bars != wifiBars, bars == nil || canDrawWiFi else { return }
         wifiBars = bars
         render()
     }

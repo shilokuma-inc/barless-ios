@@ -24,8 +24,8 @@ struct PlayPanel: View {
             OptionSeparator()
             OptionRow("Time") {
                 SegmentPicker(
-                    options: [
-                        .init(value: .keep, title: "Keep", identifier: "play.time.keep"),
+                    // 時刻の位置が分からなかった画像では、「そのまま」は選べない（出さない）
+                    options: (model.canKeepTime ? [.init(value: .keep, title: "Keep", identifier: "play.time.keep")] : []) + [
                         .init(value: .hide, title: "Hide", identifier: "play.time.hide"),
                         .init(value: .set, verbatim: model.timeText, identifier: "play.time.set")
                     ],
@@ -74,6 +74,16 @@ struct PlayPanel: View {
                     selection: Binding(get: { model.wifiBars }, set: { model.setWiFiBars($0) }),
                     fillsWidth: false
                 )
+            }
+            .disabled(!model.canDrawWiFi)
+            .opacity(model.canDrawWiFi ? 1 : 0.4)
+            if !model.canDrawWiFi {
+                Text("There's no room to draw Wi-Fi next to the carrier name")
+                    .font(.caption)
+                    .foregroundStyle(Theme.darkInkSecondary)
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+                    .padding(.bottom, 8)
+                    .accessibilityIdentifier("play.wifi.unavailable")
             }
         }
     }

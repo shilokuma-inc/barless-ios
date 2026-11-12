@@ -56,6 +56,7 @@ struct PlayModelTests {
 
         #expect(sample.model.spec == .standard)
         #expect(sample.model.timeText == "9:41")
+        #expect(sample.model.canKeepTime && sample.model.canDrawWiFi)
         #expect(sample.model.image === sample.screenshot.tidied)
         // 「遊ぶ」で値を変える前の画像は、「整える」と同じ
         #expect(sample.screenshot.image(for: .play) === sample.screenshot.tidied)

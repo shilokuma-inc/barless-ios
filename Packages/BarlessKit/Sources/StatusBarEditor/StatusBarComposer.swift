@@ -50,6 +50,9 @@ public struct PlaySpec: Sendable, Equatable {
 public struct StatusBarComposer: Sendable {
     public let layout: StatusBarLayout
     public let appearance: ContentAppearance
+    /// 時刻を「そのまま」残せるか。時刻の位置が分からなかった画像（文字を読めず、時刻のかたまりも見つからない）では残せない。
+    /// そのときに `PlaySpec.Time.keep` を渡すと、時刻は消える（`hide` と同じ）
+    public let canKeepTime: Bool
     /// 「整える」と同じ合わせ方（ホームボタンの機種では、キャリア名を残して、Wi-Fi をその右に置く）
     let plan: TidyPlan
     /// ステータスバーを消した画像の全体
@@ -82,12 +85,23 @@ public struct StatusBarComposer: Sendable {
         } else {
             clearedStrip = strip
         }
-        let kept = plan.kept + [analysis.timeRect].compactMap { $0 }
-        if let mask = analysis.eraseMask(keeping: kept) {
+        guard let timeRect = analysis.timeRect else {
+            canKeepTime = false
+            timeKeptStrip = clearedStrip
+            return
+        }
+        canKeepTime = true
+        if let mask = analysis.eraseMask(keeping: plan.kept + [timeRect]) {
             timeKeptStrip = try await inpainter.inpaint(strip, mask: mask)
         } else {
             timeKeptStrip = strip
         }
+    }
+
+    /// Wi-Fi を描く場所があるか。ホームボタンの機種で、キャリア名が長くて時刻との間に入らない画像では描けない。
+    /// そのときは、`PlaySpec.wifiBars` に何を渡しても Wi-Fi は描かない
+    public var canDrawWiFi: Bool {
+        plan.drawsWiFi
     }
 
     /// 上端の切り出しの高さ。消去で読み書きする行（インクの上下 3pt まで）が入る高さにする
