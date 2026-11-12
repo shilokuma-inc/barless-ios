@@ -2,7 +2,7 @@ import DeviceCatalog
 import StatusBarEditor
 import SwiftUI
 
-/// 「隠す」「整える」の結果を見る画面
+/// 「隠す」「整える」の結果を見る画面。自動で消せなかった画像では、その理由と、手動調整への入口を出す
 struct EditorView: View {
     let screenshot: EditedScreenshot
     @Binding var mode: EditMode
@@ -10,6 +10,8 @@ struct EditorView: View {
     @Binding var isComparing: Bool
     let onClose: () -> Void
     let onSave: () -> Void
+    /// 手動調整の画面を開く
+    let onAdjust: () -> Void
     /// 画像を押している間だけ `true`。指を離したときも、ジェスチャーが取り消されたとき（着信・通知など）も `false` に戻る
     @GestureState private var isPressing = false
     /// 読み上げの操作で、元の画像に切り替えているか（押し続ける操作の代わり）
@@ -25,7 +27,7 @@ struct EditorView: View {
     var body: some View {
         VStack(spacing: 0) {
             EditTopBar(leading: .close(onClose)) {
-                if screenshot.hidden != nil {
+                if screenshot.hasResult {
                     TopBarPillButton(title: "Save", action: onSave)
                         .accessibilityIdentifier("editor.save")
                 }
@@ -41,17 +43,28 @@ struct EditorView: View {
                 .padding(.horizontal, Theme.margin)
                 .padding(.bottom, 12)
                 HiddenSummaryView(hidden: hidden, mode: mode, isComparing: isComparing)
+            } else if let manual = screenshot.manual {
+                // 手動調整の結果。配置が分からないので「整える」は無い
+                HStack(spacing: 8) {
+                    AdjustAgainButton(action: onAdjust)
+                    CompareToggle(isOn: $isComparing)
+                }
+                .padding(.horizontal, Theme.margin)
+                .padding(.bottom, 12)
+                ManualSummaryView(manual: manual, isComparing: isComparing)
             } else if case let .notHidden(failure) = screenshot.outcome {
-                NotHiddenView(failure: failure, onChooseAnother: onClose)
+                NotHiddenView(
+                    failure: failure, onAdjust: screenshot.manualSource == nil ? nil : onAdjust, onChooseAnother: onClose
+                )
             }
         }
     }
 
     @ViewBuilder private var canvas: some View {
-        if let hidden = screenshot.hidden {
+        if let bandHeight = screenshot.bandHeight {
             ScreenshotCanvas(
                 image: isShowingOriginal ? screenshot.before : screenshot.image(for: mode),
-                bandHeight: hidden.bandHeight,
+                bandHeight: bandHeight,
                 tag: isShowingOriginal ? "BEFORE" : nil,
                 comparison: isComparing ? .init(before: screenshot.before, position: $comparePosition) : nil
             )
@@ -76,7 +89,8 @@ struct EditorView: View {
     private var canvasLabel: Text {
         if isComparing { return Text("Comparison with the original") }
         if isShowingOriginal { return Text("Original screenshot") }
-        return mode == .tidy ? Text("Screenshot with a tidied status bar") : Text("Screenshot with the status bar hidden")
+        let isTidied = mode == .tidy && screenshot.tidied != nil
+        return isTidied ? Text("Screenshot with a tidied status bar") : Text("Screenshot with the status bar hidden")
     }
 }
 
@@ -121,34 +135,16 @@ private struct HiddenSummaryView: View {
                     .foregroundStyle(Theme.darkInkSecondary)
                     .accessibilityIdentifier("editor.tidySummary")
             }
-            statusRow(color: Theme.accent, text: Text("Detected as \(screenSize)-inch · \(generationName)"))
+            StatusRow(color: Theme.accent, text: Text("Detected as \(screenSize)-inch · \(generationName)"))
                 .accessibilityIdentifier("editor.detected")
             if hidden.mayLeaveTraces {
-                statusRow(color: Theme.warning, text: Text("The background is a photo or pattern, so some traces may remain"))
-                    .accessibilityIdentifier("editor.traces")
+                TracesWarningRow()
             }
-            Text(isComparing ? "Drag the handle to compare with the original" : "Hold the image to see the original")
-                .font(.caption)
-                .foregroundStyle(Theme.darkInkSecondary)
-                .opacity(0.8)
+            CompareHint(isComparing: isComparing)
         }
         .multilineTextAlignment(.center)
         .padding(.horizontal, Theme.margin)
         .padding(.bottom, 20)
-    }
-
-    private func statusRow(color: Color, text: Text) -> some View {
-        HStack(alignment: .firstTextBaseline, spacing: 6) {
-            Circle()
-                .fill(color)
-                .frame(width: 6, height: 6)
-                .alignmentGuide(.firstTextBaseline) { $0[.bottom] + 3 }
-                .accessibilityHidden(true)
-            text
-                .font(.caption)
-                .foregroundStyle(Theme.darkInkSecondary)
-        }
-        .accessibilityElement(children: .combine)
     }
 
     /// 画面の大きさ（「6.3」）。機種名は出さない。同じ大きさの画面を持つ機種がいくつもあり、
@@ -165,9 +161,88 @@ private struct HiddenSummaryView: View {
     }
 }
 
+/// 手動調整の結果の、画像の下の説明
+private struct ManualSummaryView: View {
+    let manual: ManualEdit
+    let isComparing: Bool
+
+    var body: some View {
+        VStack(spacing: 8) {
+            StatusRow(color: Theme.accent, text: Text("Adjusted manually"))
+                .accessibilityIdentifier("editor.manualSummary")
+            if manual.mayLeaveTraces {
+                TracesWarningRow()
+            }
+            CompareHint(isComparing: isComparing)
+        }
+        .multilineTextAlignment(.center)
+        .padding(.horizontal, Theme.margin)
+        .padding(.bottom, 20)
+    }
+}
+
+/// 手動調整の画面へ戻るボタン。モードの切り替えと同じ高さ・同じ地の色にして、「比較」と並べる
+private struct AdjustAgainButton: View {
+    let action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Text("Adjust again")
+                .font(.subheadline.weight(.semibold))
+                .foregroundStyle(Theme.darkInk)
+                .frame(maxWidth: .infinity, minHeight: 36)
+                .background(Theme.darkSurfaceSecondary, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
+        }
+        .buttonStyle(PressableButtonStyle())
+        .accessibilityIdentifier("editor.adjustAgain")
+    }
+}
+
+/// 色の点と 1 行の説明（判定の結果・注意）
+private struct StatusRow: View {
+    let color: Color
+    let text: Text
+
+    var body: some View {
+        HStack(alignment: .firstTextBaseline, spacing: 6) {
+            Circle()
+                .fill(color)
+                .frame(width: 6, height: 6)
+                .alignmentGuide(.firstTextBaseline) { $0[.bottom] + 3 }
+                .accessibilityHidden(true)
+            text
+                .font(.caption)
+                .foregroundStyle(Theme.darkInkSecondary)
+        }
+        .accessibilityElement(children: .combine)
+    }
+}
+
+/// 消した跡が残りうることの注意
+private struct TracesWarningRow: View {
+    var body: some View {
+        StatusRow(color: Theme.warning, text: Text("The background is a photo or pattern, so some traces may remain"))
+            .accessibilityIdentifier("editor.traces")
+    }
+}
+
+/// 元の画像との見比べ方の説明
+private struct CompareHint: View {
+    let isComparing: Bool
+
+    var body: some View {
+        Text(isComparing ? "Drag the handle to compare with the original" : "Hold the image to see the original")
+            .font(.caption)
+            .foregroundStyle(Theme.darkInkSecondary)
+            .opacity(0.8)
+    }
+}
+
 /// 消せなかったときの、画像の下の説明
 private struct NotHiddenView: View {
     let failure: HideFailure
+    /// 手動調整へ進む。扱えない大きさの画像では `nil`（入口を出さない）
+    let onAdjust: (() -> Void)?
     let onChooseAnother: () -> Void
 
     var body: some View {
@@ -175,9 +250,16 @@ private struct NotHiddenView: View {
             notice
                 .accessibilityElement(children: .combine)
                 .accessibilityIdentifier("editor.notHidden")
-            Button("Choose another screenshot", action: onChooseAnother)
-                .buttonStyle(BlockButtonStyle(kind: .secondary))
-                .accessibilityIdentifier("editor.chooseAnother")
+            VStack(spacing: 10) {
+                if let onAdjust {
+                    Button("Adjust manually", action: onAdjust)
+                        .buttonStyle(BlockButtonStyle(kind: .primary))
+                        .accessibilityIdentifier("editor.adjustManually")
+                }
+                Button("Choose another screenshot", action: onChooseAnother)
+                    .buttonStyle(BlockButtonStyle(kind: .secondary))
+                    .accessibilityIdentifier("editor.chooseAnother")
+            }
         }
         .padding(.horizontal, Theme.margin)
         .padding(.top, 4)
