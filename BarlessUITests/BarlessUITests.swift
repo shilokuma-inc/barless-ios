@@ -46,6 +46,46 @@ final class BarlessUITests: XCTestCase {
         XCTAssertTrue(app.buttons["editor.compare"].isSelected)
     }
 
+    /// 作り物のスクリーンショットで、「遊ぶ」に切り替え、値を変えて、そのまま書き出しへ進める
+    @MainActor
+    func testSampleScreenshotCanBePlayedWith() throws {
+        let app = XCUIApplication()
+        app.launchArguments += ["-screenshot-demo", "-screenshot-scene", "editor"]
+        app.launch()
+
+        XCTAssertTrue(app.buttons["editor.mode.play"].waitForExistence(timeout: 30))
+        XCTAssertFalse(app.buttons["play.wifi.off"].exists)
+        app.buttons["editor.mode.play"].tap()
+
+        // 最初は「整える」と同じ中身
+        XCTAssertTrue(app.buttons["play.time.set"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["play.time.set"].isSelected)
+        XCTAssertTrue(app.buttons["play.cellular.4"].isSelected)
+        XCTAssertTrue(app.buttons["play.wifi.3"].isSelected)
+
+        app.buttons["play.wifi.off"].tap()
+        XCTAssertTrue(app.buttons["play.wifi.off"].isSelected)
+        app.buttons["play.cellular.2"].tap()
+        XCTAssertTrue(app.buttons["play.cellular.2"].isSelected)
+        app.buttons["play.time.keep"].tap()
+        XCTAssertTrue(app.buttons["play.time.keep"].isSelected)
+
+        // 時刻を押すと、時刻を選ぶ画面が出る。閉じると、時刻の指定が選ばれている
+        app.buttons["play.time.set"].tap()
+        XCTAssertTrue(app.buttons["play.timePicker.done"].waitForExistence(timeout: 5))
+        app.buttons["play.timePicker.done"].tap()
+        XCTAssertTrue(app.buttons["play.time.set"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["play.time.set"].isSelected)
+
+        app.buttons["editor.save"].tap()
+        XCTAssertTrue(app.descendants(matching: .any)["export.share"].waitForExistence(timeout: 30))
+        // 戻っても、選んだ値はそのまま
+        app.buttons["edit.back"].tap()
+        XCTAssertTrue(app.buttons["play.wifi.off"].waitForExistence(timeout: 10))
+        XCTAssertTrue(app.buttons["play.wifi.off"].isSelected)
+        XCTAssertTrue(app.buttons["play.cellular.2"].isSelected)
+    }
+
     /// 大きさが変わった作り物のスクリーンショットで、消せなかった → 手動調整 → 結果 → 調整し直す → 書き出し、を通す
     @MainActor
     func testResavedScreenshotCanBeAdjustedManually() throws {

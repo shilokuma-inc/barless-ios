@@ -1,0 +1,170 @@
+@testable import Barless
+import CoreGraphics
+import Foundation
+import ImageIOKit
+import StatusBarEditor
+import StatusBarRenderer
+import Testing
+
+/// 時刻の文字列は、地域の書き方に合わせる（午前・午後は付けない）
+struct PlayTimeTests {
+    @Test(arguments: [
+        ("en_US", 9, 41, "9:41"),
+        ("en_US", 14, 8, "2:08"),
+        ("en_US", 0, 5, "12:05"),
+        ("ja_JP", 9, 41, "9:41"),
+        ("ja_JP", 14, 8, "14:08"),
+        ("ja_JP", 0, 5, "0:05"),
+        ("en_GB", 9, 41, "09:41"),
+        ("en_GB", 23, 59, "23:59")
+    ])
+    func formatsTimeForLocale(identifier: String, hour: Int, minute: Int, expected: String) {
+        #expect(PlayTime.text(hour: hour, minute: minute, locale: Locale(identifier: identifier)) == expected)
+    }
+}
+
+/// 「遊ぶ」の状態
+@MainActor
+struct PlayModelTests {
+    private struct Sample {
+        let screenshot: EditedScreenshot
+        let model: PlayModel
+    }
+
+    /// 作り物のスクリーンショット（iPhone 17・iOS 27）を解析して、「遊ぶ」の状態を作る
+    private func sample(locale: String = "ja_JP") async throws -> Sample {
+        let screenshot = try await ScreenshotProcessor().process(imageData: SampleScreenshot.pngData())
+        let composer = try #require(screenshot.composer)
+        let tidied = try #require(screenshot.tidied)
+        let model = PlayModel(composer: composer, initialImage: tidied, locale: Locale(identifier: locale))
+        return Sample(screenshot: screenshot, model: model)
+    }
+
+    /// 帯の中で、2 枚の画像が違っている画素の、左端と右端（違いが無ければ `nil`）
+    private func changedColumns(_ lhs: CGImage, _ rhs: CGImage, bandHeight: Int) throws -> ClosedRange<Int>? {
+        let left = try Bitmap(cgImage: lhs)
+        let right = try Bitmap(cgImage: rhs)
+        let columns = (0..<left.width).filter { x in (0..<bandHeight).contains { left[x, $0] != right[x, $0] } }
+        guard let first = columns.first, let last = columns.last else { return nil }
+        return first...last
+    }
+
+    /// 最初の中身は「整える」と同じで、画像も「整える」の結果をそのまま使う
+    @Test
+    func startsFromTidiedImage() async throws {
+        let sample = try await sample()
+
+        #expect(sample.model.spec == .standard)
+        #expect(sample.model.timeText == "9:41")
+        #expect(sample.model.image === sample.screenshot.tidied)
+        // 「遊ぶ」で値を変える前の画像は、「整える」と同じ
+        #expect(sample.screenshot.image(for: .play) === sample.screenshot.tidied)
+    }
+
+    /// 値を変えると、その中身で描き直した画像になる。変わるのは、その要素のあたりだけ
+    @Test
+    func rendersImageWhenValuesChange() async throws {
+        let sample = try await sample()
+        let model = sample.model
+        let tidied = try #require(sample.screenshot.tidied)
+        let bandHeight = try #require(sample.screenshot.bandHeight)
+
+        model.setBatteryPercent(40)
+        await model.waitForRender()
+
+        #expect(model.spec.battery == BatterySpec(level: 0.4))
+        #expect(model.image !== tidied)
+        // 電池は右端にある。左半分（時刻）は変わらない
+        let battery = try #require(try changedColumns(model.image, tidied, bandHeight: bandHeight))
+        #expect(battery.lowerBound > tidied.width * 3 / 4)
+
+        model.setTimeChoice(.hide)
+        model.setCellularBars(1)
+        model.setWiFiBars(nil)
+        await model.waitForRender()
+
+        #expect(model.spec == PlaySpec(time: .hide, cellularBars: 1, wifiBars: nil, battery: BatterySpec(level: 0.4)))
+        let all = try #require(try changedColumns(model.image, tidied, bandHeight: bandHeight))
+        #expect(all.lowerBound < tidied.width / 4)
+        // 帯の下は、元の画像のまま
+        let before = try Bitmap(cgImage: sample.screenshot.before)
+        let after = try Bitmap(cgImage: model.image)
+        let columns = stride(from: 0, to: after.width, by: 7)
+        #expect((bandHeight..<after.height).allSatisfy { y in columns.allSatisfy { after[$0, y] == before[$0, y] } })
+    }
+
+    /// 時刻を「そのまま」にすると、元の時刻（2:47）が残る
+    @Test
+    func keepsOriginalTime() async throws {
+        let sample = try await sample()
+        let bandHeight = try #require(sample.screenshot.bandHeight)
+
+        sample.model.setTimeChoice(.keep)
+        await sample.model.waitForRender()
+
+        #expect(sample.model.spec.time == .keep)
+        // 左半分（時刻のある側）は、元の画像と同じ
+        let before = try Bitmap(cgImage: sample.screenshot.before)
+        let after = try Bitmap(cgImage: sample.model.image)
+        #expect((0..<bandHeight).allSatisfy { y in (0..<(after.width / 2)).allSatisfy { after[$0, y] == before[$0, y] } })
+    }
+
+    /// 時刻は、地域の書き方の文字列で描く
+    @Test
+    func usesLocaleForTimeText() async throws {
+        let sample = try await sample(locale: "en_US")
+
+        sample.model.setTime(hour: 14, minute: 8)
+
+        #expect(sample.model.timeText == "2:08")
+        #expect(sample.model.spec.time == .set("2:08"))
+        // 範囲の外の値は、範囲に収める
+        sample.model.setTime(hour: 30, minute: -4)
+        #expect(sample.model.hour == 23 && sample.model.minute == 0)
+    }
+
+    /// 値は、選べる範囲に収める
+    @Test
+    func clampsValues() async throws {
+        let model = try await sample().model
+
+        model.setBatteryPercent(0)
+        #expect(model.batteryPercent == 1)
+        model.setBatteryPercent(500)
+        #expect(model.batteryPercent == 100)
+        model.setCellularBars(9)
+        #expect(model.cellularBars == 4)
+        model.setCellularBars(-1)
+        #expect(model.cellularBars == 0)
+        model.setWiFiBars(7)
+        #expect(model.wifiBars == 3)
+        model.setWiFiBars(nil)
+        #expect(model.wifiBars == nil)
+    }
+}
+
+/// 編集の結果に、「遊ぶ」の状態が付く
+@MainActor
+struct EditSessionPlayTests {
+    @Test
+    func createsPlayModelWhenStatusBarIsHidden() async {
+        let session = EditSession(source: { try SampleScreenshot.pngData() })
+
+        await session.start()
+
+        #expect(session.play != nil)
+    }
+
+    @Test
+    func hasNoPlayModelWhenStatusBarIsNotHidden() async {
+        let session = EditSession(source: { try SampleScreenshot.resavedPNGData() })
+
+        await session.start()
+
+        guard case .ready = session.phase else {
+            Issue.record("ready になっていない: \(session.phase)")
+            return
+        }
+        #expect(session.play == nil)
+    }
+}
