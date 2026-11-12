@@ -57,7 +57,7 @@ struct SyntheticEdge {
     /// - Parameter isLight: 明るい背景（黒い文字用）か、暗い背景（白い文字用）か
     func make(width: Int, height: Int, isLight: Bool) -> Bitmap {
         let base = isLight ? RGB(red: 232, green: 236, blue: 240) : RGB(red: 18, green: 24, blue: 44)
-        let other = isLight ? RGB(red: 150, green: 132, blue: 120) : RGB(red: 96, green: 84, blue: 80)
+        let other = isLight ? RGB(red: 150, green: 132, blue: 120) : RGB(red: 150, green: 140, blue: 130)
         var bitmap = Bitmap(width: width, height: height, fill: base)
         for y in 0..<height {
             let boundary = Int((Double(throughX) + slope * Double(y - throughY)).rounded())
@@ -71,8 +71,10 @@ struct SyntheticEdge {
 
 /// 輪郭を通す場所
 enum EdgePlacement: String, CaseIterable {
-    /// 電池の後ろ（消すと、輪郭がぼやけた跡が残る）
+    /// 電池の後ろを斜めに通る（消すと、輪郭がぼやけた跡が残る）
     case behindBattery
+    /// 電池の後ろをまっすぐ縦に通る（上下の基準の行で色が同じなので、インクとしては拾えない）
+    case verticalBehindBattery
     /// 文字もアイコンも無い所（消去とは関係ないので、そのまま残るべき）
     case awayFromInk
 
@@ -82,6 +84,8 @@ enum EdgePlacement: String, CaseIterable {
         switch self {
         case .behindBattery:
             return SyntheticEdge(throughX: Int(layout.battery.midX), throughY: middleY)
+        case .verticalBehindBattery:
+            return SyntheticEdge(throughX: Int(layout.battery.midX), throughY: middleY, slope: 0)
         case .awayFromInk:
             // 文字・アイコンのあいだの、いちばん広いすき間の中央
             let time = TimeTypography(layout: layout).inkRect(for: timeText)

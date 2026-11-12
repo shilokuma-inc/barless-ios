@@ -33,7 +33,7 @@ struct VerificationReportTests {
             "### 4-2. グラデーションの背景（作った背景に Simulator のインクを移した画像）\n", try measurements.eraseOnGradient(),
             "### 4-3. ホーム画面（壁紙）\n", try measurements.wallpaper(),
             "### 4-4. 再圧縮した画像（単色の背景の画像を JPEG で保存し直したもの。大きさはそのまま）\n", try measurements.eraseOnRecompressed(),
-            "### 4-5. 斜めの輪郭が帯を横切る背景（作った背景に Simulator のインクを移した画像）\n", try measurements.eraseOnEdges(),
+            "### 4-5. 輪郭が帯を横切る背景（作った背景に Simulator のインクを移した画像）\n", try measurements.eraseOnEdges(),
             "## 5. 描き直し（単色の背景で、消してから同じ中身を描き、元の画像と比べる）\n", try measurements.redraw()
         ]
         try parts.joined(separator: "\n").write(to: directory.appendingPathComponent("results.md"), atomically: true, encoding: .utf8)
@@ -59,6 +59,7 @@ struct VerificationReportTests {
         ]
         for name in wallpapers { try images.wallpaper(name) }
         try images.edge("iPhone-17__iOS-27-0__light-full", placement: .behindBattery)
+        try images.edge("iPhone-17__iOS-27-0__light-full", placement: .verticalBehindBattery)
         try images.edge("iPhone-17__iOS-27-0__dark-full", placement: .awayFromInk)
     }
 }

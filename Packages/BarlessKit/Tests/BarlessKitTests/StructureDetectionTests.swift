@@ -47,6 +47,7 @@ struct StructureDetectionTests {
                 strip: try fixture.loadStrip(), pixelHeight: fixture.height, timeText: fixture.time, catalog: catalog
             )
             #expect(analysis.scan?.structure.isEmpty == true, "\(fixture)")
+            #expect(analysis.scan?.edgesAbove.isEmpty == true && analysis.scan?.edgesBelow.isEmpty == true, "\(fixture)")
             #expect(!analysis.mayLeaveTraces, "\(fixture)")
         }
     }
@@ -78,6 +79,27 @@ struct StructureDetectionTests {
         }
         #expect(fixtures.count == 48)
         #expect(warned == 32)
+    }
+
+    /// 輪郭が電池の後ろをまっすぐ縦に通る背景: 上下の基準の行で色が同じなので、輪郭はインクとして拾えない。
+    /// 基準の行の横方向の色の変化から見つけて、「跡が残りそう」と伝える
+    @Test
+    func warnsWhenVerticalEdgePassesBehindBattery() throws {
+        let catalog = try DeviceCatalog.bundled()
+        var warned = 0
+        for fixture in try Verification.representatives(in: catalog, variants: ["light-full", "dark-full"]) {
+            let image = try Self.edgeImage(fixture, placement: .verticalBehindBattery, catalog: catalog)
+            let analysis = StatusBarAnalyzer.analyze(
+                strip: image.input, pixelHeight: fixture.height, timeText: fixture.time, catalog: catalog
+            )
+            guard let resolved = analysis.decision.layout else { continue }
+            #expect(resolved.id == image.layout.id, "\(fixture)")
+            #expect(analysis.scan?.structure.isEmpty == true, "\(fixture)")
+            #expect(analysis.hasEdgeThroughElement, "\(fixture)")
+            #expect(analysis.mayLeaveTraces, "\(fixture)")
+            warned += 1
+        }
+        #expect(warned == 48)
     }
 
     /// 輪郭が、文字もアイコンも無い所を通る背景: 輪郭には触らない。消した結果は、インクが無い背景と完全に同じになる

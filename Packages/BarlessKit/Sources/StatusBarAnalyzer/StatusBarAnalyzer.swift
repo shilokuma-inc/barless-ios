@@ -49,7 +49,17 @@ public struct StatusBarAnalysis: Sendable, Equatable {
     /// 通っていると、消した後に輪郭がぼやけて残る
     public var hasStructureBehindInk: Bool {
         guard let layout = decision.layout else { return false }
-        return structureBehindElements() >= Self.visibleStructureAreaPt * layout.scale * layout.scale
+        return structureBehindElements() >= Self.visibleStructureAreaPt * layout.scale * layout.scale || hasEdgeThroughElement
+    }
+
+    /// 縦に通る輪郭が、文字・アイコンの後ろにあるか。
+    /// 帯のすぐ上の行とすぐ下の行の両方で、同じ文字・アイコンの列に、色が大きく変わるところがあれば、あるとみなす
+    var hasEdgeThroughElement: Bool {
+        guard let scan, case let .resolved(match, _) = decision else { return false }
+        return elementRects(of: match).contains { element in
+            let columns = element.x..<element.maxX
+            return scan.edgesAbove.contains(where: columns.contains) && scan.edgesBelow.contains(where: columns.contains)
+        }
     }
 
     /// 背景で埋めると跡が残りそうか（写真・模様の背景、または文字・アイコンの後ろを輪郭が通っている）

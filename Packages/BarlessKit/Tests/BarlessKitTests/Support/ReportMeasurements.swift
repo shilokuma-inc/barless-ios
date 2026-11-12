@@ -183,7 +183,7 @@ struct ReportMeasurements {
         .vertical: "縦のグラデーション", .horizontal: "横のグラデーション", .diagonal: "斜めのグラデーション", .radial: "円形のグラデーション"
     ]
     private static let edgeLabels: [EdgePlacement: String] = [
-        .behindBattery: "電池の後ろ", .awayFromInk: "文字もアイコンも無い所"
+        .behindBattery: "電池の後ろ（斜め）", .verticalBehindBattery: "電池の後ろ（縦）", .awayFromInk: "文字もアイコンも無い所"
     ]
     private static let elementLabels = ["time": "時刻", "cellular": "電波", "wifi": "Wi-Fi", "battery": "電池"]
     private static let generationLabels: [OSGeneration: String] = [.iOS18to26: "iOS 18〜26", .iOS27: "iOS 27"]

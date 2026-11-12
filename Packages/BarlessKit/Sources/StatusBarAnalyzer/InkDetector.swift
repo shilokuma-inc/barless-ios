@@ -17,6 +17,11 @@ public struct InkScan: Sendable, Equatable {
     public let mask: PixelMask
     /// インクのうち、帯を横切る背景の輪郭とみなしたもの（建物の縁・壁紙の模様など）。`mask` の一部
     public let structure: PixelMask
+    /// 背景の基準にする行（帯のすぐ上）で、横に色が大きく変わる列（px。左から）。
+    /// まっすぐ縦に通る輪郭は、上下の基準の行で色が同じなのでインクとして拾えない。その代わりに、ここで見つける
+    public let edgesAbove: [Int]
+    /// 同じく、帯のすぐ下の行で、横に色が大きく変わる列
+    public let edgesBelow: [Int]
     /// 横に 3pt 以上あいたところで分けた、インクのかたまり（左から）
     public let blobs: [PixelRect]
     public let background: BackgroundKind
@@ -40,6 +45,9 @@ struct InkDetector {
     /// 帯の上端・下端からこの幅（pt）にインクがあれば、帯の外から続く背景の輪郭とみなす。
     /// 文字とアイコンは、帯の端（基準の行）から 3pt 離れている
     static let structureEdgePt = 1
+    /// 基準の行で、1pt 離れた画素の色の差（3 チャンネルの合計）がこれ以上なら、輪郭とみなす。
+    /// 縦の輪郭が文字・アイコンの後ろを通るとき、左右の差がこのあたりから、消した跡が目に見える（docs/verification.md §3-5）
+    static let edgeContrast = 200
 
     let scale: Int
     /// 背景の基準にする行（帯のすぐ上とすぐ下）
@@ -60,7 +68,9 @@ struct InkDetector {
         // 帯が入りきらない画像（上端の切り出しが短すぎる・幅が狭すぎる）では、何も拾わない
         guard bottomRow > topRow + 1, bitmap.width > 2 * margin else {
             let empty = PixelMask(originX: 0, originY: topRow, width: max(1, bitmap.width), height: 1)
-            return InkScan(mask: empty, structure: empty, blobs: [], background: .complex, inkIsDark: true)
+            return InkScan(
+                mask: empty, structure: empty, edgesAbove: [], edgesBelow: [], blobs: [], background: .complex, inkIsDark: true
+            )
         }
         var mask = PixelMask(originX: 0, originY: topRow + 1, width: bitmap.width, height: max(1, bottomRow - topRow - 1))
         var noisy = 0
@@ -82,7 +92,23 @@ struct InkDetector {
         let blobs = Self.blobs(in: mask, gap: Self.blobGapPt * scale)
         let kind = backgroundKind(bitmap, inkCount: darker + lighter, noisyCount: noisy, blobs: blobs)
         let structure = Self.structure(in: mask, edge: Self.structureEdgePt * scale)
-        return InkScan(mask: mask, structure: structure, blobs: blobs, background: kind, inkIsDark: darker >= lighter)
+        return InkScan(
+            mask: mask,
+            structure: structure,
+            edgesAbove: edgeColumns(bitmap, row: topRow),
+            edgesBelow: edgeColumns(bitmap, row: bottomRow),
+            blobs: blobs,
+            background: kind,
+            inkIsDark: darker >= lighter
+        )
+    }
+
+    /// その行で、1pt 右の画素と色が大きく違う列
+    private func edgeColumns(_ bitmap: Bitmap, row: Int) -> [Int] {
+        let margin = Self.sideMarginPt * scale
+        return (margin..<(bitmap.width - margin - scale)).filter { x in
+            bitmap[x, row].distance(to: bitmap[x + scale, row]) >= Self.edgeContrast
+        }
     }
 
     /// インクのうち、帯の上端か下端まで届いている、ひと続きのかたまり。
