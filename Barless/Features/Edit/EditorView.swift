@@ -7,8 +7,15 @@ struct EditorView: View {
     let screenshot: EditedScreenshot
     let onClose: () -> Void
     let onSave: () -> Void
-    /// 元の画像を出しているか（画像を押している間だけ `true`）
-    @State private var isShowingOriginal = false
+    /// 画像を押している間だけ `true`。指を離したときも、ジェスチャーが取り消されたとき（着信・通知など）も `false` に戻る
+    @GestureState private var isPressing = false
+    /// 読み上げの操作で、元の画像に切り替えているか（押し続ける操作の代わり）
+    @State private var isOriginalPinned = false
+
+    /// 元の画像を出しているか
+    private var isShowingOriginal: Bool {
+        isPressing || isOriginalPinned
+    }
 
     var body: some View {
         VStack(spacing: 0) {
@@ -40,14 +47,13 @@ struct EditorView: View {
             // 押している間だけ元の画像を出す。長押しのジェスチャーは成立した時点で「押している」が切れるので、移動 0 のドラッグで代える
             .gesture(
                 DragGesture(minimumDistance: 0)
-                    .onChanged { _ in isShowingOriginal = true }
-                    .onEnded { _ in isShowingOriginal = false }
+                    .updating($isPressing) { _, state, _ in state = true }
             )
             .accessibilityElement()
             .accessibilityLabel(isShowingOriginal ? Text("Original screenshot") : Text("Screenshot with the status bar hidden"))
             .accessibilityAddTraits(.isImage)
             .accessibilityAction(named: isShowingOriginal ? Text("Show the result") : Text("Show the original")) {
-                isShowingOriginal.toggle()
+                isOriginalPinned.toggle()
             }
             .accessibilityIdentifier("editor.canvas")
         } else {
