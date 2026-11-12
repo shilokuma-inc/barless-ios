@@ -53,4 +53,5 @@
 - UI テストの中で撮った画面は、`XCUIScreen.main.screenshot().pngRepresentation` を Mac のパスにそのまま書き出せる（Simulator のテストランナーは Mac のファイルに書ける）。出力先は `TEST_RUNNER_` を付けた環境変数で渡す。PR 用の画像をこれで撮ると、iOS の画面（写真の選択・許可の確認）も写せる（2026-11-12）
 - Simulator の言語は `xcrun simctl spawn <udid> defaults write "Apple Global Domain" AppleLanguages -array ja`（と `AppleLocale ja_JP`）のあと、shutdown → boot で変わる。アプリに `-AppleLanguages` を渡すだけでは、iOS が出す確認（権限の文言）は端末の言語のままになる（2026-11-12）
 - 文字サイズを大きくした表示は `xcrun simctl ui <udid> content_size accessibility-large`、戻すのは `content_size large`（2026-11-12）
+- 時刻を「午前・午後なし」で書くのに `Date.FormatStyle` の `.hour(.defaultDigits(amPM: .omitted))` を使うと、米国（12 時間制）で `09:41` になる（ステータスバーは `9:41`）。地域の書式（`DateFormatter.dateFormat(fromTemplate: "jmm", …)`）から午前・午後の記号を除いて使うと、米国 `9:41`・日本 `14:08`・英国 `09:41` になる（2026-11-13）
 - 文言のカタログ（`Localizable.xcstrings`）は、コマンドラインのビルドでは書き換わらない（コードから文言を拾ってカタログに足すのは Xcode の画面でビルドしたときだけ）。文言を足したら、カタログにも手で足す。カタログに無い文言は、日本語でも英語のまま出る（2026-11-12）
