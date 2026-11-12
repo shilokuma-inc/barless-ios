@@ -42,6 +42,8 @@ struct SegmentPicker<Value: Hashable>: View {
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(isSelected ? Color.white : Theme.darkInkSecondary)
                         .lineLimit(1)
+                        // 文字を大きくしていて入りきらないときは、切らずに縮める
+                        .minimumScaleFactor(0.6)
                         .padding(.horizontal, fillsWidth ? 0 : 12)
                         .frame(maxWidth: fillsWidth ? .infinity : nil)
                         .padding(.vertical, 7)

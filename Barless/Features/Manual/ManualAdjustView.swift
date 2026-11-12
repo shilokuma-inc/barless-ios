@@ -271,6 +271,8 @@ private struct ManualPanel: View {
             Text(verbatim: "\(model.bandHeight) px")
                 .font(.subheadline.monospacedDigit())
                 .foregroundStyle(Theme.darkInkSecondary)
+                .lineLimit(1)
+                .fixedSize()
                 .frame(minWidth: 58, alignment: .trailing)
                 .accessibilityHidden(true)
         }

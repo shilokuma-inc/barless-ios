@@ -50,6 +50,8 @@ struct PlayPanel: View {
                     Text(verbatim: "\(model.batteryPercent)%")
                         .font(.subheadline.monospacedDigit())
                         .foregroundStyle(Theme.darkInkSecondary)
+                        .lineLimit(1)
+                        .fixedSize()
                         .frame(minWidth: 48, alignment: .trailing)
                         .accessibilityHidden(true)
                 }
