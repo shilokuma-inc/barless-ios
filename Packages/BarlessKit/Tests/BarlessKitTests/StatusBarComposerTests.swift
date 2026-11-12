@@ -208,6 +208,22 @@ struct StatusBarComposerTests {
         #expect(ImageMetrics.difference(rendered, sample.input, in: sample.below).maxAbsolute == 0)
     }
 
+    /// 透かしを渡すと、右下に載る。ステータスバーの帯と、透かしの範囲の外は変わらない
+    @Test
+    func drawsWatermarkOnlyInItsFrame() async throws {
+        let sample = try await sample("iPhone-17__iOS-27-0__dark-full")
+        var spec = PlaySpec.standard
+        spec.battery = BatterySpec(level: 0.4)
+        let plain = try sample.composer.renderBitmap(spec)
+
+        let marked = try sample.composer.renderBitmap(spec, watermark: "Barless")
+
+        let frame = try #require(WatermarkRenderer().frame(of: "Barless", width: plain.width, height: plain.height))
+        let whole = PixelRect(x: 0, y: 0, width: plain.width, height: plain.height)
+        #expect(ImageMetrics.difference(marked, plain, in: frame).maxAbsolute > 40)
+        #expect(Self.differs(marked, plain, outside: frame, in: whole) == 0)
+    }
+
     /// `StatusBarSpec` から作った中身は、時刻があれば描き直し、無ければ消す
     @Test
     func convertsFromStatusBarSpec() {

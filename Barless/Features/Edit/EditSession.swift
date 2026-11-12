@@ -35,12 +35,20 @@ final class EditSession: Identifiable {
 
     private let source: ImageSource
     private let processor: any ScreenshotProcessing
+    /// 「遊ぶ」の無料の枠。渡さなければ、アプリ全体で使うもの
+    private let allowance: PlayAllowance?
     private var hasStarted = false
 
-    init(source: @escaping ImageSource, processor: any ScreenshotProcessing = ScreenshotProcessor(), opening: Opening = Opening()) {
+    init(
+        source: @escaping ImageSource,
+        processor: any ScreenshotProcessing = ScreenshotProcessor(),
+        opening: Opening = Opening(),
+        allowance: PlayAllowance? = nil
+    ) {
         self.source = source
         self.processor = processor
         self.opening = opening
+        self.allowance = allowance
     }
 
     /// 読み込んで解析する。2 回目以降の呼び出しでは何もしない（画面が出るたびに呼ばれてもよいように）
@@ -54,7 +62,7 @@ final class EditSession: Identifiable {
             }
             let screenshot = try await processor.process(imageData: data)
             if let composer = screenshot.composer, let tidied = screenshot.tidied {
-                play = PlayModel(composer: composer, initialImage: tidied)
+                play = PlayModel(composer: composer, initialImage: tidied, allowance: allowance ?? .shared)
             }
             phase = .ready(screenshot)
         } catch {

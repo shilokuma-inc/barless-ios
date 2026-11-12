@@ -36,9 +36,15 @@ final class PlayModel {
     private(set) var wifiBars: Int?
     /// いまの中身で描いた画像
     private(set) var image: CGImage
+    /// 最後に書き出した（保存か共有をした）中身と、その日付。同じ日に同じ中身をもう一度書き出しても、無料の回数は使わない
+    private(set) var lastExport: (spec: PlaySpec, day: String)?
 
+    /// 無料の枠（1 日の回数と、透かしを入れるかどうか）
+    let allowance: PlayAllowance
     private let composer: StatusBarComposer
     private let locale: Locale
+    /// 透かしに入れる文字（アプリ名）
+    private let watermark: String
     private let renderer = PlayRenderer()
     /// まだ描いていない、いちばん新しい中身
     private var pendingSpec: PlaySpec?
@@ -47,12 +53,23 @@ final class PlayModel {
 
     /// - Parameters:
     ///   - initialImage: 最初の中身（「整える」と同じ）で描いた画像。「整える」の結果をそのまま使える
+    ///   - watermark: 透かしに入れる文字。渡さなければアプリ名（日本語の環境は「キレスク」、それ以外は「Barless」）
     ///   - locale: 時刻の書き方（12 時間制か 24 時間制か）を決める地域
-    init(composer: StatusBarComposer, initialImage: CGImage, locale: Locale = .current) {
+    init(
+        composer: StatusBarComposer,
+        initialImage: CGImage,
+        allowance: PlayAllowance = .shared,
+        watermark: String = String(localized: "Barless"),
+        locale: Locale = .current
+    ) {
         self.composer = composer
         self.image = initialImage
+        self.allowance = allowance
+        self.watermark = watermark
         self.locale = locale
         self.wifiBars = composer.canDrawWiFi ? 3 : nil
+        // 回数の保存先を読めなかった・書けなかったときは、ここでやり直す
+        allowance.sync()
     }
 
     /// 時刻を「そのまま」残せるか（時刻の位置が分からなかった画像では残せない）
@@ -90,6 +107,39 @@ final class PlayModel {
             wifiBars: wifiBars,
             battery: BatterySpec(level: Double(batteryPercent) / 100)
         )
+    }
+
+    /// 自由に決めた値（「整える」に無い値）を含むか。含む画像は、無料では透かしと回数の対象になる
+    var isCustomized: Bool {
+        spec.isCustomized
+    }
+
+    /// いまの中身を書き出すと、無料の回数を 1 回使うか（値を変えていて、今日まだ書き出していない中身のとき）
+    var usesAllowanceOnExport: Bool {
+        usesAllowance(toExport: spec)
+    }
+
+    /// いまの中身を書き出せるか。無料の回数を使い切っていると、値を変えた画像は書き出せない
+    var canExport: Bool {
+        !usesAllowanceOnExport || allowance.canExport
+    }
+
+    /// その中身を書き出すと、無料の回数を 1 回使うか。
+    /// 同じ日に同じ中身を書き出していれば使わない。日付が変わっていれば、同じ中身でも使う
+    private func usesAllowance(toExport spec: PlaySpec) -> Bool {
+        guard spec.isCustomized, !allowance.isPro else { return false }
+        guard let lastExport else { return true }
+        return lastExport.spec != spec || lastExport.day != allowance.today
+    }
+
+    /// `spec` の中身を書き出した（保存か共有をした）。必要なら、無料の回数を 1 回使う。
+    ///
+    /// 書き出しの画面を開いたときの中身を渡す。保存が終わる前に編集へ戻って値を変えても、
+    /// 書き出した画像の中身で数えるため
+    func markExported(_ spec: PlaySpec) {
+        guard usesAllowance(toExport: spec) else { return }
+        allowance.recordExport()
+        lastExport = (spec, allowance.today)
     }
 
     func setTimeChoice(_ choice: TimeChoice) {
@@ -142,7 +192,9 @@ final class PlayModel {
         renderTask = Task {
             while let next = pendingSpec {
                 pendingSpec = nil
-                if let rendered = try? await renderer.render(next, with: composer) {
+                // 無料では、値を変えた画像に透かしを入れる
+                let mark = allowance.addsWatermark && next.isCustomized ? watermark : nil
+                if let rendered = try? await renderer.render(next, watermark: mark, with: composer) {
                     image = rendered
                 }
             }
@@ -154,8 +206,8 @@ final class PlayModel {
 /// 描き直しの処理。画像の全体を作るので、メインスレッドの外で動かす
 nonisolated struct PlayRenderer: Sendable {
     @concurrent
-    func render(_ spec: PlaySpec, with composer: StatusBarComposer) async throws -> CGImage {
-        try composer.render(spec)
+    func render(_ spec: PlaySpec, watermark: String?, with composer: StatusBarComposer) async throws -> CGImage {
+        try composer.render(spec, watermark: watermark)
     }
 }
 

@@ -1,6 +1,28 @@
 {
   "sourceLanguage": "en",
   "strings": {
+    "%lld free left today": {
+      "comment": "書き出しの画面で、無料の回数を使った後に出す残りの回数",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無料 残り %lld 回"
+          }
+        }
+      }
+    },
+    "**%lld free left today** · adds a watermark": {
+      "comment": "「遊ぶ」の上に出す、無料の残りの回数と透かしの案内。太字の部分は Markdown",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "**無料 残り %lld 回**・透かしが入ります"
+          }
+        }
+      }
+    },
     "9:41 · 4 bars · Full Wi-Fi · Battery 100%": {
       "comment": "「整える」で描き直す中身",
       "localizations": {
@@ -375,6 +397,17 @@
         }
       }
     },
+    "Free exports are limited to %lld a day. They reset tomorrow.": {
+      "comment": "「遊ぶ」で、無料の回数を使い切ったときの案内",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "無料で書き出せるのは 1 日 %lld 回までで、明日また使えます"
+          }
+        }
+      }
+    },
     "Height": {
       "comment": "手動調整の項目。ステータスバーの帯の高さ",
       "localizations": {
@@ -547,6 +580,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "保存しました"
+          }
+        }
+      }
+    },
+    "Saving or sharing uses 1 free export (%lld left today)": {
+      "comment": "書き出しの画面で、無料の回数を使う前に出す案内",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "保存か共有で無料の 1 回を使います（残り %lld 回）"
           }
         }
       }

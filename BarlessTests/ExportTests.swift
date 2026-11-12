@@ -2,6 +2,7 @@
 import CoreGraphics
 import Foundation
 import ImageIOKit
+import os
 import Testing
 
 /// 書き出しの状態と、書き出すファイル
@@ -66,6 +67,29 @@ struct ExportModelTests {
 
     private static func temporaryDirectory() -> URL {
         FileManager.default.temporaryDirectory.appendingPathComponent("ExportTests-\(UUID().uuidString)", isDirectory: true)
+    }
+
+    /// 保存か共有をしたことは、最初の 1 回だけ知らせる（保存してから共有しても、1 回と数える）。保存に失敗したときは知らせない
+    @Test
+    func reportsFirstExportOnce() async throws {
+        let counter = OSAllocatedUnfairLock(initialState: 0)
+        let failing = try model(saver: StubSaver(error: PhotoSaveError.notAuthorized))
+        failing.onFirstExport = { counter.withLock { $0 += 1 } }
+        await failing.prepare()
+        await failing.save()
+        #expect(!failing.hasExported)
+        #expect(counter.withLock { $0 } == 0)
+
+        let model = try model()
+        model.onFirstExport = { counter.withLock { $0 += 1 } }
+        await model.prepare()
+        await model.save()
+        #expect(model.saveState == .saved && model.hasExported)
+        // 共有を押したとき
+        model.noteExported()
+        model.noteExported()
+
+        #expect(counter.withLock { $0 } == 1)
     }
 
     /// Software 欄にアプリ名が入り、位置情報は入らない（仕様書 §5-4a）

@@ -21,6 +21,10 @@ struct PlayPanel: View {
 
     private var rows: some View {
         VStack(spacing: 0) {
+            if !model.allowance.isPro {
+                quota
+                    .padding(.bottom, 10)
+            }
             OptionSeparator()
             OptionRow("Time") {
                 SegmentPicker(
@@ -86,6 +90,26 @@ struct PlayPanel: View {
                     .accessibilityIdentifier("play.wifi.unavailable")
             }
         }
+    }
+}
+
+extension PlayPanel {
+    /// 無料の残りの回数と、透かしが入ること。値を変える前に分かるように、いつも出しておく
+    @ViewBuilder fileprivate var quota: some View {
+        let remaining = model.allowance.remainingToday
+        Group {
+            if remaining > 0 || !model.usesAllowanceOnExport {
+                Text("**\(remaining) free left today** · adds a watermark")
+                    .foregroundStyle(Theme.darkInkSecondary)
+            } else {
+                // 使い切っていて、いまの中身は書き出せない
+                Text("Free exports are limited to \(PlayAllowance.dailyLimit) a day. They reset tomorrow.")
+                    .foregroundStyle(Theme.warning)
+            }
+        }
+        .font(.footnote)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .accessibilityIdentifier("play.quota")
     }
 }
 

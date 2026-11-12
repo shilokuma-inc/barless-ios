@@ -2,19 +2,32 @@ import CoreGraphics
 import ImageIOKit
 import SwiftUI
 
+/// 書き出しで使う、無料の枠（「遊ぶ」で値を変えた画像を、無料で書き出すときだけ）
+struct ExportFreeUse {
+    let allowance: PlayAllowance
+    /// 保存か共有をしたときに呼ぶ
+    let onExport: () -> Void
+}
+
 /// 書き出し。写真への保存が主で、その下に共有を置く
 struct ExportView: View {
     let image: CGImage
     let onBack: () -> Void
     let onDone: () -> Void
     @State private var model: ExportModel
+    /// 無料の回数を使う書き出しなら、その枠。使わない書き出し（「隠す」「整える」など）では `nil`。
+    /// 画面を開いたときのものを持ち続ける（回数を使った後も、残りの回数を出しておくため）
+    @State private var freeUse: ExportFreeUse?
     @Environment(\.openURL) private var openURL
 
-    init(image: CGImage, onBack: @escaping () -> Void, onDone: @escaping () -> Void) {
+    init(image: CGImage, freeUse: ExportFreeUse? = nil, onBack: @escaping () -> Void, onDone: @escaping () -> Void) {
         self.image = image
         self.onBack = onBack
         self.onDone = onDone
-        _model = State(initialValue: ExportModel(image: image))
+        let model = ExportModel(image: image)
+        model.onFirstExport = freeUse?.onExport
+        _model = State(initialValue: model)
+        _freeUse = State(initialValue: freeUse)
     }
 
     var body: some View {
@@ -86,6 +99,20 @@ struct ExportView: View {
                     .foregroundStyle(Theme.warning)
                     .accessibilityIdentifier("export.prepareFailed")
             }
+            if let freeUse {
+                // 無料の回数を使う書き出し。使う前と後で、残りの回数を出す
+                Group {
+                    if model.hasExported {
+                        Text("\(freeUse.allowance.remainingToday) free left today")
+                    } else {
+                        Text("Saving or sharing uses 1 free export (\(freeUse.allowance.remainingToday) left today)")
+                    }
+                }
+                .font(.footnote)
+                .foregroundStyle(Theme.darkInkSecondary)
+                .multilineTextAlignment(.center)
+                .accessibilityIdentifier("export.freeUse")
+            }
         }
         .padding(.horizontal, Theme.margin)
     }
@@ -113,6 +140,8 @@ struct ExportView: View {
                 label
             }
             .buttonStyle(BlockButtonStyle(kind: .secondary))
+            // 共有の画面を出したところで、書き出したと数える（その先で取りやめたかどうかは分からない）
+            .simultaneousGesture(TapGesture().onEnded { model.noteExported() })
             .accessibilityIdentifier("export.share")
         } else {
             Button {} label: {

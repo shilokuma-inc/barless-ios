@@ -54,6 +54,7 @@ extension EditTopBar where Trailing == EmptyView {
 struct TopBarPillButton: View {
     let title: LocalizedStringKey
     let action: () -> Void
+    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
         Button(action: action) {
@@ -63,6 +64,8 @@ struct TopBarPillButton: View {
                 .padding(.horizontal, 16)
                 .padding(.vertical, 7)
                 .background(.white, in: Capsule())
+                // 押せないときは薄くする
+                .opacity(isEnabled ? 1 : 0.35)
         }
         .buttonStyle(PressableButtonStyle())
     }

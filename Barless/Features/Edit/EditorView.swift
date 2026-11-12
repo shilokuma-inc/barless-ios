@@ -31,6 +31,8 @@ struct EditorView: View {
             EditTopBar(leading: .close(onClose)) {
                 if screenshot.hasResult {
                     TopBarPillButton(title: "Save", action: onSave)
+                        // 「遊ぶ」で値を変えた画像は、無料の回数を使い切っていると書き出せない
+                        .disabled(mode == .play && play?.canExport == false)
                         .accessibilityIdentifier("editor.save")
                 }
             }
