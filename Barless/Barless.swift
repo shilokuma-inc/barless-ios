@@ -19,7 +19,7 @@ struct Barless: App {
     @ViewBuilder private var rootView: some View {
         switch ScreenshotDemo.scene {
         case .home, nil:
-            ContentView()
+            HomeView()
         }
     }
 }

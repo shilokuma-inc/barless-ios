@@ -14,10 +14,10 @@ final class BarlessUITests: XCTestCase {
     }
 
     @MainActor
-    func testLaunchShowsContentView() throws {
+    func testLaunchShowsHome() throws {
         let app = XCUIApplication()
         app.launch()
 
-        XCTAssertTrue(app.staticTexts["Hello, world!"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["home.pick"].waitForExistence(timeout: 10))
     }
 }
