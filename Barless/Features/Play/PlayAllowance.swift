@@ -126,32 +126,92 @@ nonisolated final class InMemoryPlayUsageStore: PlayUsageStoring {
     }
 }
 
-/// キーチェーンに持つ保存先。アプリを入れ直しても、その日の回数が残る
-nonisolated struct KeychainPlayUsageStore: PlayUsageStoring {
-    var service = "jp.shilokuma.Barless.play-usage"
-    var account = "daily"
+/// キーチェーンの読み書き（テストで、失敗するものに差し替える）
+nonisolated protocol KeychainAccessing: Sendable {
+    /// 読めたらデータ、項目が無ければ `nil`。それ以外の失敗は投げる
+    func read(service: String, account: String) throws -> Data?
+    func write(_ data: Data, service: String, account: String) throws
+    func delete(service: String, account: String)
+}
 
-    private var query: [CFString: Any] {
+/// キーチェーンの失敗（結果のコードを持つ）
+nonisolated struct KeychainError: Error, Equatable {
+    let status: OSStatus
+}
+
+/// iOS のキーチェーン
+nonisolated struct SystemKeychain: KeychainAccessing {
+    private func query(service: String, account: String) -> [CFString: Any] {
         [kSecClass: kSecClassGenericPassword, kSecAttrService: service, kSecAttrAccount: account]
     }
 
-    func load() -> PlayUsage? {
+    func read(service: String, account: String) throws -> Data? {
         var item: CFTypeRef?
-        let request = query.merging([kSecReturnData: true, kSecMatchLimit: kSecMatchLimitOne]) { $1 }
-        guard SecItemCopyMatching(request as CFDictionary, &item) == errSecSuccess, let data = item as? Data else { return nil }
-        return try? JSONDecoder().decode(PlayUsage.self, from: data)
+        let request = query(service: service, account: account).merging([kSecReturnData: true, kSecMatchLimit: kSecMatchLimitOne]) { $1 }
+        let status = SecItemCopyMatching(request as CFDictionary, &item)
+        if status == errSecItemNotFound { return nil }
+        guard status == errSecSuccess, let data = item as? Data else { throw KeychainError(status: status) }
+        return data
+    }
+
+    func write(_ data: Data, service: String, account: String) throws {
+        let query = query(service: service, account: account)
+        var status = SecItemUpdate(query as CFDictionary, [kSecValueData: data] as CFDictionary)
+        if status == errSecItemNotFound {
+            let attributes = query.merging([kSecValueData: data, kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlock]) { $1 }
+            status = SecItemAdd(attributes as CFDictionary, nil)
+        }
+        guard status == errSecSuccess else { throw KeychainError(status: status) }
+    }
+
+    func delete(service: String, account: String) {
+        SecItemDelete(query(service: service, account: account) as CFDictionary)
+    }
+}
+
+/// キーチェーンに持つ保存先。アプリを入れ直しても、その日の回数が残る。
+///
+/// キーチェーンを読めない・書けないときに、回数を「まだ使っていない」と扱わないように、同じ回数を
+/// アプリの設定（`UserDefaults`）にも控えておく。読むときは、両方のうち進んでいるほうを使う
+nonisolated struct KeychainPlayUsageStore: PlayUsageStoring {
+    var service = "jp.shilokuma.Barless.play-usage"
+    var account = "daily"
+    var keychain: any KeychainAccessing = SystemKeychain()
+    /// 控えを置く `UserDefaults` の名前。`nil` なら標準のもの
+    var backupSuiteName: String?
+
+    private var backup: UserDefaults {
+        backupSuiteName.flatMap(UserDefaults.init(suiteName:)) ?? .standard
+    }
+
+    private var backupKey: String {
+        "\(service).\(account)"
+    }
+
+    func load() -> PlayUsage? {
+        let stored = (try? keychain.read(service: service, account: account)).flatMap { $0 }.flatMap(Self.decode)
+        let copied = backup.data(forKey: backupKey).flatMap(Self.decode)
+        guard let stored else { return copied }
+        guard let copied else { return stored }
+        // 日付が新しいほう、同じ日なら回数が多いほう
+        if stored.day != copied.day { return stored.day > copied.day ? stored : copied }
+        return stored.count >= copied.count ? stored : copied
     }
 
     func save(_ usage: PlayUsage) {
         guard let data = try? JSONEncoder().encode(usage) else { return }
-        let status = SecItemUpdate(query as CFDictionary, [kSecValueData: data] as CFDictionary)
-        guard status == errSecItemNotFound else { return }
-        let attributes = query.merging([kSecValueData: data, kSecAttrAccessible: kSecAttrAccessibleAfterFirstUnlock]) { $1 }
-        SecItemAdd(attributes as CFDictionary, nil)
+        // キーチェーンに書けなくても、控えには残す
+        backup.set(data, forKey: backupKey)
+        try? keychain.write(data, service: service, account: account)
     }
 
     /// 保存した回数を消す（テストの後片付け）
     func remove() {
-        SecItemDelete(query as CFDictionary)
+        keychain.delete(service: service, account: account)
+        backup.removeObject(forKey: backupKey)
+    }
+
+    private static func decode(_ data: Data) -> PlayUsage? {
+        try? JSONDecoder().decode(PlayUsage.self, from: data)
     }
 }

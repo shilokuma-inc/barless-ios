@@ -1,38 +1,14 @@
 @testable import Barless
 import Foundation
-import os
 import Testing
 
 /// 「遊ぶ」で値を変えた画像の、無料の枠（1 日 3 回）
 @MainActor
 struct PlayAllowanceTests {
-    /// テストで進められる時計
-    nonisolated private final class Clock: Sendable {
-        private let date = OSAllocatedUnfairLock(initialState: Date(timeIntervalSince1970: 1_800_000_000))
-
-        var now: Date {
-            date.withLock { $0 }
-        }
-
-        func advance(hours: Double) {
-            date.withLock { $0 = $0.addingTimeInterval(hours * 3600) }
-        }
-    }
-
-    nonisolated private struct FixedPlan: ProStatusProviding {
-        let isPro: Bool
-    }
-
-    private func allowance(store: any PlayUsageStoring, clock: Clock, isPro: Bool = false) -> PlayAllowance {
-        var calendar = Calendar(identifier: .gregorian)
-        calendar.timeZone = .gmt
-        return PlayAllowance(store: store, proStatus: FixedPlan(isPro: isPro), calendar: calendar) { clock.now }
-    }
-
     /// 1 日に 3 回まで書き出せる。透かしは入る
     @Test
     func allowsThreeExportsADay() {
-        let allowance = allowance(store: InMemoryPlayUsageStore(), clock: Clock())
+        let allowance = TestClock().allowance()
 
         #expect(PlayAllowance.dailyLimit == 3)
         #expect(allowance.addsWatermark)
@@ -50,8 +26,8 @@ struct PlayAllowanceTests {
     /// 端末の日付が変わると、回数が戻る
     @Test
     func resetsWhenDateChanges() {
-        let clock = Clock()
-        let allowance = allowance(store: InMemoryPlayUsageStore(), clock: clock)
+        let clock = TestClock()
+        let allowance = clock.allowance()
         allowance.recordExport()
         allowance.recordExport()
         allowance.recordExport()
@@ -67,13 +43,13 @@ struct PlayAllowanceTests {
     /// 回数は保存先に残り、アプリを起動し直しても続きから数える
     @Test
     func keepsCountAcrossLaunches() {
-        let clock = Clock()
+        let clock = TestClock()
         let store = InMemoryPlayUsageStore()
-        let first = allowance(store: store, clock: clock)
+        let first = clock.allowance(store: store)
         first.recordExport()
         first.recordExport()
 
-        let second = allowance(store: store, clock: clock)
+        let second = clock.allowance(store: store)
 
         #expect(second.usedToday == 2 && second.remainingToday == 1)
     }
@@ -82,7 +58,7 @@ struct PlayAllowanceTests {
     @Test
     func proHasNoLimit() {
         let store = InMemoryPlayUsageStore()
-        let allowance = allowance(store: store, clock: Clock(), isPro: true)
+        let allowance = TestClock().allowance(store: store, isPro: true)
 
         #expect(allowance.isPro && !allowance.addsWatermark && allowance.canExport)
         allowance.recordExport()
@@ -92,7 +68,8 @@ struct PlayAllowanceTests {
     /// キーチェーンの保存先は、書いた回数を読み戻せる
     @Test
     func keychainStoreRoundTrips() {
-        let store = KeychainPlayUsageStore(service: "jp.shilokuma.Barless.tests.\(UUID().uuidString)")
+        let name = "jp.shilokuma.Barless.tests.\(UUID().uuidString)"
+        let store = KeychainPlayUsageStore(service: name, backupSuiteName: name)
         defer { store.remove() }
 
         #expect(store.load() == nil)
@@ -102,5 +79,44 @@ struct PlayAllowanceTests {
         #expect(store.load() == PlayUsage(day: "2026-11-13", count: 2))
         store.remove()
         #expect(store.load() == nil)
+    }
+
+    /// キーチェーンを読めない・書けないときも、回数を「まだ使っていない」と扱わない（控えから読む）
+    @Test
+    func keepsCountWhenKeychainFails() {
+        let name = "jp.shilokuma.Barless.tests.\(UUID().uuidString)"
+        let keychain = FakeKeychain()
+        let store = KeychainPlayUsageStore(service: name, keychain: keychain, backupSuiteName: name)
+        defer { store.remove() }
+
+        // 書けないときも、控えに残る
+        keychain.setFailure(read: false, write: true)
+        store.save(PlayUsage(day: "2026-11-13", count: 2))
+        #expect(store.load() == PlayUsage(day: "2026-11-13", count: 2))
+
+        // 読めないときも、控えの回数を返す
+        keychain.setFailure(read: true, write: false)
+        store.save(PlayUsage(day: "2026-11-13", count: 3))
+        #expect(store.load() == PlayUsage(day: "2026-11-13", count: 3))
+    }
+
+    /// キーチェーンと控えで回数が違うときは、進んでいるほう（日付が新しいほう、同じ日なら回数が多いほう）を使う
+    @Test
+    func usesTheMoreAdvancedCount() throws {
+        let name = "jp.shilokuma.Barless.tests.\(UUID().uuidString)"
+        let keychain = FakeKeychain()
+        let store = KeychainPlayUsageStore(service: name, keychain: keychain, backupSuiteName: name)
+        defer { store.remove() }
+        func encoded(_ usage: PlayUsage) throws -> Data { try JSONEncoder().encode(usage) }
+
+        // アプリを入れ直した後（控えは消えて、キーチェーンだけに残っている）
+        try keychain.write(encoded(PlayUsage(day: "2026-11-13", count: 3)), service: name, account: "daily")
+        #expect(store.load() == PlayUsage(day: "2026-11-13", count: 3))
+
+        // キーチェーンに書けなかった日の後（控えのほうが新しい）
+        keychain.setFailure(read: false, write: true)
+        store.save(PlayUsage(day: "2026-11-14", count: 1))
+        keychain.setFailure(read: false, write: false)
+        #expect(store.load() == PlayUsage(day: "2026-11-14", count: 1))
     }
 }
