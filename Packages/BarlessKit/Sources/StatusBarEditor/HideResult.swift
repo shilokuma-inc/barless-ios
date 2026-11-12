@@ -16,19 +16,20 @@ public enum HideFailure: String, Sendable, Equatable, CaseIterable {
 public struct HiddenStatusBar: Sendable, Equatable {
     /// 判定した配置（機種グループ × iOS の世代）
     public let layout: StatusBarLayout
-    /// 背景の種類。`complex`（写真・模様）のときは、輪郭がぼやけるなどの跡が残ることがある
+    /// 背景の種類
     public let background: BackgroundKind
     /// ステータスバーの帯の高さ（px。画像の上端から）。画面で帯に印を付けるのに使う
     public let bandHeight: Int
+    /// 消した跡が残りそうか。背景が写真・模様（`complex`）のときと、
+    /// 建物の縁のような輪郭が文字・アイコンの後ろを通っているとき（背景の種類はグラデーションでも）に `true`
+    public let mayLeaveTraces: Bool
 
-    public init(layout: StatusBarLayout, background: BackgroundKind, bandHeight: Int) {
+    public init(layout: StatusBarLayout, background: BackgroundKind, bandHeight: Int, mayLeaveTraces: Bool) {
         self.layout = layout
         self.background = background
         self.bandHeight = bandHeight
+        self.mayLeaveTraces = mayLeaveTraces
     }
-
-    /// 跡が残りやすい背景か
-    public var mayLeaveTraces: Bool { background == .complex }
 }
 
 public enum HideOutcome: Sendable, Equatable {

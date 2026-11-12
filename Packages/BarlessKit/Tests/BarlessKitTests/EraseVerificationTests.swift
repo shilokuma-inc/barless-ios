@@ -28,11 +28,13 @@ struct EraseVerificationTests {
             let strip = try fixture.loadStrip()
             let input = try Synthetic.recompressed(strip, quality: 0.7)
             let background = Verification.flatBackground(of: strip, scale: fixture.scale)
-            let (_, result) = try #require(
+            let (output, result) = try #require(
                 Verification.erase(fixture, input: input, background: background, kind: "jpeg", catalog: catalog), "\(fixture)"
             )
             #expect(result.isLayoutCorrect, "\(fixture)")
             #expect(result.maxDifference <= 32, "\(fixture): 差の最大 \(result.maxDifference)")
+            // 文字のまわりのにじみを、背景の輪郭と取り違えない
+            #expect(!output.analysis.mayLeaveTraces, "\(fixture)")
         }
     }
 
