@@ -125,6 +125,22 @@ struct ImageCodecTests {
         #expect(image.width == 20 && image.height == 40)
     }
 
+    /// 大きさは、画素を展開しなくても読める。向きの情報が付いていれば、見たとおりの縦横になる
+    @Test
+    func readsPixelSizeWithoutDecoding() throws {
+        let plain = try #require(ImageDecoder.pixelSize(of: ImageEncoder.encode(sample())))
+        #expect(plain == (40, 20))
+
+        let output = NSMutableData()
+        let destination = try #require(CGImageDestinationCreateWithData(output, UTType.jpeg.identifier as CFString, 1, nil))
+        CGImageDestinationAddImage(destination, try sample(), [kCGImagePropertyOrientation: 6] as CFDictionary)
+        #expect(CGImageDestinationFinalize(destination))
+        let rotated = try #require(ImageDecoder.pixelSize(of: output as Data))
+        #expect(rotated == (20, 40))
+
+        #expect(ImageDecoder.pixelSize(of: Data([0, 1, 2, 3])) == nil)
+    }
+
     /// HEIC でも書き出せて、Software 欄も残る
     @Test
     func encodesHEIC() throws {

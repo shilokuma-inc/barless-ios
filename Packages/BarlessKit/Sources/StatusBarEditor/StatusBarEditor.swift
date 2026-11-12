@@ -8,10 +8,20 @@ import StatusBarAnalyzer
 ///
 /// アプリの画面・共有シート拡張・ショートカットから同じものを呼ぶ。処理はすべて端末の中で行う。
 public struct StatusBarEditor: Sendable {
+    private let catalog: DeviceCatalog
     private let analyzer: StatusBarAnalyzer
 
     public init(catalog: DeviceCatalog, recognizer: any TimeTextRecognizing = VisionTimeTextRecognizer()) {
+        self.catalog = catalog
         self.analyzer = StatusBarAnalyzer(catalog: catalog, recognizer: recognizer)
+    }
+
+    /// 大きさ（px）だけで「消せない」と分かるなら、その理由を返す。
+    ///
+    /// 画素を展開する前に呼べば、カメラの写真のような巨大な画像を、原寸で持たずに済む
+    public func failureKnownFromSize(pixelWidth: Int, pixelHeight: Int) -> HideFailure? {
+        guard catalog.candidates(pixelWidth: pixelWidth, pixelHeight: pixelHeight).isEmpty else { return nil }
+        return catalog.unsupportedScreen(pixelWidth: pixelWidth, pixelHeight: pixelHeight) == nil ? .unknownSize : .unsupportedScreen
     }
 
     /// ステータスバーの文字とアイコンを、背景になじませて消す（「隠す」の「埋める」）。

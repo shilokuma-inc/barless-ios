@@ -126,6 +126,27 @@ struct StatusBarEditorTests {
         #expect(result.image === image)
     }
 
+    /// 大きさだけで消せないと分かる画像は、画素を展開する前に理由が分かる
+    @Test(arguments: [
+        (1000, 2000, HideFailure.unknownSize),
+        (8064, 6048, HideFailure.unknownSize),
+        (1398, 2034, HideFailure.unsupportedScreen)
+    ])
+    func tellsFailureFromSizeAlone(width: Int, height: Int, expected: HideFailure) throws {
+        let editor = StatusBarEditor(catalog: try DeviceCatalog.bundled())
+        #expect(editor.failureKnownFromSize(pixelWidth: width, pixelHeight: height) == expected)
+    }
+
+    /// 対応している大きさは、解析するまで分からない
+    @Test
+    func cannotTellFromSizeForSupportedScreens() throws {
+        let catalog = try DeviceCatalog.bundled()
+        let editor = StatusBarEditor(catalog: catalog)
+        for layout in catalog.layouts {
+            #expect(editor.failureKnownFromSize(pixelWidth: layout.pixelWidth, pixelHeight: layout.pixelHeight) == nil)
+        }
+    }
+
     /// 背景の色のまわりで、画素ごとに少しずつ色が揺れる画像（写真や模様の代わり）
     private static func noise(width: Int, height: Int, base: RGB) -> Bitmap {
         var bitmap = Bitmap(width: width, height: height, fill: base)

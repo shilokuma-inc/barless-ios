@@ -102,16 +102,19 @@ struct StatusBarHiderTests {
         #expect(band.allSatisfy { after[$0.x, $0.y] == background })
     }
 
-    /// 対応していない大きさの画像は、消さずに、縮めた画像を画面用に返す
-    @Test
-    func returnsPreviewWhenSizeIsUnknown() async throws {
-        let large = try ImageEncoder.encode(Bitmap(width: 3000, height: 400).makeCGImage())
+    /// 対応していない大きさ・対象外の機種の画像は、消さずに、縮めた画像を画面用に返す
+    @Test(arguments: [
+        (3000, 400, HideFailure.unknownSize),
+        (1398, 2034, HideFailure.unsupportedScreen)
+    ])
+    func returnsPreviewWhenSizeIsNotSupported(width: Int, height: Int, expected: HideFailure) async throws {
+        let data = try ImageEncoder.encode(Bitmap(width: width, height: height).makeCGImage())
 
-        let result = try await StatusBarHider().hide(imageData: large)
+        let result = try await StatusBarHider().hide(imageData: data)
 
-        #expect(result.outcome == .notHidden(.unknownSize))
+        #expect(result.outcome == .notHidden(expected))
         #expect(result.hidden == nil)
-        #expect(result.after.width == StatusBarHider.previewMaxPixelSize)
+        #expect(max(result.after.width, result.after.height) == min(max(width, height), StatusBarHider.previewMaxPixelSize))
         #expect(result.before === result.after)
     }
 

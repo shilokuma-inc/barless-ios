@@ -43,6 +43,19 @@ public enum ImageDecoder {
         try decode(data: Data(contentsOf: url))
     }
 
+    /// 画像の大きさ（px）を、画素を展開せずに読む。向きの情報が付いていれば、見たとおりの縦横で返す
+    public static func pixelSize(of data: Data) -> (width: Int, height: Int)? {
+        guard let source = CGImageSourceCreateWithData(data as CFData, nil),
+              let properties = CGImageSourceCopyPropertiesAtIndex(source, 0, nil) as? [CFString: Any],
+              let width = properties[kCGImagePropertyPixelWidth] as? Int,
+              let height = properties[kCGImagePropertyPixelHeight] as? Int else {
+            return nil
+        }
+        // 5〜8 は、90 度回して表示する向き
+        let orientation = properties[kCGImagePropertyOrientation] as? Int ?? 1
+        return orientation >= 5 ? (height, width) : (width, height)
+    }
+
     /// 長辺が `maxPixelSize` 以下になるように縮小して読み込む（プレビュー用。原寸を展開しないのでメモリを抑えられる）
     public static func decodeThumbnail(data: Data, maxPixelSize: Int) throws -> CGImage {
         guard let source = CGImageSourceCreateWithData(data as CFData, nil) else {
