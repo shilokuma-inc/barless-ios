@@ -125,6 +125,15 @@ struct ImageCodecTests {
         #expect(image.width == 20 && image.height == 40)
     }
 
+    /// HEIC でも書き出せて、Software 欄も残る
+    @Test
+    func encodesHEIC() throws {
+        let data = try ImageEncoder.encode(sample(), options: ExportOptions(format: .heic, softwareName: "Barless"))
+        let image = try ImageDecoder.decode(data: data)
+        #expect(image.width == 40 && image.height == 20)
+        #expect(ImageMetadata.softwareName(of: data) == "Barless")
+    }
+
     @Test
     func rejectsBrokenData() {
         #expect(throws: ImageCodecError.cannotDecode) {
