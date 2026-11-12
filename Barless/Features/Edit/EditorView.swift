@@ -69,7 +69,7 @@ private struct HiddenSummaryView: View {
 
     var body: some View {
         VStack(spacing: 8) {
-            statusRow(color: Theme.accent, text: Text("Detected as \(modelName) size · \(generationName)"))
+            statusRow(color: Theme.accent, text: Text("Detected as \(screenSize)-inch · \(generationName)"))
                 .accessibilityIdentifier("editor.detected")
             if hidden.mayLeaveTraces {
                 statusRow(color: Theme.warning, text: Text("The background is a photo or pattern, so some traces may remain"))
@@ -100,9 +100,10 @@ private struct HiddenSummaryView: View {
         .accessibilityElement(children: .combine)
     }
 
-    /// 実測した機種の名前。同じ大きさの画面を持つ機種はほかにもあるので、「〜相当」として出す
-    private var modelName: String {
-        hidden.layout.models.first ?? "iPhone"
+    /// 画面の大きさ（「6.3」）。機種名は出さない。同じ大きさの画面を持つ機種がいくつもあり、
+    /// カタログの機種名（実測した機種）を出すと、別の機種で撮った人には誤った判定に見えるため
+    private var screenSize: String {
+        hidden.layout.screenInches.formatted(.number.precision(.fractionLength(1)))
     }
 
     private var generationName: String {

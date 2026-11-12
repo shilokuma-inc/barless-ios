@@ -231,7 +231,7 @@ struct LocalizationTests {
     @Test(arguments: [
         ("Choose a screenshot", "スクショを選ぶ"),
         ("Save to Photos", "写真に保存"),
-        ("Detected as %@ size · %@", "%1$@ 相当・%2$@ として認識"),
+        ("Detected as %@-inch · %@", "%1$@ インチ・%2$@ として認識"),
         ("iOS 18–26", "iOS 18〜26")
     ])
     func japaneseStringsAreBundled(key: String, expected: String) throws {

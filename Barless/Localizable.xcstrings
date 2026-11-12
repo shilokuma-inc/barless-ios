@@ -177,13 +177,13 @@
         }
       }
     },
-    "Detected as %@ size · %@": {
-      "comment": "判定の結果。1 つ目は機種名（iPhone 17）、2 つ目は iOS の世代（iOS 27）",
+    "Detected as %@-inch · %@": {
+      "comment": "判定の結果。1 つ目は画面の大きさ（6.3）、2 つ目は iOS の世代（iOS 27）",
       "localizations": {
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "%1$@ 相当・%2$@ として認識"
+            "value": "%1$@ インチ・%2$@ として認識"
           }
         }
       }
