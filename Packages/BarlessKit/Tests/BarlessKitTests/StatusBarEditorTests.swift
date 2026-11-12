@@ -58,16 +58,16 @@ struct StatusBarEditorTests {
         let input = fullSize(strip, fixture: fixture)
         let editor = StatusBarEditor(catalog: catalog, recognizer: FixedTime(time: fixture.time))
 
-        let result = try await editor.hide(input.makeCGImage())
+        let result = try await editor.edit(input.makeCGImage())
 
-        let hidden = try #require(result.hidden, "\(fixture): \(result.outcome)")
+        let hidden = try #require(result.statusBar, "\(fixture): \(result.outcome)")
         let layout = try #require(fixture.expectedLayout(in: catalog))
         #expect(hidden.layout.id == layout.id)
         #expect(hidden.background == .solid)
         #expect(!hidden.mayLeaveTraces)
         #expect(hidden.bandHeight == layout.inkTop + layout.inkBottom)
         // 帯の中は背景の色だけになり、帯の外は 1 画素も変わらない
-        let output = try Bitmap(cgImage: result.image)
+        let output = try Bitmap(cgImage: result.hidden)
         #expect(output.width == fixture.width && output.height == fixture.height)
         let background = Verification.flatBackground(of: input, scale: fixture.scale)
         let band = Verification.band(of: layout)
@@ -83,9 +83,9 @@ struct StatusBarEditorTests {
         let fixture = try fixture(named: "iPhone-17__iOS-27-0__dark-full")
         let input = fullSize(try fixture.loadStrip(), fixture: fixture)
 
-        let result = try await StatusBarEditor(catalog: catalog).hide(input.makeCGImage())
+        let result = try await StatusBarEditor(catalog: catalog).edit(input.makeCGImage())
 
-        #expect(result.hidden?.layout.id == fixture.expectedLayout(in: catalog)?.id)
+        #expect(result.statusBar?.layout.id == fixture.expectedLayout(in: catalog)?.id)
     }
 
     /// 背景が細かい模様のときも消すが、跡が残りうることを伝える
@@ -100,9 +100,9 @@ struct StatusBarEditorTests {
         let input = fullSize(noisyStrip, fixture: fixture, background: noise)
         let editor = StatusBarEditor(catalog: catalog, recognizer: FixedTime(time: fixture.time))
 
-        let result = try await editor.hide(input.makeCGImage())
+        let result = try await editor.edit(input.makeCGImage())
 
-        let hidden = try #require(result.hidden, "\(result.outcome)")
+        let hidden = try #require(result.statusBar, "\(result.outcome)")
         #expect(hidden.layout.id == fixture.expectedLayout(in: catalog)?.id)
         #expect(hidden.background == .complex)
         #expect(hidden.mayLeaveTraces)
@@ -122,9 +122,9 @@ struct StatusBarEditorTests {
         let input = fullSize(inked, fixture: fixture, background: background)
         let editor = StatusBarEditor(catalog: catalog, recognizer: FixedTime(time: fixture.time))
 
-        let result = try await editor.hide(input.makeCGImage())
+        let result = try await editor.edit(input.makeCGImage())
 
-        let hidden = try #require(result.hidden, "\(result.outcome)")
+        let hidden = try #require(result.statusBar, "\(result.outcome)")
         #expect(hidden.layout.id == layout.id)
         #expect(hidden.background != .complex)
         #expect(hidden.mayLeaveTraces)
@@ -141,11 +141,12 @@ struct StatusBarEditorTests {
         let input = Bitmap(width: width, height: height, fill: RGB(red: 240, green: 240, blue: 244))
         let image = try input.makeCGImage()
 
-        let result = try await StatusBarEditor(catalog: catalog, recognizer: FixedTime(time: nil)).hide(image)
+        let result = try await StatusBarEditor(catalog: catalog, recognizer: FixedTime(time: nil)).edit(image)
 
         #expect(result.outcome == .notHidden(expected))
-        #expect(result.hidden == nil)
-        #expect(result.image === image)
+        #expect(result.statusBar == nil)
+        #expect(result.tidied == nil)
+        #expect(result.hidden === image)
     }
 
     /// 大きさだけで消せないと分かる画像は、画素を展開する前に理由が分かる

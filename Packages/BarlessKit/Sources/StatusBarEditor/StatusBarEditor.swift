@@ -3,8 +3,9 @@ import DeviceCatalog
 import ImageIOKit
 import InpaintEngine
 import StatusBarAnalyzer
+import StatusBarRenderer
 
-/// スクリーンショット 1 枚に対する編集の入口。解析 → 消去をまとめて行う（仕様書 §5-1）。
+/// スクリーンショット 1 枚に対する編集の入口。解析 → 消去 → 描き直しをまとめて行う（仕様書 §5-1）。
 ///
 /// アプリの画面・共有シート拡張・ショートカットから同じものを呼ぶ。処理はすべて端末の中で行う。
 public struct StatusBarEditor: Sendable {
@@ -24,29 +25,47 @@ public struct StatusBarEditor: Sendable {
         return catalog.unsupportedScreen(pixelWidth: pixelWidth, pixelHeight: pixelHeight) == nil ? .unknownSize : .unsupportedScreen
     }
 
-    /// ステータスバーの文字とアイコンを、背景になじませて消す（「隠す」の「埋める」）。
+    /// ステータスバーを編集する。次の 2 つを 1 回の解析で作る。
+    ///
+    /// - 「隠す」: 文字とアイコンを、背景になじませて消す（「埋める」）
+    /// - 「整える」: 消したうえで、`tidy` の中身（既定は 9:41・電波 4 本・Wi-Fi 最大・電池満タン）を自作のベクターで描き直す
     ///
     /// 機種を決められないときは、誤った位置を消さずに元の画像のまま返す（`HideOutcome.notHidden`）。
     /// 背景が写真・模様のときと、輪郭が文字・アイコンの後ろを通っているときも消すが、
     /// 跡が残ることがあるので `HiddenStatusBar.mayLeaveTraces` で分かるようにしている。
-    public func hide(_ image: CGImage) async throws -> HideResult {
+    public func edit(_ image: CGImage, tidy spec: StatusBarSpec = .tidy) async throws -> EditResult {
         let analysis = try await analyzer.analyze(image)
         guard let layout = analysis.decision.layout else {
-            return HideResult(original: image, image: image, outcome: .notHidden(Self.failure(for: analysis.decision)))
+            return EditResult(original: image, hidden: image, tidied: nil, outcome: .notHidden(Self.failure(for: analysis.decision)))
         }
-        guard let mask = analysis.eraseMask(), !mask.isEmpty, let background = analysis.background else {
-            return HideResult(original: image, image: image, outcome: .notHidden(.undetermined))
+        guard let mask = analysis.eraseMask(), !mask.isEmpty,
+              let background = analysis.background, let appearance = analysis.appearance else {
+            return EditResult(original: image, hidden: image, tidied: nil, outcome: .notHidden(.undetermined))
         }
         // 単色なら 1 色で塗り、それ以外は周りから補間する
         let inpainter: any Inpainter = background == .solid ? SolidFillInpainter() : GradientInpainter()
-        let erased = try await inpainter.inpaint(image, mask: mask)
-        let hidden = HiddenStatusBar(
+        let source = try Bitmap(cgImage: image)
+        let erased = try await inpainter.inpaint(source, mask: mask)
+
+        // 「整える」: キャリア名のある機種では、キャリア名を残して消し直してから描く
+        let plan = analysis.tidyPlan() ?? .plain
+        var tidied = erased
+        if !plan.kept.isEmpty, let tidyMask = analysis.eraseMask(keeping: plan.kept) {
+            tidied = try await inpainter.inpaint(source, mask: tidyMask)
+        }
+        var content = spec
+        if !plan.drawsWiFi { content.wifiBars = nil }
+        try StatusBarRenderer().render(content, layout: layout, appearance: appearance, into: &tidied, wifiShiftX: plan.wifiShiftX)
+
+        let statusBar = HiddenStatusBar(
             layout: layout,
             background: background,
             bandHeight: Self.bandHeight(of: layout, in: image),
             mayLeaveTraces: analysis.mayLeaveTraces
         )
-        return HideResult(original: image, image: erased, outcome: .hidden(hidden))
+        return EditResult(
+            original: image, hidden: try erased.makeCGImage(), tidied: try tidied.makeCGImage(), outcome: .hidden(statusBar)
+        )
     }
 
     private static func failure(for decision: LayoutDecision) -> HideFailure {

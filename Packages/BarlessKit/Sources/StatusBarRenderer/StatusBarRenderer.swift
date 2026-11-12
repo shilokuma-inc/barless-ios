@@ -15,11 +15,14 @@ public struct StatusBarRenderer: Sendable {
     ///   - layout: 判定した配置
     ///   - appearance: 文字とアイコンの色（黒か白）
     ///   - bitmap: 描き込む画像。スクリーンショット全体でも、上端だけを切り出したものでもよい（座標は左上が原点の px）
+    ///   - wifiShiftX: Wi-Fi を、配置の位置から右へずらす量（px）。キャリア名の右に Wi-Fi が並ぶ機種で、
+    ///     キャリア名の長さに合わせるのに使う（配置の実測は、Simulator のキャリア名の長さでの位置）
     public func render(
         _ spec: StatusBarSpec,
         layout: StatusBarLayout,
         appearance: ContentAppearance,
-        into bitmap: inout Bitmap
+        into bitmap: inout Bitmap,
+        wifiShiftX: Int = 0
     ) throws {
         let palette = Palette(appearance: appearance, generation: layout.generation)
         try bitmap.draw { context in
@@ -33,7 +36,10 @@ public struct StatusBarRenderer: Sendable {
                 CellularIcon(layout: layout).draw(activeBars: bars, palette: palette, in: context)
             }
             if let bars = spec.wifiBars {
+                context.saveGState()
+                context.translateBy(x: CGFloat(wifiShiftX), y: 0)
                 WiFiIcon(layout: layout).draw(activeBars: bars, palette: palette, in: context)
+                context.restoreGState()
             }
             if let battery = spec.battery {
                 BatteryIcon(layout: layout).draw(battery, palette: palette, in: context)

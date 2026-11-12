@@ -4,11 +4,15 @@ import SwiftUI
 struct EditFlowView: View {
     let session: EditSession
     @Environment(\.dismiss) private var dismiss
+    @State private var mode: EditMode
+    @State private var isComparing: Bool
     @State private var isExporting: Bool
 
     init(session: EditSession) {
         self.session = session
-        _isExporting = State(initialValue: session.startsInExport)
+        _mode = State(initialValue: session.opening.mode)
+        _isComparing = State(initialValue: session.opening.isComparing)
+        _isExporting = State(initialValue: session.opening.isExporting)
     }
 
     var body: some View {
@@ -40,9 +44,12 @@ struct EditFlowView: View {
             }
         case let .ready(screenshot):
             if isExporting, screenshot.hidden != nil {
-                ExportView(image: screenshot.after, onBack: { isExporting = false }, onDone: close)
+                // 選んでいるモードの画像を書き出す
+                ExportView(image: screenshot.image(for: mode), onBack: { isExporting = false }, onDone: close)
             } else {
-                EditorView(screenshot: screenshot, onClose: close, onSave: { isExporting = true })
+                EditorView(
+                    screenshot: screenshot, mode: $mode, isComparing: $isComparing, onClose: close, onSave: { isExporting = true }
+                )
             }
         }
     }
