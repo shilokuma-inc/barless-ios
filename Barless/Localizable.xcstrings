@@ -12,6 +12,39 @@
         }
       }
     },
+    "Adjust again": {
+      "comment": "手動調整の結果から、調整の画面へ戻るボタン",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "調整し直す"
+          }
+        }
+      }
+    },
+    "Adjust manually": {
+      "comment": "自動で消せなかったときの、手動調整への入口",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手動で調整する"
+          }
+        }
+      }
+    },
+    "Adjusted manually": {
+      "comment": "手動調整の結果であることの表示",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "手動で調整しました"
+          }
+        }
+      }
+    },
     "Allow adding photos in Settings.": {
       "comment": "写真への追加が許可されていないときの説明",
       "localizations": {
@@ -34,6 +67,17 @@
         }
       }
     },
+    "Auto": {
+      "comment": "手動調整の選択肢（文字の色・背景）",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "自動"
+          }
+        }
+      }
+    },
     "Back": {
       "comment": "書き出しから編集へ戻るボタン（読み上げ用）",
       "localizations": {
@@ -41,6 +85,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "戻る"
+          }
+        }
+      }
+    },
+    "Background": {
+      "comment": "手動調整の項目。帯の埋め方",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "背景"
           }
         }
       }
@@ -63,6 +118,28 @@
           "stringUnit": {
             "state": "translated",
             "value": "写真に追加できません"
+          }
+        }
+      }
+    },
+    "Black": {
+      "comment": "手動調整の選択肢（文字の色）",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "黒"
+          }
+        }
+      }
+    },
+    "Blur": {
+      "comment": "手動調整の選択肢（背景）。帯の全体をぼかす",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ぼかす"
           }
         }
       }
@@ -155,6 +232,17 @@
         }
       }
     },
+    "Continue with these settings": {
+      "comment": "手動調整を終えて、結果を見る画面へ進むボタン",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この設定で続ける"
+          }
+        }
+      }
+    },
     "Couldn't find the status bar": {
       "comment": "機種を決められない・文字やアイコンが見つからないとき",
       "localizations": {
@@ -162,6 +250,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "ステータスバーを見つけられませんでした"
+          }
+        }
+      }
+    },
+    "Couldn't identify the device": {
+      "comment": "手動調整の画面の見出し",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "機種を判定できませんでした"
           }
         }
       }
@@ -254,6 +353,17 @@
         }
       }
     },
+    "Height": {
+      "comment": "手動調整の項目。ステータスバーの帯の高さ",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "高さ"
+          }
+        }
+      }
+    },
     "Hide": {
       "comment": "エディタのモード: ステータスバーを消す",
       "localizations": {
@@ -298,6 +408,17 @@
         }
       }
     },
+    "Move the green line to just below the status bar.": {
+      "comment": "手動調整の画面の説明",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "緑の線を、ステータスバーのすぐ下に合わせてください。"
+          }
+        }
+      }
+    },
     "OK": {
       "comment": "お知らせを閉じるボタン",
       "localizations": {
@@ -327,6 +448,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "元のスクリーンショット"
+          }
+        }
+      }
+    },
+    "Pick color": {
+      "comment": "手動調整の選択肢（背景）。画像から拾った 1 色で帯を塗る",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "色を拾う"
           }
         }
       }
@@ -452,6 +584,39 @@
         }
       }
     },
+    "Status bar height": {
+      "comment": "手動調整のスライダーの読み上げ",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "ステータスバーの高さ"
+          }
+        }
+      }
+    },
+    "Tap the image to pick the fill color": {
+      "comment": "手動調整で「色を拾う」を選んでいるときの説明",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "画像をタップして、塗る色を拾います"
+          }
+        }
+      }
+    },
+    "Text color": {
+      "comment": "手動調整の項目。ステータスバーの文字とアイコンの色",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "文字の色"
+          }
+        }
+      }
+    },
     "The background is a photo or pattern, so some traces may remain": {
       "comment": "背景が複雑なときの注意",
       "localizations": {
@@ -474,6 +639,17 @@
         }
       }
     },
+    "Traces may remain with this background. Try Blur or Pick color.": {
+      "comment": "手動調整で、背景が写真や模様のときの注意",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "この背景では跡が残りそうです。「ぼかす」か「色を拾う」も試せます"
+          }
+        }
+      }
+    },
     "Try again.": {
       "comment": "保存に失敗したときの説明",
       "localizations": {
@@ -492,6 +668,17 @@
           "stringUnit": {
             "state": "translated",
             "value": "もう一度選び直してください。"
+          }
+        }
+      }
+    },
+    "White": {
+      "comment": "手動調整の選択肢（文字の色）",
+      "localizations": {
+        "ja": {
+          "stringUnit": {
+            "state": "translated",
+            "value": "白"
           }
         }
       }
