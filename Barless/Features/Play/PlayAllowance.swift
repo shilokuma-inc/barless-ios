@@ -47,11 +47,12 @@ final class PlayAllowance {
     private var usage: PlayUsage?
 
     /// - Parameters:
+    ///   - calendar: 日付を決める暦。既定は、端末の設定（タイムゾーンなど）の変更に追従するもの
     ///   - now: いまの時刻（テストで日付を進めるのに使う）
     init(
         store: any PlayUsageStoring,
         proStatus: any ProStatusProviding = FreePlan(),
-        calendar: Calendar = .current,
+        calendar: Calendar = .autoupdatingCurrent,
         now: @escaping @Sendable () -> Date = { Date() }
     ) {
         self.store = store
@@ -94,8 +95,8 @@ final class PlayAllowance {
         store.save(updated)
     }
 
-    /// 端末の日付（その地域の暦で、年月日だけ）
-    private var today: String {
+    /// 端末の日付（その地域の暦で、年月日だけ。`2026-11-13`）
+    var today: String {
         let components = calendar.dateComponents([.year, .month, .day], from: now())
         return String(format: "%04d-%02d-%02d", components.year ?? 0, components.month ?? 0, components.day ?? 0)
     }
