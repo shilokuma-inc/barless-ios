@@ -7,6 +7,24 @@ import Testing
 import UniformTypeIdentifiers
 
 struct BitmapTests {
+    /// 上端の行だけを、同じ幅の画像の中身で置き換える
+    @Test
+    func replacesTopRows() {
+        var bitmap = Bitmap(width: 3, height: 4, fill: .white)
+        var strip = Bitmap(width: 3, height: 2, fill: .black)
+        strip[1, 1] = RGB(red: 10, green: 20, blue: 30)
+
+        bitmap.replaceTopRows(with: strip)
+
+        #expect(bitmap[0, 0] == .black && bitmap[2, 1] == .black)
+        #expect(bitmap[1, 1] == RGB(red: 10, green: 20, blue: 30))
+        #expect(bitmap[0, 2] == .white && bitmap[2, 3] == .white)
+        // 置き換える側のほうが高いときは、入る分だけ使う
+        var short = Bitmap(width: 3, height: 1, fill: .white)
+        short.replaceTopRows(with: strip)
+        #expect(short[1, 0] == .black)
+    }
+
     @Test
     func keepsPixelValuesThroughCGImage() throws {
         var bitmap = Bitmap(width: 4, height: 3, fill: RGB(red: 10, green: 20, blue: 30))

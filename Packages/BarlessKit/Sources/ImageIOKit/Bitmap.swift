@@ -125,6 +125,13 @@ public struct Bitmap: @unchecked Sendable {
         return result
     }
 
+    /// 上端の行を、同じ幅の画像の中身で置き換える（`strip` の高さの分だけ。画像より高い分は使わない）
+    public mutating func replaceTopRows(with strip: Bitmap) {
+        precondition(strip.width == width, "幅が同じ画像だけを重ねられる")
+        let count = min(height, strip.height) * width * Self.bytesPerPixel
+        storage.replaceSubrange(0..<count, with: strip.storage[0..<count])
+    }
+
     /// 縦横を整数倍に拡大する（なめらかに補間する）
     public func enlarged(by factor: Int) throws -> Bitmap {
         precondition(factor >= 1, "倍率は 1 以上にする")
