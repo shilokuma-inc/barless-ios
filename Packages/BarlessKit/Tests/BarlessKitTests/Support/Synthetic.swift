@@ -112,6 +112,25 @@ enum Synthetic {
         return try Bitmap(cgImage: ImageDecoder.decode(data: output as Data))
     }
 
+    /// 背景の色のまわりで、画素ごとに少しずつ色が揺れる画像（写真や模様の代わり）
+    static func noise(width: Int, height: Int, base: RGB) -> Bitmap {
+        var bitmap = Bitmap(width: width, height: height, fill: base)
+        var state: UInt32 = 20_261_112
+        func next() -> Int {
+            state = state &* 1_664_525 &+ 1_013_904_223
+            return Int(state >> 24) % 17 - 8
+        }
+        func shift(_ value: UInt8) -> UInt8 {
+            UInt8(min(255, max(0, Int(value) + next())))
+        }
+        for y in 0..<height {
+            for x in 0..<width {
+                bitmap[x, y] = RGB(red: shift(base.red), green: shift(base.green), blue: shift(base.blue))
+            }
+        }
+        return bitmap
+    }
+
     /// 単色の背景で撮った画像のインク（文字・アイコン）を、別の背景に移す。
     /// 画素ごとに「撮った画像と、その背景の色との差」をそのまま新しい背景に足す
     static func transplantInk(from shot: Bitmap, onto background: Bitmap, scale: Int) -> Bitmap {
