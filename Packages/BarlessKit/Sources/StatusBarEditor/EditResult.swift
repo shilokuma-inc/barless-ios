@@ -38,23 +38,26 @@ public enum HideOutcome: Sendable, Equatable {
     case notHidden(HideFailure)
 }
 
-/// 「隠す」の結果
-public struct HideResult: Sendable {
+/// 編集の結果。「隠す」と「整える」の両方の画像を持つ
+public struct EditResult: Sendable {
     /// 元の画像
     public let original: CGImage
-    /// 表示・書き出しに使う画像。消せなかったときは元の画像と同じ
-    public let image: CGImage
+    /// 「隠す」: ステータスバーを消した画像。消せなかったときは元の画像と同じ
+    public let hidden: CGImage
+    /// 「整える」: 消したうえで、定番の表示に描き直した画像。消せなかったときは `nil`
+    public let tidied: CGImage?
     public let outcome: HideOutcome
 
-    public init(original: CGImage, image: CGImage, outcome: HideOutcome) {
+    public init(original: CGImage, hidden: CGImage, tidied: CGImage?, outcome: HideOutcome) {
         self.original = original
-        self.image = image
+        self.hidden = hidden
+        self.tidied = tidied
         self.outcome = outcome
     }
 
     /// 消せたときの情報
-    public var hidden: HiddenStatusBar? {
-        if case let .hidden(hidden) = outcome { return hidden }
+    public var statusBar: HiddenStatusBar? {
+        if case let .hidden(statusBar) = outcome { return statusBar }
         return nil
     }
 }
