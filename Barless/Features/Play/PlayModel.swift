@@ -26,6 +26,8 @@ final class PlayModel {
     /// 描き直す時刻（時は 0〜23）
     private(set) var hour = 9
     private(set) var minute = 41
+    /// 時刻を選び直したか。選び直すまでは、「整える」と同じ文字列（`9:41`）で描く
+    private(set) var hasPickedTime = false
     /// 電池の残量（%）
     private(set) var batteryPercent = 100
     /// 電波の本数（0〜4）
@@ -52,10 +54,17 @@ final class PlayModel {
         self.locale = locale
     }
 
-    /// 描き直す時刻の文字列（`9:41`）。12 時間制の地域では午前・午後を付けない（ステータスバーの表示と同じ）
+    /// 描き直す時刻の文字列。12 時間制の地域では午前・午後を付けない（ステータスバーの表示と同じ）。
+    ///
+    /// 時刻を選び直すまでは、地域によらず「整える」と同じ `9:41`。地域の書き方（英国は `09:41`）にすると、
+    /// 電池などを変えただけで、時刻の表記まで変わってしまうため
     var timeText: String {
-        PlayTime.text(hour: hour, minute: minute, locale: locale)
+        guard hasPickedTime else { return Self.standardTime }
+        return PlayTime.text(hour: hour, minute: minute, locale: locale)
     }
+
+    /// 「整える」で描く時刻
+    private static let standardTime = StatusBarSpec.tidy.time ?? "9:41"
 
     /// いまの中身
     var spec: PlaySpec {
@@ -84,6 +93,7 @@ final class PlayModel {
         guard hour != self.hour || minute != self.minute else { return }
         self.hour = hour
         self.minute = minute
+        hasPickedTime = true
         render()
     }
 

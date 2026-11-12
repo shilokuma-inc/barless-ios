@@ -109,7 +109,29 @@ struct PlayModelTests {
         #expect((0..<bandHeight).allSatisfy { y in (0..<(after.width / 2)).allSatisfy { after[$0, y] == before[$0, y] } })
     }
 
-    /// 時刻は、地域の書き方の文字列で描く
+    /// 時刻を選び直すまでは、地域によらず「整える」と同じ `9:41` で描く。
+    /// 英国（`09:41` と書く地域）でも、電池だけを変えたときに、時刻の表記が変わらない
+    @Test
+    func keepsStandardTimeTextUntilTimeIsPicked() async throws {
+        let sample = try await sample(locale: "en_GB")
+        let model = sample.model
+
+        #expect(model.timeText == "9:41")
+        #expect(model.spec == .standard)
+
+        model.setBatteryPercent(60)
+        await model.waitForRender()
+        #expect(model.spec.time == .set("9:41"))
+
+        // 時刻を選び直したら、その地域の書き方になる
+        model.setTime(hour: 14, minute: 8)
+        #expect(model.timeText == "14:08")
+        model.setTime(hour: 9, minute: 41)
+        #expect(model.timeText == "09:41")
+        #expect(model.spec.time == .set("09:41"))
+    }
+
+    /// 選び直した時刻は、地域の書き方の文字列で描く
     @Test
     func usesLocaleForTimeText() async throws {
         let sample = try await sample(locale: "en_US")
