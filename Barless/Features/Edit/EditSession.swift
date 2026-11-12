@@ -29,6 +29,8 @@ final class EditSession: Identifiable {
 
     nonisolated let id = UUID()
     private(set) var phase: Phase = .loading
+    /// 「遊ぶ」の状態。自動で消せた画像のときだけある
+    private(set) var play: PlayModel?
     let opening: Opening
 
     private let source: ImageSource
@@ -50,7 +52,11 @@ final class EditSession: Identifiable {
                 phase = .failed
                 return
             }
-            phase = .ready(try await processor.process(imageData: data))
+            let screenshot = try await processor.process(imageData: data)
+            if let composer = screenshot.composer, let tidied = screenshot.tidied {
+                play = PlayModel(composer: composer, initialImage: tidied)
+            }
+            phase = .ready(screenshot)
         } catch {
             phase = .failed
         }
