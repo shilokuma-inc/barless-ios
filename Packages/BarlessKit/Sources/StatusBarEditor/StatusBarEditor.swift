@@ -25,10 +25,11 @@ public struct StatusBarEditor: Sendable {
         return catalog.unsupportedScreen(pixelWidth: pixelWidth, pixelHeight: pixelHeight) == nil ? .unknownSize : .unsupportedScreen
     }
 
-    /// ステータスバーを編集する。次の 2 つを 1 回の解析で作る。
+    /// ステータスバーを編集する。次の 3 つを 1 回の解析で作る。
     ///
     /// - 「隠す」: 文字とアイコンを、背景になじませて消す（「埋める」）
     /// - 「整える」: 消したうえで、`tidy` の中身（既定は 9:41・電波 4 本・Wi-Fi 最大・電池満タン）を自作のベクターで描き直す
+    /// - 「遊ぶ」: 中身を変えて何度でも描き直すための入れ物（`StatusBarComposer`）
     ///
     /// 機種を決められないときは、誤った位置を消さずに元の画像のまま返す（`HideOutcome.notHidden`）。
     /// 背景が写真・模様のときと、輪郭が文字・アイコンの後ろを通っているときも消すが、
@@ -63,8 +64,15 @@ public struct StatusBarEditor: Sendable {
             bandHeight: Self.bandHeight(of: layout, in: image),
             mayLeaveTraces: analysis.mayLeaveTraces
         )
+        let composer = try await StatusBarComposer(
+            source: source, erased: erased, analysis: analysis, layout: layout, appearance: appearance, plan: plan, inpainter: inpainter
+        )
         return EditResult(
-            original: image, hidden: try erased.makeCGImage(), tidied: try tidied.makeCGImage(), outcome: .hidden(statusBar)
+            original: image,
+            hidden: try erased.makeCGImage(),
+            tidied: try tidied.makeCGImage(),
+            outcome: .hidden(statusBar),
+            composer: composer
         )
     }
 
