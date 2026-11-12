@@ -64,10 +64,18 @@ struct EditFlowView: View {
                     isComparing: $isComparing,
                     play: session.play,
                     onClose: close,
-                    onSave: { isExporting = true },
+                    onSave: startExport,
                     onAdjust: { openManualAdjust(for: screenshot) }
                 )
             }
+        }
+    }
+
+    /// 書き出しの画面へ進む。「遊ぶ」で値を変えた直後でも、その値で描き終えた画像を書き出す
+    private func startExport() {
+        Task {
+            await session.play?.waitForRender()
+            isExporting = true
         }
     }
 
