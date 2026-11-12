@@ -47,6 +47,15 @@ enum ScreenshotDemo {
         return Scene(rawValue: arguments[index + 1])
     }()
 
+    /// 撮影モードで、「遊ぶ」の無料の回数を、今日すでに使ったことにする数（`-screenshot-play-used <数>`。無ければ 0）
+    static let playUsedCount: Int = {
+        let arguments = ProcessInfo.processInfo.arguments
+        guard let index = arguments.firstIndex(of: "-screenshot-play-used"), arguments.indices.contains(index + 1) else {
+            return 0
+        }
+        return Int(arguments[index + 1]) ?? 0
+    }()
+
     /// 作り物のスクリーンショットを開いた編集。写真の選択を通らずに、編集と書き出しの画面を出せる
     @MainActor
     static func sampleSession(opening: EditSession.Opening = EditSession.Opening()) -> EditSession {
