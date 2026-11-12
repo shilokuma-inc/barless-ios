@@ -1,11 +1,15 @@
 import CoreGraphics
 import Foundation
 import ImageIOKit
+import os
 
 /// 書き出す画像のファイル。保存と共有の両方で、同じファイルを使う
 nonisolated enum ExportFile {
     /// メタデータの Software 欄に書くアプリ名（仕様書 §5-4a）
     static let softwareName = "Barless"
+
+    /// 保存の途中のファイルが入っているフォルダの名前。片付けでは消さない
+    private static let foldersInUse = OSAllocatedUnfairLock(initialState: Set<String>())
 
     /// 一時フォルダの中の、書き出し用のフォルダ
     static var defaultDirectory: URL {
@@ -32,10 +36,33 @@ nonisolated enum ExportFile {
         return url
     }
 
-    /// 前の書き出しで残ったファイルをすべて消す。書き出しの画面を開いたときに、新しく書く前に呼ぶ
+    /// 前の書き出しで残ったファイルを消す。書き出しの画面を開いたときに、新しく書く前に呼ぶ。
+    ///
+    /// 保存の途中のファイル（`beginUsing` から `endUsing` の間）は残す。保存を始めてすぐ画面を戻り、
+    /// 書き出しの画面を開き直したときに、保存しているファイルを消さないため
     @concurrent
     static func removeAll(in directory: URL = defaultDirectory) async {
-        try? FileManager.default.removeItem(at: directory)
+        let manager = FileManager.default
+        let folders = (try? manager.contentsOfDirectory(atPath: directory.path)) ?? []
+        let inUse = foldersInUse.withLock { $0 }
+        for folder in folders where !inUse.contains(folder) {
+            try? manager.removeItem(at: directory.appendingPathComponent(folder))
+        }
+    }
+
+    /// そのファイルを使い始める（片付けの対象から外す）
+    static func beginUsing(_ url: URL) {
+        _ = foldersInUse.withLock { $0.insert(folderName(of: url)) }
+    }
+
+    /// そのファイルを使い終えた（次の片付けで消してよい）
+    static func endUsing(_ url: URL) {
+        _ = foldersInUse.withLock { $0.remove(folderName(of: url)) }
+    }
+
+    /// 書き出しごとのフォルダの名前（UUID なので、置き場所が違っても重ならない）
+    private static func folderName(of url: URL) -> String {
+        url.deletingLastPathComponent().lastPathComponent
     }
 
     /// 使わなかった書き出しのファイルを、フォルダごと消す

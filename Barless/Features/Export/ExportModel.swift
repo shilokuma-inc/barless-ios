@@ -90,6 +90,9 @@ final class ExportModel {
     func save() async {
         guard let fileURL, saveState == .idle else { return }
         saveState = .saving
+        // 保存の途中で書き出しの画面を開き直しても、片付けでこのファイルを消さないようにする
+        ExportFile.beginUsing(fileURL)
+        defer { ExportFile.endUsing(fileURL) }
         do {
             try await saver.save(imageAt: fileURL)
             saveState = .saved

@@ -39,12 +39,28 @@ struct ExportModelTests {
         }
     }
 
+    /// 保存を、テストが合図するまで待たせる。合図の後にファイルが無ければ失敗する
+    private actor SlowSaver: PhotoSaving {
+        let started = Gate()
+        let release = Gate()
+
+        func save(imageAt url: URL) async throws {
+            await started.open()
+            await release.wait()
+            guard FileManager.default.fileExists(atPath: url.path) else { throw CocoaError(.fileNoSuchFile) }
+        }
+    }
+
     private func image() throws -> CGImage {
         try Bitmap(width: 30, height: 60, fill: RGB(red: 20, green: 120, blue: 220)).makeCGImage()
     }
 
     /// テストごとに別の書き出し先（テストは並んで走るので、同じ場所を使うと互いのファイルを消してしまう）
-    private func model(saver: StubSaver = StubSaver(), directory: URL? = nil, writer: ExportModel.Writer? = nil) throws -> ExportModel {
+    private func model(
+        saver: any PhotoSaving = StubSaver(),
+        directory: URL? = nil,
+        writer: ExportModel.Writer? = nil
+    ) throws -> ExportModel {
         ExportModel(image: try image(), saver: saver, directory: directory ?? Self.temporaryDirectory(), writer: writer)
     }
 
@@ -183,6 +199,32 @@ struct ExportModelTests {
         #expect(FileManager.default.fileExists(atPath: try #require(model.fileURL).path))
     }
 
+    /// 保存を始めてすぐ画面を戻り、書き出しの画面を開き直しても、保存しているファイルは片付けで消えない
+    @Test
+    func keepsFileBeingSavedWhenExportReopens() async throws {
+        let directory = Self.temporaryDirectory()
+        let saver = SlowSaver()
+        let first = try model(saver: saver, directory: directory)
+        await first.prepare()
+        let saving = try #require(first.fileURL)
+        let save = Task { await first.save() }
+        await saver.started.wait()
+
+        // 開き直した画面が、同じ場所で片付けと用意を始める
+        let second = try model(directory: directory)
+        await second.prepare()
+        #expect(FileManager.default.fileExists(atPath: saving.path))
+
+        await saver.release.open()
+        await save.value
+        #expect(first.saveState == .saved)
+
+        // 保存が済んだファイルは、次の片付けで消える
+        let third = try model(directory: directory)
+        await third.prepare()
+        #expect(!FileManager.default.fileExists(atPath: saving.path))
+    }
+
     @Test
     func reportsPreparationFailure() async throws {
         let model = try model { _, _ in
@@ -222,7 +264,8 @@ struct ExportFileTests {
         #expect(FileManager.default.fileExists(atPath: second.path))
 
         await ExportFile.removeAll(in: directory)
-        #expect(!FileManager.default.fileExists(atPath: directory.path))
+        #expect(!FileManager.default.fileExists(atPath: first.path))
+        #expect(!FileManager.default.fileExists(atPath: second.path))
     }
 }
 
