@@ -13,7 +13,7 @@ let package = Package(
     products: [
         .library(
             name: "BarlessKit",
-            targets: ["DeviceCatalog", "ImageIOKit", "InpaintEngine", "StatusBarAnalyzer", "StatusBarRenderer"]
+            targets: ["DeviceCatalog", "ImageIOKit", "InpaintEngine", "StatusBarAnalyzer", "StatusBarEditor", "StatusBarRenderer"]
         )
     ],
     targets: [
@@ -31,6 +31,12 @@ let package = Package(
             dependencies: ["DeviceCatalog", "ImageIOKit", "StatusBarRenderer"],
             swiftSettings: optimized
         ),
+        // 解析 → 消去をまとめた編集の入口（アプリの画面から呼ぶ）
+        .target(
+            name: "StatusBarEditor",
+            dependencies: ["DeviceCatalog", "ImageIOKit", "InpaintEngine", "StatusBarAnalyzer"],
+            swiftSettings: optimized
+        ),
         // テスト用: Simulator と実機の画像（上端の切り出し）とその一覧
         .target(
             name: "BarlessTestSupport",
@@ -41,7 +47,8 @@ let package = Package(
         .testTarget(
             name: "BarlessKitTests",
             dependencies: [
-                "BarlessTestSupport", "DeviceCatalog", "ImageIOKit", "InpaintEngine", "StatusBarAnalyzer", "StatusBarRenderer"
+                "BarlessTestSupport", "DeviceCatalog", "ImageIOKit", "InpaintEngine", "StatusBarAnalyzer", "StatusBarEditor",
+                "StatusBarRenderer"
             ],
             swiftSettings: optimized
         )
