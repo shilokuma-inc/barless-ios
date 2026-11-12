@@ -51,7 +51,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "「設定」で、写真への追加を許可してください。"
+            "value": "「設定」で写真への追加を許可してください"
           }
         }
       }
@@ -172,7 +172,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "切り抜きや縮小をしていない、iPhone のスクリーンショットを選んでください。"
+            "value": "切り抜きや縮小をしていない iPhone のスクショを選んでください"
           }
         }
       }
@@ -183,7 +183,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "上端に時刻・電波・電池が写っている iPhone のスクリーンショットを選んでください。"
+            "value": "上端に時刻・電波・電池が写っている iPhone のスクショを選んでください"
           }
         }
       }
@@ -337,7 +337,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "つまみを左右に動かして、元の画像と見比べます"
+            "value": "つまみを動かして元の画像と比較"
           }
         }
       }
@@ -392,7 +392,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "画像を押している間、元の画像を表示します"
+            "value": "長押しで元の画像を表示"
           }
         }
       }
@@ -414,7 +414,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "緑の線を、ステータスバーのすぐ下に合わせてください。"
+            "value": "緑の線をステータスバーのすぐ下に合わせてください"
           }
         }
       }
@@ -447,7 +447,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "元のスクリーンショット"
+            "value": "元のスクショ"
           }
         }
       }
@@ -513,7 +513,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ステータスバーを整えたスクリーンショット"
+            "value": "ステータスバーを整えたスクショ"
           }
         }
       }
@@ -524,7 +524,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "ステータスバーを隠したスクリーンショット"
+            "value": "ステータスバーを隠したスクショ"
           }
         }
       }
@@ -535,7 +535,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この機種のスクリーンショットには、まだ対応していません"
+            "value": "この機種のスクショにはまだ対応していません"
           }
         }
       }
@@ -568,7 +568,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "隠した結果を表示"
+            "value": "結果を表示"
           }
         }
       }
@@ -601,7 +601,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "画像をタップして、塗る色を拾います"
+            "value": "タップして塗る色を拾う"
           }
         }
       }
@@ -623,7 +623,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "背景が写真や模様のため、跡が残ることがあります"
+            "value": "背景が写真や模様のため跡が残ることがあります"
           }
         }
       }
@@ -645,7 +645,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "この背景では跡が残りそうです。「ぼかす」か「色を拾う」も試せます"
+            "value": "跡が残りそうなときは「ぼかす」か「色を拾う」も試せます"
           }
         }
       }
@@ -656,7 +656,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "もう一度お試しください。"
+            "value": "もう一度お試しください"
           }
         }
       }
@@ -667,7 +667,7 @@
         "ja": {
           "stringUnit": {
             "state": "translated",
-            "value": "もう一度選び直してください。"
+            "value": "もう一度選び直してください"
           }
         }
       }
