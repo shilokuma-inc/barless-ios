@@ -140,7 +140,6 @@ struct ScreenshotCanvas: View {
     private var line: some View {
         Theme.accent.frame(width: 1.5)
     }
-
 }
 
 extension CGImage {
