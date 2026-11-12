@@ -14,7 +14,11 @@ struct ManualAdjustView: View {
 
     var body: some View {
         VStack(spacing: 0) {
-            EditTopBar(leading: .back(onCancel))
+            EditTopBar(leading: .back {
+                // 「続ける」の処理の途中で戻ったら、その結果は当てない
+                model.cancelFinish()
+                onCancel()
+            })
             switch model.phase {
             case .loading:
                 placeholder {
@@ -27,10 +31,13 @@ struct ManualAdjustView: View {
                     NoticeView(title: "Couldn't open this image", detail: "Try choosing it again.")
                 }
             case let .ready(canvas):
+                // 文字を大きくしていて調整の中身が長くなっても、画像にはこの高さを残す（中身のほうをスクロールさせる）
                 ManualCanvasView(model: model, canvas: canvas)
+                    .frame(minHeight: 160)
                     .padding(.top, 4)
                     .padding(.bottom, 12)
                 ManualPanel(model: model, canvas: canvas, onContinue: onContinue)
+                    .layoutPriority(1)
             }
         }
         .task {
@@ -155,6 +162,35 @@ private struct ManualPanel: View {
 
     var body: some View {
         VStack(spacing: 0) {
+            // 入りきらないときは、調整の中身だけをスクロールさせる。「続ける」は、いつも見えるところに置く
+            ViewThatFits(in: .vertical) {
+                options
+                ScrollView {
+                    options
+                }
+            }
+            Button("Continue with these settings") {
+                Task {
+                    if let result = await model.finish() { onContinue(result) }
+                }
+            }
+            .buttonStyle(BlockButtonStyle(kind: .primary))
+            .disabled(model.isFinishing)
+            .accessibilityIdentifier("manual.continue")
+        }
+        .padding(.horizontal, Theme.margin)
+        .padding(.top, 18)
+        .padding(.bottom, 12)
+        .background {
+            UnevenRoundedRectangle(topLeadingRadius: 22, topTrailingRadius: 22, style: .continuous)
+                .fill(Theme.darkSurfaceSecondary)
+                .ignoresSafeArea(edges: .bottom)
+        }
+    }
+
+    /// 説明と、高さ・文字の色・背景の行
+    private var options: some View {
+        VStack(spacing: 0) {
             message
                 .padding(.bottom, 12)
             separator
@@ -196,23 +232,9 @@ private struct ManualPanel: View {
                 footnote
             }
             .frame(maxWidth: .infinity, minHeight: 34)
-            Button("Continue with these settings") {
-                Task {
-                    if let result = await model.finish() { onContinue(result) }
-                }
-            }
-            .buttonStyle(BlockButtonStyle(kind: .primary))
-            .disabled(model.isFinishing)
-            .accessibilityIdentifier("manual.continue")
         }
-        .padding(.horizontal, Theme.margin)
-        .padding(.top, 18)
-        .padding(.bottom, 12)
-        .background {
-            UnevenRoundedRectangle(topLeadingRadius: 22, topTrailingRadius: 22, style: .continuous)
-                .fill(Theme.darkSurfaceSecondary)
-                .ignoresSafeArea(edges: .bottom)
-        }
+        // 「続ける」の処理の途中は、調整を変えられない
+        .disabled(model.isFinishing)
     }
 
     private var message: some View {
