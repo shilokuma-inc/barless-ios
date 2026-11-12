@@ -93,6 +93,9 @@ public struct StatusBarLayout: Codable, Hashable, Sendable, Identifiable {
     public let pixelHeight: Int
     /// 1pt あたりの px
     public let scale: Int
+    /// 画面の大きさ（対角のインチ）。画面に「6.3 インチ」のように出すのに使う。
+    /// 機種名（`models`）は実測した機種だけなので、利用者には見せない
+    public let screenInches: Double
     public let style: StatusBarStyle
     /// 文字とアイコンが描かれている範囲の上端と下端（px）
     public let inkTop: Int

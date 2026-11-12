@@ -42,5 +42,5 @@ Tools/statusbar/make-verification-report.sh                # 検証の表と画�
 - 画像のファイル名は `<機種>__<ランタイム>__<状態>.png`（例: `iPhone-17__iOS-27-0__light-full.png`）
 - `light-full` / `dark-full` / `dark-home` は 9:41・電波 4 本・Wi-Fi 3 本・電池 100%（充電済み）、`light-low` は 23:58・電波 1 本・Wi-Fi なし・電池 12%
 - 撮った画像（168 枚で約 130MB）は `.gitignore` で除外している。リポジトリには上端だけを切り出したフィクスチャ（約 6MB）を置く
-- 新しい機種を足すときは `run-26-27.sh` の `types` に機種名を足す。iOS の世代が増えたら `make-catalog.py` の `GENERATION` と、`DeviceCatalog` の `OSGeneration` を足す
+- 新しい機種を足すときは `run-26-27.sh` の `types` に機種名を、`make-catalog.py` の `SCREEN_INCHES` に画面の大きさ（インチ）を足す。iOS の世代が増えたら `make-catalog.py` の `GENERATION` と、`DeviceCatalog` の `OSGeneration` を足す
 - 実機で撮った画像は、名前や通知が写らないよう上端 80pt だけを切り出して `Fixtures/realshots/` に置き、`make-fixtures.py` の `REALSHOTS` に大きさと写っている値を書く
