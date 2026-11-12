@@ -22,6 +22,8 @@ enum ScreenshotDemo {
         case editor
         /// 「整える」の結果を、元の画像と比較している状態
         case tidy
+        /// 「遊ぶ」（値を変える行を出した状態）
+        case play
         /// 書き出し
         case export
         /// 自動で消せなかったとき（大きさが変わった画像を開いた状態）

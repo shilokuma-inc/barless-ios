@@ -24,6 +24,8 @@ struct Barless: App {
             HomeView(initialSession: ScreenshotDemo.sampleSession())
         case .tidy:
             HomeView(initialSession: ScreenshotDemo.sampleSession(opening: .init(mode: .tidy, isComparing: true)))
+        case .play:
+            HomeView(initialSession: ScreenshotDemo.sampleSession(opening: .init(mode: .play)))
         case .export:
             HomeView(initialSession: ScreenshotDemo.sampleSession(opening: .init(isExporting: true)))
         case .unrecognized:
