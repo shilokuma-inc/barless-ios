@@ -96,6 +96,30 @@ struct ManualEditorTests {
         #expect(ImageMetrics.difference(result.bitmap, input, in: sample.below(sample.bandHeight)).maxAbsolute == 0)
     }
 
+    /// JPEG で保存し直した画像（SNS を通った画像の代わり）: 文字のまわりのにじみまで消えて、輪郭が薄く残らない。
+    /// グラデーションの背景では、消す範囲のすぐ外の色から埋めるので、にじみが残っていると、それが文字の形に広がる
+    @Test(arguments: ["iPhone-17__iOS-27-0__light-low", "iPhone-17__iOS-27-0__dark-full", "iPhone-SE-3rd-generation__iOS-18-6__light-low"])
+    func erasesRingingOfRecompressedImage(name: String) throws {
+        let sample = try sample(name)
+        let isLight = sample.fixture.appearance == "light"
+        let gradient = SyntheticBackground.vertical.make(width: sample.strip.width, height: sample.strip.height, isLight: isLight)
+        let band = sample.band(height: sample.bandHeight)
+        for clean in [Verification.flatBackground(of: sample.strip, scale: sample.scale), gradient] {
+            let inked = Synthetic.transplantInk(from: sample.strip, onto: clean, scale: sample.scale)
+            let input = try Synthetic.recompressed(inked, quality: 0.7)
+            let background = try Synthetic.recompressed(clean, quality: 0.7)
+
+            let result = sample.editor.apply(ManualAdjustment(bandHeight: sample.bandHeight), to: input)
+
+            let before = ImageMetrics.difference(input, background, in: band)
+            let after = ImageMetrics.difference(result.bitmap, background, in: band)
+            #expect(before.maxAbsolute > 100)
+            // 広げる幅が 1pt だと、暗いグラデーションで 19 まで残る（2pt では 13 以下）
+            #expect(after.maxAbsolute <= 16)
+            #expect(after.visibleRatio == 0)
+        }
+    }
+
     /// 背景が細かい模様・輪郭が帯を横切る背景では、跡が残りうることを伝える
     @Test
     func flagsBackgroundsThatLeaveTraces() throws {

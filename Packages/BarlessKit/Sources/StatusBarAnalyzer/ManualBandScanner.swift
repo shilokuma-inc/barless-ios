@@ -2,7 +2,7 @@ import ImageIOKit
 
 /// 手動調整で、利用者が合わせた帯から拾ったもの
 public struct ManualBandScan: Sendable, Equatable {
-    /// 消す画素。インクを、縁のにじみまで覆うように 1pt 広げたもの
+    /// 消す画素。インクを、縁のにじみまで覆うように 2pt 広げたもの
     public let eraseMask: PixelMask
     public let background: BackgroundKind
     /// 消した跡が残りそうか（背景が写真・模様、または背景の輪郭が帯を横切っている）
@@ -18,6 +18,9 @@ public struct ManualBandScan: Sendable, Equatable {
 public struct ManualBandScanner: Sendable {
     /// 背景の輪郭を拾ったインクがこの面積（pt²）以上あれば、跡が残るとみなす（自動の判定と同じ値）
     static let visibleStructureAreaPt = 4
+    /// インクを広げる幅（pt）。自動の判定（1pt）より広くする。手動調整に来るのは SNS などで保存し直した画像が多く、
+    /// 再圧縮のにじみが文字の 1pt より外まで広がっていて、1pt では文字の輪郭が薄く残るため
+    static let erasePaddingPt = 2
 
     /// 1pt が何 px かの見込み。縁を覆う幅などに使う
     public let scale: Int
@@ -33,7 +36,7 @@ public struct ManualBandScanner: Sendable {
         let scan = detector.scan(bitmap, keeping: tone)
         let structure = scan.structure.count
         return ManualBandScan(
-            eraseMask: scan.mask.dilated(by: scale),
+            eraseMask: scan.mask.dilated(by: Self.erasePaddingPt * scale),
             background: scan.background,
             mayLeaveTraces: scan.background == .complex || structure >= Self.visibleStructureAreaPt * scale * scale
         )
