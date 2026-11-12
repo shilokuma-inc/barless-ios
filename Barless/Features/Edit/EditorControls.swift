@@ -4,8 +4,21 @@ import SwiftUI
 struct SegmentPicker<Value: Hashable>: View {
     struct Option {
         let value: Value
-        let title: LocalizedStringKey
+        let label: Text
         let identifier: String
+
+        init(value: Value, title: LocalizedStringKey, identifier: String) {
+            self.value = value
+            self.label = Text(title)
+            self.identifier = identifier
+        }
+
+        /// 数字や時刻のように、どの言語でも同じ文字を出す選択肢
+        init(value: Value, verbatim: String, identifier: String) {
+            self.value = value
+            self.label = Text(verbatim: verbatim)
+            self.identifier = identifier
+        }
     }
 
     let options: [Option]
@@ -14,6 +27,8 @@ struct SegmentPicker<Value: Hashable>: View {
     var fillsWidth = true
     /// 切り替えの地の色
     var track = Theme.darkSurfaceSecondary
+    /// 選択肢を押したとき（選んでいるものを、もう一度押したときも）に呼ぶ
+    var onTap: ((Value) -> Void)?
 
     var body: some View {
         HStack(spacing: 0) {
@@ -21,8 +36,9 @@ struct SegmentPicker<Value: Hashable>: View {
                 let isSelected = option.value == selection
                 Button {
                     selection = option.value
+                    onTap?(option.value)
                 } label: {
-                    Text(option.title)
+                    option.label
                         .font(.subheadline.weight(.semibold))
                         .foregroundStyle(isSelected ? Color.white : Theme.darkInkSecondary)
                         .lineLimit(1)
@@ -78,5 +94,44 @@ struct CompareToggle: View {
         .accessibilityLabel("Compare")
         .accessibilityAddTraits(isOn ? .isSelected : [])
         .accessibilityIdentifier("editor.compare")
+    }
+}
+
+/// 項目の名前と、その右に置く操作（スライダー・切り替え）の 1 行。
+/// 文字を大きくしていて横に入りきらないときは、操作を項目の名前の下に置く
+struct OptionRow<Content: View>: View {
+    let title: LocalizedStringKey
+    @ViewBuilder let content: Content
+
+    init(_ title: LocalizedStringKey, @ViewBuilder content: () -> Content) {
+        self.title = title
+        self.content = content()
+    }
+
+    var body: some View {
+        let label = Text(title)
+            .font(.body)
+            .foregroundStyle(Theme.darkInk)
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 16) {
+                label
+                content
+                    .frame(maxWidth: .infinity, alignment: .trailing)
+            }
+            VStack(alignment: .leading, spacing: 8) {
+                label
+                content
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.vertical, 10)
+        }
+        .frame(minHeight: 52)
+    }
+}
+
+/// 行と行のあいだの細い線
+struct OptionSeparator: View {
+    var body: some View {
+        Theme.darkLine.frame(height: 1)
     }
 }
