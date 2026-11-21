@@ -1,4 +1,5 @@
-# ビルド（＋テスト）の共通処理。build.yml から workflow_call で呼び出される。
+# ビルド（SwiftLint ＋ テスト）の共通処理。build.yml から workflow_call で呼び出される。
+# UI テストも流すかは build.yml が ui-tests で決める（作業ブランチへの push では Unit テストだけ）。
 name: _build
 
 on:

@@ -1,5 +1,5 @@
 # Archive → IPA Export（→ App Store Connect へアップロード）の共通処理。
-# archive.yml / upload.yml から workflow_call で呼び出される。
+# archive.yml（手動実行）と upload.yml（develop・release/** への push と手動実行）から workflow_call で呼び出される。
 #
 # 認証はすべて App Store Connect API Key で行う（Apple ID / App 用パスワードは使わない）。
 # アップロードは ExportOptions.plist の destination を upload にした xcodebuild -exportArchive で行う。
