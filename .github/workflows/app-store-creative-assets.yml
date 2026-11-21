@@ -4,7 +4,7 @@ name: Creative assets/App Store
 # App Store Connect の App Asset Library に上げ、編集できるバージョンに配置する。手動実行のみ。
 # https://developer.apple.com/app-store/asset-best-practices/
 # 手動実行だけなので、GitHub に登録されるまで Actions の一覧にも gh workflow run にも出ない。
-# テンプレートから作ったリポジトリで一覧に出ないときは、このファイルを変更するコミットを develop に入れると登録される。
+# テンプレートから作ったリポジトリで一覧に出ないときは、このファイルを変更するコミットを既定のブランチ（develop）に入れると登録される。
 #
 # 置き場所と画像は AppStore/creative_assets.json と AppStore/creative/<言語>/。
 # 画像は手元で Tools/render_creative_assets.sh を使って書き出し、コミットしておく（ここでは描かないので macOS は要らない）。

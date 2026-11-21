@@ -2,7 +2,7 @@ name: Screenshots/App Store
 
 # App Store 用のスクリーンショットを、表示サイズ × 言語ぶん撮って App Store Connect に反映する。手動実行のみ。
 # 手動実行だけなので、GitHub に登録されるまで Actions の一覧にも gh workflow run にも出ない。
-# テンプレートから作ったリポジトリで一覧に出ないときは、このファイルを変更するコミットを develop に入れると登録される。
+# テンプレートから作ったリポジトリで一覧に出ないときは、このファイルを変更するコミットを既定のブランチ（develop）に入れると登録される。
 #
 # 撮る画面・並び順・表示サイズは AppStore/screenshots.json、言語は AppStore/languages.json、
 # ビルドする Scheme は AppStore/app.json で決める。撮影は Tools/capture_screenshots.sh が、アプリの撮影モード
