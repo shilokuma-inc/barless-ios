@@ -1,6 +1,8 @@
 name: Metadata/App Store
 
 # App Store の掲載情報と、審査に出すのに要る App 情報などを App Store Connect に反映する。手動実行のみ。
+# 手動実行だけなので、GitHub に登録されるまで Actions の一覧にも gh workflow run にも出ない。
+# テンプレートから作ったリポジトリで一覧に出ないときは、このファイルを変更するコミットを develop に入れると登録される。
 #
 #   Tools/upload_metadata.py … 名前・サブタイトル・説明文・キーワード・プロモーションテキスト・最新情報・URL・プライバシーポリシーの URL・著作権
 #                              （元ネタは AppStore/metadata/<言語>.json と shared.json）
